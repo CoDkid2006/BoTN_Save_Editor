@@ -20,7 +20,7 @@ If you encounter a bug in the program or it creates corrupted saves. Create a ne
 
 If applicable to the bug/issue any of the following
 - Original save
-- New Save (useful for comparing what happened, and testing recreatablity or issue)
+- New Save (useful for comparing what happened, and testing recreatablity of issue)
 - list of functions executed
 - preset files
 
