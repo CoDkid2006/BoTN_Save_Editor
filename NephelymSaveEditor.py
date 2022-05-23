@@ -18,36 +18,42 @@ def find_all_instances(data_block, search_term, padding=0):
 
 
 ''' Batch Editor for Save Files
-# New size ONLY shows inside of breeding session and with vargrants
-# Breaks animations with vigrants and wild nephs
+# New size ONLY shows inside of breeding session and during sex
+# Breaks animations with wild nephelyms
 # Sexual interactions with wild nephelyms will soft lock game
 # milking and harvesting animates will not play unless normal size
-# spirit form is currently unmodified and thus won't break animations if in spirit form
+# Being in spirit form seems to ignore size so it doesn't cause issues
 # disable wild sex or stay in spirit form if roaming with a new player size
 # changing of the Main Breeder GUID breaks the save. Since the game looks for the GUID for the player data.
 # fixed automatically in save function
 
 
 ### Important Headers: Ordered by position
-## PARTIAL OBSOLETE. Parsing now using largest dataclass.
-#tabbed entries are not parsable with split_struct_array()
 
-"Save Head stuff" - Ignore
+## Header
+GVAS - Infomation about the save. Leave unmodified
+PlayerGuid - Guid of Nephelym that maps to the player character
+PlayerWealth - Currecies of Player --ArrayProperty
+PlayerBodyFluids - Nephelym Fluids --ArrayProperty
 
-'PlayerBodyFluids' - Fluids
-'PlayerMonsters' - Breeder and Nephelyms
->Each Entity Starts with Name
-'PlayerSexPositions' - Sex Positions unlocked
-    'PlayerSpirit' - Player Spirit Energy --IntProperty
-    'PlayerSpiritForm' - Spirit Properties. Like PlayerMonster --StructProperty
-'PlayerObtainedVariants'
-'PlayerSeenVariants'
-    'GameFlags' - Flags for the game --StructProperty
-'DialogueStates' - State of Dialogue with NPCs
-    'MonsterLevels' - World Level? --MapProperty
-'BreedingTasks' - Breeding Tasks and text. I recommend not fucking with it
-    'DaysSinceBreedingTaskRefresh' --IntProperty
-    'BreederStatProgress' - IDC enought to know --StructProperty
+
+### Player monster
+PlayerMonsters - Breeder and Nephelyms
+>Each entity starts with their name
+Nephelym
+    
+
+PlayerSexPositions - Sex Positions unlocked --ArrayProperty
+PlayerSpirit - Player Spirit Energy --IntProperty
+PlayerSpiritForm - Spirit Properties --StructProperty
+    
+
+PlayerObtainedVariants - Obtained Nephelym races. probably for spirit form --ArrayProperty
+PlayerSeenVariants - Seen Nephelym races. probably for spirit form --ArrayProperty
+GameFlags - Flags for the game --StructProperty
+WorldState - state for the game, Includes breeding tasks --StructProperty
+BreederStatProgress - IDK or care --StructProperty
+
 
 
 ### Monster and Breeder Data Structure
@@ -663,9 +669,8 @@ class Header(GenericParsers):
 
 class NephelymBase(GenericParsers):
     '''
-    Base Data structure for Nephelyms. 
+    Base Data structure for Nephelyms.
     Used for parsing specific datablocks of a nephelym
-    
     '''
     def __str__(self):
         return f'Nephelym\n{self.name} {self.sex} {self.race} {self.guid}'
@@ -753,7 +758,7 @@ class NephelymBase(GenericParsers):
         return bytes_out
     
     def _get_gameplaytags(self, tags):
-        ''' returns bytes for game_play_tags with input tags'''
+        '''Returns bytes for game_play_tags with input tags'''
         bytes_out = self.GAMEPLAY_TAG_CONTAINER + len(tags).to_bytes(4, 'little')
         for tag in tags:
             bytes_out += len(tag).to_bytes(4, 'little') + tag
@@ -788,8 +793,6 @@ class NephelymBase(GenericParsers):
     
     def _check_sex(self):
         '''Check if the new sex is a possibility for the race'''
-        # print(self.race)
-        # print(self.SEX_RACE[self.sex].values())
         if self.race in self.SEX_RACE[self.sex].values():
             return
         else:
@@ -1060,8 +1063,6 @@ class NephelymSaveEditor(GenericParsers):
         self.nephelyms = self._parse_nephelyms(data_monster_and_player)
         self.playerspiritform = PlayerSpiritForm(playerspiritform_data)
         self.data_footer = save_data
-        # self.write_save('footer.bin', save_data)
-        # print(self.data_footer[:100])
 
     def _parse_nephelyms(self, data_monster_and_player):
         '''
@@ -1223,7 +1224,7 @@ class NephelymSaveEditor(GenericParsers):
             self.duplicate_nephelym(self.nephelyms[nephelym], count)
 
     def add_nephelym(self, nephelym):
-        '''Add Nephelym to Nephelym list)'''
+        '''Add Nephelym to Nephelym list'''
         self.nephelyms.append(nephelym)
 
     def remove_nephelym(self, nephelym):
