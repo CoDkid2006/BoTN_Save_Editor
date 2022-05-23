@@ -38,15 +38,38 @@ PlayerBodyFluids - Nephelym Fluids --ArrayProperty
 
 
 ### Player monster
-PlayerMonsters - Breeder and Nephelyms
->Each entity starts with their name
+PlayerMonsters - Breeder and Nephelyms --ArrayProperty
 Nephelym
-    
+    name - nephelym name
+    guid - unique identifier for nephelym
+    variant - race and sex
+    appearance - appearance and shape
+    splatter - cum stains
+    citargetvalue - idk
+    cibuffer -idk
+    cirate - idk
+    cialpha - idk
+    appliedscheme -idk
+    stats - stats of nephelym.
+    mother - mother nehpelym
+    father - father nephelym
+    traits - all the traits of the nephelym
+    playertags - idk
+    states - idk
+    offspringid - guid of most recent offspring
+    lastmateid - guid of last mate
+    lastmatesexcount - count of sex with last mate
 
 PlayerSexPositions - Sex Positions unlocked --ArrayProperty
 PlayerSpirit - Player Spirit Energy --IntProperty
 PlayerSpiritForm - Spirit Properties --StructProperty
-    
+    guid - guid, doesn't seem to affect anything
+    variant - race and sex. might not be part of save
+    appearance - the appearance/shape of spirit form
+    appliedscheme - idk
+    mother - parent mother
+    father - parent father
+    remain - trailing data
 
 PlayerObtainedVariants - Obtained Nephelym races. probably for spirit form --ArrayProperty
 PlayerSeenVariants - Seen Nephelym races. probably for spirit form --ArrayProperty
@@ -1386,5 +1409,3 @@ if __name__ == "__main__":
     
     # Export Editor data to specified file
     nephelym_save_editor.save(save_out)
-
-
