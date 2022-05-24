@@ -721,7 +721,6 @@ class NephelymBase(GenericParsers):
         self._parse_nephelym_data(nephelym_data)
     
     def _parse_nephelym_data(self, nephelym_data):
-        original = nephelym_data
         _, self.name,             nephelym_data = self._parse_name(nephelym_data)
         _, self.guid,             nephelym_data = self._parse_guid(nephelym_data, self.NEPHELYM_GUID)
         _, self.race, self.sex,   nephelym_data = self._parse_variant(nephelym_data)
