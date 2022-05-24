@@ -39,27 +39,27 @@ PlayerBodyFluids - Nephelym Fluids --ArrayProperty
 
 ### Player monster
 PlayerMonsters - Breeder and Nephelyms --ArrayProperty
-Nephelym
-    name - nephelym name
-    guid - unique identifier for nephelym
-    variant - race and sex
-    appearance - appearance and shape
-    splatter - cum stains
-    citargetvalue - idk
-    cibuffer -idk
-    cirate - idk
-    cialpha - idk
-    appliedscheme -idk
-    stats - stats of nephelym.
-    mother - mother nehpelym
-    father - father nephelym
-    traits - all the traits of the nephelym
-    playertags - idk
-    states - idk
-    offspringid - guid of most recent offspring
-    lastmateid - guid of last mate
-    lastmatesexcount - count of sex with last mate
-
+    Nephelym
+        name - nephelym name
+        guid - unique identifier for nephelym
+        variant - race and sex
+        appearance - appearance and shape
+        splatter - cum stains
+        citargetvalue - idk
+        cibuffer -idk
+        cirate - idk
+        cialpha - idk
+        appliedscheme -idk
+        stats - stats of nephelym.
+        mother - mother nehpelym
+        father - father nephelym
+        traits - all the traits of the nephelym
+        playertags - idk
+        states - idk
+        offspringid - Used to determine Child from OffspringBuffer
+        lastmateid - guid of last mate
+        lastmatesexcount - count of sex with last mate
+OffspringBuffer - same as PlayerMonster, holds nephelyms for currently pregnant Nephelyms. Mapped with GUID
 PlayerSexPositions - Sex Positions unlocked --ArrayProperty
 PlayerSpirit - Player Spirit Energy --IntProperty
 PlayerSpiritForm - Spirit Properties --StructProperty
@@ -458,7 +458,7 @@ class ByteMacros:
     LASTMATEID_STRUCT_PROP = b'\x0B\x00\x00\x00\x4C\x61\x73\x74\x4D\x61\x74\x65\x49\x44\x00' + STRUCT_PROPERTY
     LASTMATESEXCOUNT_BYTE_PROP = b'\x11\x00\x00\x00\x4C\x61\x73\x74\x4D\x61\x74\x65\x53\x65\x78\x43\x6F\x75\x6E\x74\x00' + BYTE_PROPERTY
     
-    ### Pregnancy
+    ### Offspring Macros
     OFFSPRINGBUFFER = b'\x10\x00\x00\x00\x4F\x66\x66\x73\x70\x72\x69\x6E\x67\x42\x75\x66\x66\x65\x72\x00'
     OFFSPRINGBUFFER_ARRAY_PROP = OFFSPRINGBUFFER + ARRAY_PROPERTY
     
@@ -721,6 +721,7 @@ class NephelymBase(GenericParsers):
         self._parse_nephelym_data(nephelym_data)
     
     def _parse_nephelym_data(self, nephelym_data):
+        original = nephelym_data
         _, self.name,             nephelym_data = self._parse_name(nephelym_data)
         _, self.guid,             nephelym_data = self._parse_guid(nephelym_data, self.NEPHELYM_GUID)
         _, self.race, self.sex,   nephelym_data = self._parse_variant(nephelym_data)
@@ -741,7 +742,6 @@ class NephelymBase(GenericParsers):
         _, self.lastmateid,       nephelym_data = self._parse_struct_property(nephelym_data, self.LASTMATEID_STRUCT_PROP,    self.GUID_PROP)
         _, self.lastmatesexcount, nephelym_data = self._parse_byte_property(nephelym_data, self.LASTMATESEXCOUNT_BYTE_PROP)
         self.remain = nephelym_data
-        
     
     def _parse_traits(self, nephelym_data):
         cursor = nephelym_data.find(self.TRAITS_STRUCT_PROP)
@@ -1096,7 +1096,7 @@ class NephelymSaveEditor(GenericParsers):
 
     def _parse_save_data(self, save_data):
         data_header, data_monster_and_player, save_data = self._parse_array_property(save_data,  self.PLAYERMONSTER_ARRAY_PROP,     self.STRUCT_PROPERTY)
-        _, self.offspringbuffer,              save_data = self._parse_offspringbuffer(save_data)
+        _, offspringbuffer,                   save_data = self._parse_offspringbuffer(save_data)
         _, self.playersexpositions,           save_data = self._parse_playersexpositions(save_data)
         _, self.playerspirit,                 save_data = self._parse_playerspirit(save_data)
         _, playerspiritform_data,             save_data = self._parse_struct_property(save_data, self.PLAYERSPIRITFORM_STRUCT_PROP, self.CHATACTER_DATA)
@@ -1105,14 +1105,16 @@ class NephelymSaveEditor(GenericParsers):
         _, self.gameflags,                    save_data = self._parse_struct_property(save_data, self.GAMEFLAGS_STRUCT_PROP,        self.GAMEPLAY_TAG_CONTAINER)
         _, self.worldstate,                   save_data = self._parse_struct_property(save_data, self.WORLDSTATE_STRUCT_PROP,       self.SEXYWOLDSTATE)
         _, self.breederstatprogress,          save_data = self._parse_breederstatprogress(save_data)
-        self.header = Header(data_header)
-        self.nephelyms = self._parse_nephelyms(data_monster_and_player)
+        
+        self.header           = Header(data_header)
+        self.nephelyms        = self._parse_nephelyms(data_monster_and_player)
+        self.offspringbuffer  = self._parse_nephelyms(offspringbuffer)
         self.playerspiritform = PlayerSpiritForm(playerspiritform_data)
-        self.data_footer = save_data
+        self.data_footer      = save_data
 
     def _parse_nephelyms(self, monster_and_player_data):
         '''
-        Parse out Breeder and Nephelyms for PlayerMonster Block
+        Parse out Breeder and Nephelyms from PlayerMonster Block
         returns list of Nephelym
         '''
         cursor = 0
@@ -1184,27 +1186,28 @@ class NephelymSaveEditor(GenericParsers):
             breederstatprogress = b''
         return pre_data, breederstatprogress, save_data
 
-    def _get_player_monster_data(self):
-        nephelyms = self.list_to_bytes([neph.get_data() for neph in self.nephelyms])
-        count = len(self.nephelyms)
-        length_neph = len(nephelyms)
-        length_header = length_neph + len(self.CHARACTER_DATA) + 8 + len(self.STRUCT_PROPERTY) + len(self.PLAYERMONSTER) + 4
-        header_new = self.PLAYERMONSTER_ARRAY_PROP \
+    def _get_player_monster_data(self, nephelyms, nephelym_array_name_macro):
+        nephelym_array_prop_macro = nephelym_array_name_macro + self.ARRAY_PROPERTY
+        nephelyms_bytes = self.list_to_bytes([nephelym.get_data() for nephelym in nephelyms])
+        count = len(nephelyms)
+        length_neph = len(nephelyms_bytes)
+        length_header = length_neph + len(self.CHARACTER_DATA) + 8 + len(self.STRUCT_PROPERTY) + len(nephelym_array_name_macro) + 4
+        header_new = nephelym_array_prop_macro \
             + length_header.to_bytes(8, 'little') \
             + self.STRUCT_ARRAY_PROPERTY \
             + count.to_bytes(4, 'little') \
-            + self.PLAYERMONSTER \
+            + nephelym_array_name_macro \
             + self.STRUCT_PROPERTY \
             + length_neph.to_bytes(8, 'little') \
             + self.CHARACTER_DATA \
-            + nephelyms
+            + nephelyms_bytes
         return header_new
 
     def _get_offspringbuffer(self):
-        if self.offspringbuffer == b'':
+        if self.offspringbuffer == []:
             data = b''
         else:
-            data = self._get_array_property_bytes(self.offspringbuffer, self.OFFSPRINGBUFFER_ARRAY_PROP, self.STRUCT_PROPERTY)
+            data = self._get_player_monster_data(self.offspringbuffer, self.OFFSPRINGBUFFER)
         return data
 
     def _get_playersexpositions(self):
@@ -1358,7 +1361,7 @@ class NephelymSaveEditor(GenericParsers):
         '''Return data in save file format'''
         data_out = []
         data_out.append(self.header.get_data())
-        data_out.append(self._get_player_monster_data())
+        data_out.append(self._get_player_monster_data(self.nephelyms, self.PLAYERMONSTER))
         data_out.append(self._get_offspringbuffer())
         data_out.append(self._get_playersexpositions())
         data_out.append(self._get_playerspirit())
@@ -1373,7 +1376,7 @@ class NephelymSaveEditor(GenericParsers):
 
 
 if __name__ == "__main__":
-    save_in       = r'0.sav'
+    save_in       = r'7.sav'
     save_out      = r'15.sav'
     preset_folder = r'..\CharacterPresets'
     
