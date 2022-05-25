@@ -36,8 +36,7 @@ PlayerGuid - Guid of Nephelym that maps to the player character
 PlayerWealth - Currecies of Player --ArrayProperty
 PlayerBodyFluids - Nephelym Fluids --ArrayProperty
 
-
-### Player monster
+## Player monster
 PlayerMonsters - Breeder and Nephelyms --ArrayProperty
     Nephelym
         name - nephelym name
@@ -59,6 +58,8 @@ PlayerMonsters - Breeder and Nephelyms --ArrayProperty
         offspringid - Used to determine Child from OffspringBuffer
         lastmateid - guid of last mate
         lastmatesexcount - count of sex with last mate
+        remain - trailing data
+
 OffspringBuffer - same as PlayerMonster, holds nephelyms for currently pregnant Nephelyms. Mapped with GUID
 PlayerSexPositions - Sex Positions unlocked --ArrayProperty
 PlayerSpirit - Player Spirit Energy --IntProperty
@@ -79,7 +80,7 @@ BreederStatProgress - IDK or care --StructProperty
 
 
 
-### Monster and Breeder Data Structure
+## Monster and Breeder Data Structure
 MAIN HEADER
 4 BYTE Number of Breeder + Nephelyms    will need to be updated if Nephelyms are added or dropped
 \x0F + PlayerMonsters                   for list name
@@ -93,9 +94,8 @@ MAIN HEADER
 ### Observations
 # Houseing Max is 4096. Barn menu breaks after this. 12-bits.
 # Max Breeding Center is 4096, including Breeder
-# Max Nephelyms+Breeder is 12998 before save not recognized/ Save would be 2 GB.
-# 12998 is odd since it's not close to any power of 2. inbetween 13 and 14-bytes.
-# expected max of 4-bytes, 2,147,483,647 Nephelyms+Breeder
+# Max Nephelyms+Breeder is 12998 before save not recognized. Save is approx 2 GB.
+# This is probably a result from the Array have a Max length of 2^32-1 or 2,147,483,647.
 
 
 # Intresting limitations to the game.
