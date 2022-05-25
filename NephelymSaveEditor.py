@@ -1126,11 +1126,12 @@ class NephelymSaveEditor(GenericParsers):
             nephelym_name_positions.append(pos_name)
             cursor = pos_name + 1
         
-        if len(nephelym_name_positions) == 4:
+        nephelym_name_count = len(nephelym_name_positions)
+        if nephelym_name_count == 4:
             nephelyms.append(Nephelym(monster_and_player_data[nephelym_name_positions[0]:]))
-        else:
+        elif nephelym_name_count > 4:
             data_start = 0
-            for position_index in range(4, len(nephelym_name_positions), 4):
+            for position_index in range(4, nephelym_name_count, 4):
                 nephelym = Nephelym(monster_and_player_data[nephelym_name_positions[data_start]:nephelym_name_positions[position_index]])
                 nephelyms.append(nephelym)
                 data_start = position_index
@@ -1375,12 +1376,12 @@ class NephelymSaveEditor(GenericParsers):
 
 
 if __name__ == "__main__":
-    save_in       = r'7.sav'
+    save_in       = r'0.sav'
     save_out      = r'15.sav'
     preset_folder = r'..\CharacterPresets'
     
     # DEBUGGING: test if parsing and save of save works. 
-    # Files should be identical, with except of spirit form if not changed yet
+    # Files should be identical
     Testing = True
     if Testing:
         NephelymSaveEditor(save_in).save(save_out)
