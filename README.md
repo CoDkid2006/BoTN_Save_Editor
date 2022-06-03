@@ -3,15 +3,18 @@ Save Editor for Breeders of the Nephelym. Current Build 0.754.3
 
 Requires python 3.7+
 
+# DISCLAIMER!
+Make backups of saves before modifing them. Program should be able to make working saves, but there is no 100% guarantee. Invalid options should throw an exception during runtime. 
+
+# GUIDE
 Place editor in save directory or change files paths to save directory.
+
+MODIFY LOGIC IN MAIN TO PREFORM DESIRED EDITS.
 
 To execute run 'python NephelymSaveEditor.py'
 
-Modify Logic in Main to preform desired edits.
-Main function provides examples of most program functions. Functions starting with _ are ment to be internal and should only be used inside class.
-
-# DISCLAIMER!
-Make backups of saves before modifing them. Program should be able to make working saves, but there is no 100% guarantee. Invalid options should throw an exception during runtime. 
+## Brief
+Mostly started this because of not wanting to spend hours breeding perfect nehpelyms but it morphed into curiosity of how UE serializes it saves. Figuring out how to parse save game file data structures down to a simple form and recreating them back into a working save has been and interesting challenge. This is more of a tech exploration than a 'Proper' save editor, but included are functions to help facilitate bulk editing of a save. More ganular editing is possible but will require more logical thinking on the users end to achieve the desired changes. The main function provides examples of most higher level program functions. Functions starting with _ are ment to be internal and should only be used inside class or if debugging.
 
 # BUGS and ISSUES
 If you encounter a bug in the program or it creates corrupted saves. Create a new Issue on the Issues page, with the following and it will maybe get fixed
@@ -27,16 +30,14 @@ If applicable to the bug/issue any of the following
 ## TODO
 Lower level parsing and editing for the following classes
 
-- Class for appearance.
+- Refactoring of code
 
-- Class for playerobtainedvariants
+- Moving of all macros into own class
 
-- Class for playerseenvariants
+- Better Understanding of text and map properties for better generic parsing
 
-- Class for gameflags
+- Interface functions for lower level variables like appearance and game flags
 
-- Class for worldstate
-
-- Class for breederstatprogress
+- Macros for remaining sub-classes values. I.e. list of all possible gamestate flag
 
 - GUI. OMEGALUL
