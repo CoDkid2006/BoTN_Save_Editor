@@ -26,6 +26,7 @@ def hex_to_float(bytes):
 def float_to_hex(value):
     return bytes(bytearray(struct.pack("f", value)))
 
+
 ''' Batch Editor for Save Files
 # New size ONLY shows inside of breeding session and during sex
 # Breaks animations with wild nephelyms
@@ -120,6 +121,8 @@ MAIN HEADER
 # >Can stack the same trait multiple times but doesn't have a tangable effect
 '''
 
+
+'''Macros and Generic Functions'''
 class DictMacros:
     '''Dictionary macros used by funcions'''
     ##Nephelym Stats
@@ -414,17 +417,22 @@ class ByteMacros:
     BYTE_PROPERTY = _BYTE_PROPERTY + b'\x01\x00\x00\x00\x00\x00\x00\x00\x05\x00\x00\x00\x4E\x6F\x6E\x65\x00\x00'
     NAME_PROPERTY = b'\x0D\x00\x00\x00\x4E\x61\x6D\x65\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
     BOOL_PROPERTY = b'\x0D\x00\x00\x00\x42\x6F\x6F\x6C\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
+    MAP_PROPERTY = b'\x0C\x00\x00\x00\x4D\x61\x70\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
+    TEXT_PROPERTY = b'\x0D\x00\x00\x00\x54\x65\x78\x74\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
+    
+    MAP_PADDING = b'\x00\x00\x00\x00'
     STRUCT_PADDING = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    NONE = b'\x05\x00\x00\x00\x4E\x6F\x6E\x65\x00'
     GUID_PROP = b'\x05\x00\x00\x00\x47\x75\x69\x64\x00' + STRUCT_PADDING
 
     ### Save header macros
     GUID_HEADER = b'\x10\x00\x00\x00\x00\x00\x00\x00\x05\x00\x00\x00\x47\x75\x69\x64\x00' + STRUCT_PADDING
     PLAYER_UNIQUE_ID = b'\x0F\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x55\x6E\x69\x71\x75\x65\x49\x44\x00' + STRUCT_PROPERTY + GUID_HEADER
-    PLAYERWEALTH_ARRAY_PROP = b'\x0D\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x57\x65\x61\x6C\x74\x68\x00' + ARRAY_PROPERTY
-    PLAYERBODYFLUIDS_ARRAY_PROP = b'\x11\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x42\x6F\x64\x79\x46\x6C\x75\x69\x64\x73\x00' + ARRAY_PROPERTY
+    PLAYERWEALTH = b'\x0D\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x57\x65\x61\x6C\x74\x68\x00'
+    PLAYERBODYFLUIDS = b'\x11\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x42\x6F\x64\x79\x46\x6C\x75\x69\x64\x73\x00'
+    TAGNAME = b'\x08\x00\x00\x00\x54\x61\x67\x4E\x61\x6D\x65\x00'
     #Nephelym/Breeder Block Headers
     PLAYERMONSTER = b'\x0F\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x4D\x6F\x6E\x73\x74\x65\x72\x73\x00'
-    PLAYERMONSTER_ARRAY_PROP = PLAYERMONSTER + ARRAY_PROPERTY
     CHARACTER_DATA = b'\x0E\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x44\x61\x74\x61\x00' + STRUCT_PADDING
 
     ### Individual Nephelym Macros
@@ -433,6 +441,7 @@ class ByteMacros:
     
     VARIANT_STRUCT_PROP = b'\x08\x00\x00\x00\x56\x61\x72\x69\x61\x6E\x74\x00' + STRUCT_PROPERTY
     GAMEPLAY_TAG_CONTAINER = b'\x15\x00\x00\x00\x47\x61\x6D\x65\x70\x6C\x61\x79\x54\x61\x67\x43\x6F\x6E\x74\x61\x69\x6E\x65\x72\x00' + STRUCT_PADDING
+    
     
     APPEARANCE_STRUCT_PROP = b'\x0B\x00\x00\x00\x41\x70\x70\x65\x61\x72\x61\x6E\x63\x65\x00' + STRUCT_PROPERTY
     CHARACTER_APPEARANCE = b'\x14\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x41\x70\x70\x65\x61\x72\x61\x6E\x63\x65\x00' + STRUCT_PADDING
@@ -469,30 +478,25 @@ class ByteMacros:
     
     ### Offspring Macros
     OFFSPRINGBUFFER = b'\x10\x00\x00\x00\x4F\x66\x66\x73\x70\x72\x69\x6E\x67\x42\x75\x66\x66\x65\x72\x00'
-    OFFSPRINGBUFFER_ARRAY_PROP = OFFSPRINGBUFFER + ARRAY_PROPERTY
     
     ### Spiritform Macros
     UNIQUEID = b'\x09\x00\x00\x00\x55\x6E\x69\x71\x75\x65\x49\x44\x00'
     SPIRITFORM_GUID = UNIQUEID + STRUCT_PROPERTY + GUID_HEADER
-    PLAYERSPIRIT_INT_PROP = b'\x0D\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x53\x70\x69\x72\x69\x74\x00' + INT_PROPERTY
-    PLAYERSPIRITFORM_STRUCT_PROP = b'\x11\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x53\x70\x69\x72\x69\x74\x46\x6F\x72\x6D\x00' + STRUCT_PROPERTY
+    PLAYERSPIRIT = b'\x0D\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x53\x70\x69\x72\x69\x74\x00'
+    PLAYERSPIRITFORM = b'\x11\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x53\x70\x69\x72\x69\x74\x46\x6F\x72\x6D\x00'
     
     
     ### Footer Macros
     PLAYERSEXPOSITIONS = b'\x13\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x53\x65\x78\x50\x6F\x73\x69\x74\x69\x6F\x6E\x73\x00'
-    PLAYERSEXPOSITIONS_ARRAY_PROP = PLAYERSEXPOSITIONS + ARRAY_PROPERTY
+    GAMEPLAY_TAG = b'\x0C\x00\x00\x00\x47\x61\x6D\x65\x70\x6C\x61\x79\x54\x61\x67\x00' + STRUCT_PADDING
     CHATACTER_DATA = b'\x0E\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x44\x61\x74\x61\x00' + STRUCT_PADDING
     PLAYEROBTAINEDVARIANTS = b'\x17\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x4F\x62\x74\x61\x69\x6E\x65\x64\x56\x61\x72\x69\x61\x6E\x74\x73\x00'
     PLAYEROBTAINEDVARIANTS_ARRAY_PROP = PLAYEROBTAINEDVARIANTS + ARRAY_PROPERTY
     PLAYERSEENVARIANTS = b'\x13\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x53\x65\x65\x6E\x56\x61\x72\x69\x61\x6E\x74\x73\x00'
-    PLAYERSEENVARIANTS_ARRAY_PROP = PLAYERSEENVARIANTS + ARRAY_PROPERTY
     GAMEFLAGS = b'\x0A\x00\x00\x00\x47\x61\x6D\x65\x46\x6C\x61\x67\x73\x00'
-    GAMEFLAGS_STRUCT_PROP = GAMEFLAGS + STRUCT_PROPERTY
     WORLDSTATE = b'\x0B\x00\x00\x00\x57\x6F\x72\x6C\x64\x53\x74\x61\x74\x65\x00'
-    WORLDSTATE_STRUCT_PROP = WORLDSTATE + STRUCT_PROPERTY
     SEXYWOLDSTATE = b'\x0F\x00\x00\x00\x53\x65\x78\x79\x57\x6F\x72\x6C\x64\x53\x74\x61\x74\x65\x00' + STRUCT_PADDING
     BREEDERSTATPROGRESS = b'\x14\x00\x00\x00\x42\x72\x65\x65\x64\x65\x72\x53\x74\x61\x74\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
-    BREEDERSTATPROGRESS_STRUCT_PROP = BREEDERSTATPROGRESS + STRUCT_PROPERTY
     BREEDERSTATRANKPROGRESS = b'\x18\x00\x00\x00\x42\x72\x65\x65\x64\x65\x72\x53\x74\x61\x74\x52\x61\x6E\x6B\x50\x72\x6F\x67\x72\x65\x73\x73\x00' + STRUCT_PADDING
     
     ### Preset Macros
@@ -526,7 +530,6 @@ class IO:
             chunk = 1024
             for bytes in [data_out[i:i+chunk] for i in range(0, len(data_out), chunk)]:
                 f.write(bytes)
-
 
 class GenericParsers(DictMacros, ByteMacros, IO):
     '''Generic function for parsing and reconstucting datablocks'''
@@ -621,6 +624,55 @@ class GenericParsers(DictMacros, ByteMacros, IO):
         guid_start = cursor + len(guid_macro)
         return guid_bytes[:cursor], guid_bytes[guid_start:guid_start + 16], guid_bytes[guid_start + 16:]
     
+    def _parse_map_property(self, map_bytes, map_macro, child_macro):
+        cursor = map_bytes.find(map_macro)
+        if cursor == -1:
+            raise Exception(f'Invalid Save: {map_macro}')
+        length_start = cursor + len(map_macro)
+        length_end = length_start + 8
+        length_bytes = map_bytes[length_start:length_end]
+        length = int.from_bytes(length_bytes, 'little')
+        
+        child_macro += child_macro + b'\x00'
+        data_start = length_end + len(child_macro)
+        data_end = data_start + length
+        
+        data_out = map_bytes[data_start:data_start+length]
+        return map_bytes[:cursor], data_out, map_bytes[data_start+length:]
+    
+    def _parse_array_struct_property(self, array_struct_bytes, array_macro, struct_macro, child_macro):
+        # TODO Add multi-level search to ensure proper segment parsed
+        cursor = array_struct_bytes.find(array_macro)
+        if cursor == -1:
+            raise Exception(f'Invalid Save: {array_macro}')
+        length_start = cursor + len(array_macro)
+        length_end = length_start + 8
+        length_bytes = array_struct_bytes[length_start:length_end]
+        length = int.from_bytes(length_bytes, 'little')
+        
+        data_length_offset = 4 + len(struct_macro) + len(self.STRUCT_PROPERTY) + 8 + len(child_macro)
+        data_offset = len(self.STRUCT_PROPERTY + b'\x00') + data_length_offset
+        
+        data_start = length_end + data_offset
+        data_end = data_start + length - data_length_offset
+        data_out = array_struct_bytes[data_start:data_end]
+        
+        return array_struct_bytes[:cursor], data_out, array_struct_bytes[data_end:]
+    
+    def _parse_text_property(self, text_bytes, text_macro):
+        cursor = text_bytes.find(text_macro)
+        if cursor == -1:
+            raise Exception(f'Invalid Save: {text_macro}')
+        length_start = cursor + len(text_macro)
+        length_end = length_start + 8
+        length_bytes = text_bytes[length_start:length_end]
+        length = int.from_bytes(length_bytes, 'little')
+        
+        data_start = length_end + 1
+        data_end = data_start + length
+        return text_bytes[:cursor], text_bytes[data_start:data_end], text_bytes[data_end:]
+    
+    
     def _get_float_property_bytes(self, float_bytes, float_macro):
         float_length = len(float_bytes)
         bytes_out = float_macro \
@@ -660,11 +712,11 @@ class GenericParsers(DictMacros, ByteMacros, IO):
     
     def _get_name_property_bytes(self, name_bytes, name_macro):
         name_length = len(name_bytes)
-        name_char_length = name_length - 4
+        name_full_length = name_length + 4
         bytes_out = name_macro \
-            + name_length.to_bytes(8, 'little') \
+            + name_full_length.to_bytes(8, 'little') \
             + b'\x00' \
-            + name_char_length.to_bytes(4, 'little') \
+            + name_length.to_bytes(4, 'little') \
             + name_bytes
         return bytes_out
     
@@ -676,6 +728,181 @@ class GenericParsers(DictMacros, ByteMacros, IO):
     def _get_guid_bytes(self, guid_bytes, guid_macro):
         '''Rebuild guid string'''
         return guid_macro + guid_bytes
+    
+    def _get_map_property_bytes(self, map_bytes, map_macro, child_macro):
+        child_macro += child_macro + b'\x00'
+        map_length = len(map_bytes)
+        
+        bytes_out = map_macro \
+            + map_length.to_bytes(8, 'little') \
+            + child_macro \
+            + map_bytes
+        return bytes_out
+    
+    def _get_array_struct_property_bytes(self, array_struct_bytes_list, array_macro, struct_macro, child_macro):
+        bytes_out = []
+        count = len(array_struct_bytes_list)
+        array_struct_bytes_list_data = self.list_to_bytes([array_struct_bytes.get_data() for array_struct_bytes in array_struct_bytes_list])
+        array_struct_bytes_list_data_length = len(array_struct_bytes_list_data)
+        array_length = 4 + len(struct_macro) + len(self.STRUCT_PROPERTY) + 8 + len(child_macro) + array_struct_bytes_list_data_length
+        
+        bytes_out.append(array_macro)
+        bytes_out.append(array_length.to_bytes(8, 'little'))
+        bytes_out.append(self.STRUCT_PROPERTY + b'\x00')
+        bytes_out.append(count.to_bytes(4, 'little'))
+        bytes_out.append(struct_macro)
+        bytes_out.append(self.STRUCT_PROPERTY)
+        bytes_out.append(array_struct_bytes_list_data_length.to_bytes(8, 'little'))
+        bytes_out.append(child_macro)
+        bytes_out.append(array_struct_bytes_list_data)
+        return self.list_to_bytes(bytes_out)
+    
+    def _get_text_property_bytes(self, text_bytes, text_macro):
+        text_length = len(text_bytes)
+        bytes_out = text_macro \
+            + text_length.to_bytes(8, 'little') \
+            + b'\x00' \
+            + text_bytes
+        return bytes_out
+    
+    
+    def _try_parse_int_property(self, data_in, int_macro):
+        int_macro += self.INT_PROPERTY
+        try:
+            pre_data, int_prop, data_in = self._parse_int_property(data_in, int_macro)
+        except Exception as e:
+            pre_data = b''
+            int_prop = b''
+        return pre_data, int_prop, data_in
+    
+    def _try_parse_float_property(self, data_in, float_macro):
+        float_macro += self.FLOAT_PROPERTY
+        try:
+            pre_data, float_prop, data_in = self._parse_float_property(data_in, float_macro)
+        except:
+            pre_data = b''
+            float_prop = b''
+        return pre_data, float_prop, data_in
+    
+    def _try_parse_struct_property(self, data_in, struct_macro, child_macro):
+        struct_macro += self.STRUCT_PROPERTY
+        try:
+            pre_data, struct_prop, data_in = self._parse_struct_property(data_in, struct_macro, child_macro)
+        except:
+            pre_data = b''
+            struct_prop = b''
+        return pre_data, struct_prop, data_in
+    
+    def _try_parse_array_property(self, data_in, array_macro, child_macro, child_data_size=None):
+        array_macro += self.ARRAY_PROPERTY
+        try:
+            pre_data, array_prop, data_in = self._parse_array_property(data_in, array_macro, child_macro, child_data_size)
+        except:
+            pre_data = b''
+            array_prop = b''
+        return pre_data, array_prop, data_in
+    
+    def _try_parse_map_property(self, data_in, map_macro, child_macro):
+        map_macro += self.MAP_PROPERTY
+        try:
+            pre_data, map_prop, data_in = self._parse_map_property(data_in, map_macro, child_macro)
+        except:
+            pre_data = b''
+            map_prop = b''
+        return pre_data, map_prop, data_in
+    
+    def _try_parse_name_property(self, data_in, name_macro):
+        name_macro += self.NAME_PROPERTY
+        try:
+            pre_data, name_prop, data_in = self._parse_name_property(data_in, name_macro)
+        except:
+            pre_data = b''
+            name_prop = b''
+        return pre_data, name_prop, data_in
+    
+    def _try_parse_array_struct_property(self, data_in, array_macro, struct_macro, child_macro):
+        array_macro += self.ARRAY_PROPERTY
+        try:
+            pre_data, array_struct_prop, data_in = self._parse_array_struct_property(data_in, array_macro, struct_macro, child_macro)
+        except:
+            pre_data = b''
+            array_struct_prop = b''
+        return pre_data, array_struct_prop, data_in
+    
+    def _try_parse_text_property(self, data_in, text_macro):
+        text_macro += self.TEXT_PROPERTY
+        try:
+            pre_data, text_prop, data_in = self._parse_text_property(data_in, text_macro)
+        except:
+            pre_data = b''
+            text_prop = b''
+        return pre_data, text_prop, data_in
+    
+    
+    def _try_get_int_property_bytes(self, data_in, int_macro):
+        if data_in == b'':
+            data = b''
+        else:
+            int_macro += self.INT_PROPERTY
+            data = self._get_int_property_bytes(data_in, int_macro)
+        return data
+    
+    def _try_get_float_property_bytes(self, data_in, float_macro):
+        if data_in == b'':
+            data = b''
+        else:
+            float_macro += self.FLOAT_PROPERTY
+            data = self._get_float_property_bytes(data_in, float_macro)
+        return data
+    
+    def _try_get_struct_property_bytes(self, data_in, struct_macro, child_macro):
+        if data_in == b'':
+            data = b''
+        else:
+            struct_macro += self.STRUCT_PROPERTY
+            data = self._get_struct_property_bytes(data_in, struct_macro, child_macro)
+        return data
+    
+    def _try_get_array_property_bytes(self, data_in, array_macro, child_macro, child_data_size=None):
+        if data_in == b'':
+            data = b''
+        else:
+            array_macro += self.ARRAY_PROPERTY
+            data = self._get_array_property_bytes(data_in, array_macro, child_macro, child_data_size)
+        return data
+    
+    def _try_get_map_property_bytes(self, data_in, map_macro, child_macro):
+        if data_in == b'':
+            data = b''
+        else:
+            map_macro += self.MAP_PROPERTY
+            data = self._get_map_property_bytes(data_in, map_macro, child_macro)
+        return data
+    
+    def _try_get_name_property_bytes(self, data_in, name_macro):
+        if data_in == b'':
+            data = b''
+        else:
+            name_macro += self.NAME_PROPERTY
+            data = self._get_name_property_bytes(data_in, name_macro)
+        return data
+    
+    def _try_get_array_struct_property_bytes(self, data_in, array_macro, struct_macro, child_macro):
+        if data_in == []:
+            data_out = b''
+        else:
+            array_macro += self.ARRAY_PROPERTY
+            data_out = self._get_array_struct_property_bytes(data_in, array_macro, struct_macro, child_macro)
+        return data_out
+    
+    def _try_get_text_property_bytes(self, data_in, text_macro):
+        if data_in == b'':
+            data_out = b''
+        else:
+            text_macro += self.TEXT_PROPERTY
+            data_out = self._get_text_property_bytes(data_in, text_macro)
+        return data_out
+    
     
     def list_to_bytes(self, byte_list):
         '''
@@ -689,18 +916,34 @@ class GenericParsers(DictMacros, ByteMacros, IO):
             out_array.extend(x)
         return bytes(out_array)
 
+    def split_byte_list(self, bytes_in):
+        out_list = []
+        if len(bytes_in) > 0:
+            count = int.from_bytes(bytes_in[:4], 'little')
+            bytes_in = bytes_in[4:]
+            for _ in range(count):
+                length = int.from_bytes(bytes_in[:4], 'little')
+                data = bytes_in[:4+length]
+                out_list.append(data)
+                bytes_in = bytes_in[4+length:]
+        return out_list, bytes_in
 
+
+'''Header Classes'''
 class Header(GenericParsers):
     '''Header Parser'''
+    BODYFLUIDS = b'\x0B\x00\x00\x00\x42\x6F\x64\x79\x46\x6C\x75\x69\x64\x73\x00' + ByteMacros.STRUCT_PADDING
     def __init__(self, header_data):
         self._parse_header_data(header_data)
     
     def _parse_header_data(self, header_data):
-        self.gvas,                header_data = self._parse_gvas(header_data)
-        _, self.playerguid,       header_data = self._parse_guid(header_data, self.PLAYER_UNIQUE_ID)
-        _, self.playerwealth,     header_data = self._parse_array_property(header_data, self.PLAYERWEALTH_ARRAY_PROP     ,self.INT_PROPERTY, 4)
-        _, self.playerbodyfluids, header_data = self._parse_array_property(header_data, self.PLAYERBODYFLUIDS_ARRAY_PROP ,self.STRUCT_PROPERTY)
+        self.gvas,            header_data = self._parse_gvas(header_data)
+        _, self.playerguid,   header_data = self._parse_guid(header_data, self.PLAYER_UNIQUE_ID)
+        _, self.playerwealth, header_data = self._try_parse_array_property(header_data, self.PLAYERWEALTH, self.INT_PROPERTY, 4)
+        _, playerbodyfluids,  header_data = self._try_parse_array_struct_property(header_data, self.PLAYERBODYFLUIDS, self.PLAYERBODYFLUIDS, self.BODYFLUIDS)
         self.remain = header_data
+        
+        self.playerbodyfluids = PlayerBodyFluids(playerbodyfluids)
     
     def _parse_gvas(self, header_data):
         cursor = header_data.find(self.PLAYER_UNIQUE_ID)
@@ -712,12 +955,56 @@ class Header(GenericParsers):
         data_out = []
         data_out.append(self.gvas)
         data_out.append(self._get_guid_bytes(self.playerguid, self.PLAYER_UNIQUE_ID))
-        data_out.append(self._get_array_property_bytes(self.playerwealth, self.PLAYERWEALTH_ARRAY_PROP, self.INT_PROPERTY, 4))
-        data_out.append(self._get_array_property_bytes(self.playerbodyfluids, self.PLAYERBODYFLUIDS_ARRAY_PROP, self.STRUCT_PROPERTY))
+        data_out.append(self._try_get_array_property_bytes(self.playerwealth, self.PLAYERWEALTH, self.INT_PROPERTY, 4))
+        data_out.append(self._try_get_array_struct_property_bytes(self.playerbodyfluids.get_data(), self.PLAYERBODYFLUIDS, self.PLAYERBODYFLUIDS, self.BODYFLUIDS))
+        data_out.append(self.remain)
+        return self.list_to_bytes(data_out)
+
+class PlayerBodyFluids(GenericParsers):
+    RACETAG = b'\x08\x00\x00\x00\x52\x61\x63\x65\x54\x61\x67\x00'
+    MILKML = b'\x08\x00\x00\x00\x4D\x69\x6C\x6B\x5F\x6D\x6C\x00'
+    SEMENML = b'\x09\x00\x00\x00\x53\x65\x6D\x65\x6E\x5F\x6D\x6C\x00'
+    MAXMILKML = b'\x0B\x00\x00\x00\x4D\x61\x78\x4D\x69\x6C\x6B\x5F\x6D\x6C\x00'
+    MAXSEMENML = b'\x0C\x00\x00\x00\x4D\x61\x78\x53\x65\x6D\x65\x6E\x5F\x6D\x6C\x00'
+    def __init__(self, playerbodyfluids_data):
+        self._parse_playerbodyfluids_data(playerbodyfluids_data)
+    
+    def _parse_playerbodyfluids_data(self, playerbodyfluids_data):
+        self.bodyfluids = []
+        while len(playerbodyfluids_data) > 0:
+            _, racetag,    playerbodyfluids_data = self._try_parse_struct_property(playerbodyfluids_data, self.RACETAG, self.GAMEPLAY_TAG)
+            _, milkml,     playerbodyfluids_data = self._try_parse_int_property(playerbodyfluids_data, self.MILKML)
+            _, semenml,    playerbodyfluids_data = self._try_parse_int_property(playerbodyfluids_data, self.SEMENML)
+            _, maxmilkml,  playerbodyfluids_data = self._try_parse_int_property(playerbodyfluids_data, self.MAXMILKML)
+            _, maxsemenml, playerbodyfluids_data = self._try_parse_int_property(playerbodyfluids_data, self.MAXSEMENML)
+            playerbodyfluids_data = playerbodyfluids_data[len(self.NONE):]
+            self.bodyfluids.append(BodyFluid(racetag, milkml, semenml, maxmilkml, maxsemenml, self.NONE))
+    
+    def get_data(self):
+        return self.bodyfluids
+
+class BodyFluid(PlayerBodyFluids):
+    def __init__(self, racetag, milkml, semenml, maxmilkml, maxsemenml, remain):
+        _, self.racetag, _ = self._try_parse_name_property(racetag, self.TAGNAME)
+        self.milkml = milkml
+        self.semenml = semenml
+        self.maxmilkml = maxmilkml
+        self.maxsemenml = maxsemenml
+        self.remain = remain
+    
+    def get_data(self):
+        data_out = []
+        racetag = self._try_get_name_property_bytes(self.racetag, self.TAGNAME) + self.NONE
+        data_out.append(self._try_get_struct_property_bytes(racetag, self.RACETAG, self.GAMEPLAY_TAG))
+        data_out.append(self._try_get_int_property_bytes(self.milkml, self.MILKML))
+        data_out.append(self._try_get_int_property_bytes(self.semenml, self.SEMENML))
+        data_out.append(self._try_get_int_property_bytes(self.maxmilkml, self.MAXMILKML))
+        data_out.append(self._try_get_int_property_bytes(self.maxsemenml, self.MAXSEMENML))
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
 
+'''Base Nephelym Classes'''
 class NephelymBase(GenericParsers):
     '''
     Base Data structure for Nephelyms.
@@ -1099,6 +1386,7 @@ class PlayerSpiritForm(NephelymBase):
         return self.list_to_bytes(data_out)
 
 
+'''Appearance Classes'''
 class Appearance(GenericParsers):
     TAGS  = b'\x05\x00\x00\x00\x54\x61\x67\x73\x00'
     MORPH = b'\x06\x00\x00\x00\x4D\x6F\x72\x70\x68\x00'
@@ -1199,58 +1487,7 @@ class Appearance(GenericParsers):
         self.chubbyshape = BaseShape(chubbyshape)
         self.slendershape = BaseShape(slendershape)
         self.meatyshape = BaseShape(meatyshape)
-     
-    def _try_parse_int_property(self, data_in, int_macro):
-        int_macro += self.INT_PROPERTY
-        try:
-            pre_data, int_prop, data_in = self._parse_int_property(data_in, int_macro)
-        except:
-            pre_data = b''
-            int_prop = b''
-        return pre_data, int_prop, data_in
-    
-    def _try_parse_float_property(self, data_in, float_macro):
-        float_macro += self.FLOAT_PROPERTY
-        try:
-            pre_data, float_prop, data_in = self._parse_float_property(data_in, float_macro)
-        except:
-            pre_data = b''
-            float_prop = b''
-        return pre_data, float_prop, data_in
-    
-    def _try_parse_struct_property(self, data_in, struct_macro, child_macro):
-        struct_macro += self.STRUCT_PROPERTY
-        try:
-            pre_data, struct_prop, data_in = self._parse_struct_property(data_in, struct_macro, child_macro)
-        except:
-            pre_data = b''
-            struct_prop = b''
-        return pre_data, struct_prop, data_in
-    
-    def _try_get_int_property_bytes(self, data_in, int_macro):
-        int_macro += self.INT_PROPERTY
-        if data_in == b'':
-            data = b''
-        else:
-            data = self._get_int_property_bytes(data_in, int_macro)
-        return data
-    
-    def _try_get_float_property_bytes(self, data_in, float_macro):
-        float_macro += self.FLOAT_PROPERTY
-        if data_in == b'':
-            data = b''
-        else:
-            data = self._get_float_property_bytes(data_in, float_macro)
-        return data
-    
-    def _try_get_struct_property_bytes(self, data_in, struct_macro, child_macro):
-        struct_macro += self.STRUCT_PROPERTY
-        if data_in == b'':
-            data = b''
-        else:
-            data = self._get_struct_property_bytes(data_in, struct_macro, child_macro)
-        return data
-    
+
     def get_data(self):
         data_out = []
         data_out.append(self._try_get_struct_property_bytes(self.tags.get_data(),               self.TAGS, self.GAMEPLAY_TAG_CONTAINER))
@@ -2401,29 +2638,368 @@ class GameplayTag(GenericParsers):
         return self.list_to_bytes(bytes_out)
 
 
-class NephelymSaveEditor(GenericParsers):
+'''World Level Classes'''
+class MonsterLevels(Appearance):
+    LEVEL = b'\x06\x00\x00\x00\x4C\x65\x76\x65\x6C\x00'
+    PROGRESS = b'\x09\x00\x00\x00\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
+    def __init__(self, monsterlevels_data):
+        self._parse_monsterlevels_data(monsterlevels_data)
+    
+    def _parse_monsterlevels_data(self, monsterlevels_data):
+        self.monsterlevel = []
+        monsterlevels_data = monsterlevels_data[4:]
+        count = int.from_bytes(monsterlevels_data[:4], 'little')
+        monsterlevels_data = monsterlevels_data[4:]
+        for _ in range(count):
+            _, tagname,  monsterlevels_data = self._try_parse_name_property(monsterlevels_data, self.TAGNAME)
+            _, level,    monsterlevels_data = self._try_parse_int_property(monsterlevels_data, self.LEVEL)
+            _, progress, monsterlevels_data = self._try_parse_int_property(monsterlevels_data, self.PROGRESS)
+            monsterlevels_data = monsterlevels_data[len(self.NONE):]
+            self.monsterlevel.append(MonsterLevel(tagname, level, progress, self.NONE))
+        self.remain = monsterlevels_data
+        
+    def get_data(self):
+        data_out = []
+        data_out.append(self.MAP_PADDING)
+        data_out.append(len(self.monsterlevel).to_bytes(4, 'little'))
+        for monsterlevel in self.monsterlevel:
+            data_out.append(monsterlevel.get_data())
+        data_out.append(self.remain)
+        return self.list_to_bytes(data_out)
+
+class MonsterLevel(MonsterLevels):
+    def __init__(self, tagname, level, progress, remain):
+        self.tagname = tagname
+        self.level = level
+        self.progress = progress
+        self.remain = remain
+        
+    def get_data(self):
+        data_out = []
+        data_out.append(self._try_get_name_property_bytes(self.tagname, self.TAGNAME))
+        data_out.append(self.NONE)
+        data_out.append(self._try_get_int_property_bytes(self.level, self.LEVEL))
+        data_out.append(self._try_get_int_property_bytes(self.progress, self.PROGRESS))
+        data_out.append(self.remain)
+        return self.list_to_bytes(data_out)
+
+
+'''Sex Posistion Classes'''
+class PlayerSexPositions(MonsterLevels):
+    def __init__(self, playersexpositions_data):
+        self._parse_sexpositions(playersexpositions_data)
+    
+    def _parse_sexpositions(self, playersexpositions_data):
+        self.playersexposition_list = []
+        while len(playersexpositions_data) > 0:
+            _, sexposition, playersexpositions_data, = self._try_parse_name_property(playersexpositions_data, self.TAGNAME)
+            playersexpositions_data = playersexpositions_data[len(self.NONE):]
+            self.playersexposition_list.append(SexPosition(sexposition, self.NONE))
+    
+    def get_data(self):
+        return self.playersexposition_list
+
+class SexPosition(PlayerSexPositions):
+    def __init__(self, sexpositions_data, remain):
+        self.sexposition = sexpositions_data
+        self.remain = remain
+    
+    def get_data(self):
+        data_out = []
+        data_out.append(self._try_get_name_property_bytes(self.sexposition, self.TAGNAME))
+        data_out.append(self.remain)
+        return self.list_to_bytes(data_out)
+
+
+'''Breeder Stat Progress Class'''
+class BreederStatProgress(Appearance):
+    STRENGTHPROGRESS =  b'\x11\x00\x00\x00\x53\x74\x72\x65\x6E\x67\x74\x68\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
+    DEXTERITYPROGRESS = b'\x12\x00\x00\x00\x44\x65\x78\x74\x65\x72\x69\x74\x79\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
+    WILLPOWERPROGRESS = b'\x12\x00\x00\x00\x57\x69\x6C\x6C\x70\x6F\x77\x65\x72\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
+    ALLUREPROGRESS =    b'\x0F\x00\x00\x00\x41\x6C\x6C\x75\x72\x65\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
+    FERTILITYPROGRESS = b'\x12\x00\x00\x00\x46\x65\x72\x74\x69\x6C\x69\x74\x79\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
+    
+    def __init__(self, breederstatprogress_data):
+        self._parse_breederstatprogress_data(breederstatprogress_data)
+    
+    def _parse_breederstatprogress_data(self, breederstatprogress_data):
+        _, self.strengthprogress,  breederstatprogress_data = self._try_parse_int_property(breederstatprogress_data, self.STRENGTHPROGRESS)
+        _, self.dexterityprogress, breederstatprogress_data = self._try_parse_int_property(breederstatprogress_data, self.DEXTERITYPROGRESS)
+        _, self.willpowerprogress, breederstatprogress_data = self._try_parse_int_property(breederstatprogress_data, self.WILLPOWERPROGRESS)
+        _, self.allureprogress,    breederstatprogress_data = self._try_parse_int_property(breederstatprogress_data, self.ALLUREPROGRESS)
+        _, self.fertilityprogress, breederstatprogress_data = self._try_parse_int_property(breederstatprogress_data, self.FERTILITYPROGRESS)
+        self.remain = breederstatprogress_data
+        
+    def get_data(self):
+        data_out = []
+        data_out.append(self._try_get_int_property_bytes(self.strengthprogress,  self.STRENGTHPROGRESS))
+        data_out.append(self._try_get_int_property_bytes(self.dexterityprogress, self.DEXTERITYPROGRESS))
+        data_out.append(self._try_get_int_property_bytes(self.willpowerprogress, self.WILLPOWERPROGRESS))
+        data_out.append(self._try_get_int_property_bytes(self.allureprogress,    self.ALLUREPROGRESS))
+        data_out.append(self._try_get_int_property_bytes(self.fertilityprogress, self.FERTILITYPROGRESS))
+        data_out.append(self.remain)
+        return self.list_to_bytes(data_out)
+
+
+'''World State Classes'''
+class WorldState(Appearance):
+    SECONDS = b'\x08\x00\x00\x00\x53\x65\x63\x6F\x6E\x64\x73\x00'
+    MINUTE = b'\x07\x00\x00\x00\x4D\x69\x6E\x75\x74\x65\x00'
+    HOUR = b'\x05\x00\x00\x00\x48\x6F\x75\x72\x00'
+    DAY = b'\x04\x00\x00\x00\x44\x61\x79\x00'
+    MONTH = b'\x06\x00\x00\x00\x4D\x6F\x6E\x74\x68\x00'
+    ACTIVETRAVELSHRINES = b'\x14\x00\x00\x00\x41\x63\x74\x69\x76\x65\x54\x72\x61\x76\x65\x6C\x53\x68\x72\x69\x6E\x65\x73\x00'
+    ACQUIREDRANCHUPGRADES = b'\x16\x00\x00\x00\x41\x63\x71\x75\x69\x72\x65\x64\x52\x61\x6E\x63\x68\x55\x70\x67\x72\x61\x64\x65\x73\x00'
+    DIALOGUESTATES = b'\x0F\x00\x00\x00\x44\x69\x61\x6C\x6F\x67\x75\x65\x53\x74\x61\x74\x65\x73\x00'
+    DIALOGUESTATE = b'\x0E\x00\x00\x00\x44\x69\x61\x6C\x6F\x67\x75\x65\x53\x74\x61\x74\x65\x00' + ByteMacros.STRUCT_PADDING
+    MONSTERLEVELS = b'\x0E\x00\x00\x00\x4D\x6F\x6E\x73\x74\x65\x72\x4C\x65\x76\x65\x6C\x73\x00'
+    FERNFED = b'\x08\x00\x00\x00\x46\x65\x72\x6E\x46\x65\x64\x00'
+    BREEDINGTASKS = b'\x0E\x00\x00\x00\x42\x72\x65\x65\x64\x69\x6E\x67\x54\x61\x73\x6B\x73\x00'
+    BREEDINGTASK = b'\x0D\x00\x00\x00\x42\x72\x65\x65\x64\x69\x6E\x67\x54\x61\x73\x6B\x00' + ByteMacros.STRUCT_PADDING
+    SPECIALBREEDINGTASKS = b'\x15\x00\x00\x00\x53\x70\x65\x63\x69\x61\x6C\x42\x72\x65\x65\x64\x69\x6E\x67\x54\x61\x73\x6B\x73\x00'
+    DAYSSINCEBREEDINGTASKREFRESH = b'\x1D\x00\x00\x00\x44\x61\x79\x73\x53\x69\x6E\x63\x65\x42\x72\x65\x65\x64\x69\x6E\x67\x54\x61\x73\x6B\x52\x65\x66\x72\x65\x73\x68\x00'
+    
+    def __init__(self, worldstate_data):
+        self._parse_worldstate_data(worldstate_data)
+    
+    def _parse_worldstate_data(self, worldstate_data):
+        _, self.seconds,                      worldstate_data = self._try_parse_int_property(worldstate_data,    self.SECONDS)
+        _, self.minute,                       worldstate_data = self._try_parse_int_property(worldstate_data,    self.MINUTE)
+        _, self.hour,                         worldstate_data = self._try_parse_int_property(worldstate_data,    self.HOUR)
+        _, self.day,                          worldstate_data = self._try_parse_int_property(worldstate_data,    self.DAY)
+        _, self.month,                        worldstate_data = self._try_parse_int_property(worldstate_data,    self.MONTH)
+        _, activetravelshrines,               worldstate_data = self._try_parse_struct_property(worldstate_data, self.ACTIVETRAVELSHRINES, self.GAMEPLAY_TAG_CONTAINER)
+        _, acquiredranchupgrades,             worldstate_data = self._try_parse_struct_property(worldstate_data, self.ACQUIREDRANCHUPGRADES, self.GAMEPLAY_TAG_CONTAINER)
+        _, dialoguestates,                    worldstate_data = self._try_parse_array_struct_property(worldstate_data,  self.DIALOGUESTATES,  self.DIALOGUESTATES,  self.DIALOGUESTATE)
+        _, monsterlevels,                     worldstate_data = self._try_parse_map_property(worldstate_data, self.MONSTERLEVELS, self.STRUCT_PROPERTY)
+        _, self.fernfed,                      worldstate_data = self._try_parse_int_property(worldstate_data,    self.FERNFED)
+        _, breedingtasks,                     worldstate_data = self._try_parse_array_struct_property(worldstate_data, self.BREEDINGTASKS, self.BREEDINGTASKS, self.BREEDINGTASK)
+        _, specialbreedingtasks,              worldstate_data = self._try_parse_array_struct_property(worldstate_data, self.SPECIALBREEDINGTASKS, self.SPECIALBREEDINGTASKS, self.BREEDINGTASK)
+        _, self.dayssincebreedingtaskrefresh, worldstate_data = self._try_parse_int_property(worldstate_data,    self.DAYSSINCEBREEDINGTASKREFRESH)
+        
+        self.remain =                worldstate_data
+        self.activetravelshrines =   GameplayTag(activetravelshrines)
+        self.acquiredranchupgrades = GameplayTag(acquiredranchupgrades)
+        self.dialoguestates =        DialogueStates(dialoguestates)
+        self.monsterlevels =         MonsterLevels(monsterlevels)
+        self.breedingtasks =         BreedingTasks(breedingtasks)
+        self.specialbreedingtasks =  BreedingTasks(specialbreedingtasks)
+        
+    def get_data(self):
+        data_out = []
+        data_out.append(self._try_get_int_property_bytes(self.seconds, self.SECONDS))
+        data_out.append(self._try_get_int_property_bytes(self.minute, self.MINUTE))
+        data_out.append(self._try_get_int_property_bytes(self.hour, self.HOUR))
+        data_out.append(self._try_get_int_property_bytes(self.day, self.DAY))
+        data_out.append(self._try_get_int_property_bytes(self.month, self.MONTH))
+        data_out.append(self._try_get_struct_property_bytes(self.activetravelshrines.get_data(), self.ACTIVETRAVELSHRINES, self.GAMEPLAY_TAG_CONTAINER))
+        data_out.append(self._try_get_struct_property_bytes(self.acquiredranchupgrades.get_data(), self.ACQUIREDRANCHUPGRADES, self.GAMEPLAY_TAG_CONTAINER))
+        data_out.append(self._try_get_array_struct_property_bytes(self.dialoguestates.get_data(), self.DIALOGUESTATES, self.DIALOGUESTATES, self.DIALOGUESTATE))
+        data_out.append(self._try_get_map_property_bytes(self.monsterlevels.get_data(), self.MONSTERLEVELS, self.STRUCT_PROPERTY))
+        data_out.append(self._try_get_int_property_bytes(self.fernfed, self.FERNFED))
+        data_out.append(self._try_get_array_struct_property_bytes(self.breedingtasks.get_data(), self.BREEDINGTASKS, self.BREEDINGTASKS, self.BREEDINGTASK))
+        data_out.append(self._try_get_array_struct_property_bytes(self.specialbreedingtasks.get_data(), self.SPECIALBREEDINGTASKS, self.SPECIALBREEDINGTASKS, self.BREEDINGTASK))
+        data_out.append(self._try_get_int_property_bytes(self.dayssincebreedingtaskrefresh, self.DAYSSINCEBREEDINGTASKREFRESH))
+        data_out.append(self.remain)
+        return self.list_to_bytes(data_out)
+
+class DialogueStates(Appearance):
+    NPC = b'\x04\x00\x00\x00\x4E\x50\x43\x00'
+    def __init__(self, dialoguestates_data):
+        self._parse_dialoguestates_data(dialoguestates_data)
+    
+    def _parse_dialoguestates_data(self, dialoguestates_data):
+        self.dialoguestates_list = []
+        while len(dialoguestates_data) > 0:
+            _, npc, dialoguestates_data = self._try_parse_struct_property(dialoguestates_data, self.NPC, self.GAMEPLAY_TAG_CONTAINER)
+            _, tags, dialoguestates_data = self._try_parse_struct_property(dialoguestates_data, self.TAGS, self.GAMEPLAY_TAG_CONTAINER)
+            dialoguestates_data = dialoguestates_data[len(self.NONE):]
+            self.dialoguestates_list.append(DialogueState(npc, tags, self.NONE))
+        
+    def get_data(self):
+        return self.dialoguestates_list
+
+class DialogueState(DialogueStates):
+    def __init__(self, npc, tags, remain):
+        self.npc = self._parse_npc(npc)
+        self.tags = self._parse_tags(tags)
+        self.remain = remain
+    
+    def _parse_npc(self, npc_data):
+        variant_values, npc_data = self.split_byte_list(npc_data)
+        if len(variant_values) != 2:
+            raise
+        
+        return Variants(variant_values)
+    
+    def _parse_tags(self, tag_data):
+        tag_list, tag_data = self.split_byte_list(tag_data)
+        if tag_data:
+            raise
+        
+        return tag_list
+    
+    def get_data(self):
+        bytes_out = []
+        tags = len(self.tags).to_bytes(4, 'little') + self.list_to_bytes(self.tags)
+        bytes_out.append(self._try_get_struct_property_bytes(self.npc.get_data(), self.NPC, self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_struct_property_bytes(tags, self.TAGS, self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
+
+class BreedingTasks(Appearance):
+    DISPLAYNAME = b'\x0C\x00\x00\x00\x44\x69\x73\x70\x6C\x61\x79\x4E\x61\x6D\x65\x00'
+    DISCRIPTION = b'\x0C\x00\x00\x00\x44\x65\x73\x63\x72\x69\x70\x74\x69\x6F\x6E\x00'
+    REQUIREDVARIANT = b'\x10\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x56\x61\x72\x69\x61\x6E\x74\x00'
+    REQUIREDSTAT = b'\x0D\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x53\x74\x61\x74\x00'
+    REQUIREDFLUID = b'\x0E\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x46\x6C\x75\x69\x64\x00'
+    REQUIREDSTATVALUE = b'\x12\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x53\x74\x61\x74\x56\x61\x6C\x75\x65\x00'
+    REQUIREDFLUIDML = b'\x11\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x46\x6C\x75\x69\x64\x5F\x6D\x6C\x00'
+    LEVELREQUIREMENT = b'\x11\x00\x00\x00\x4C\x65\x76\x65\x6C\x52\x65\x71\x75\x69\x72\x65\x6D\x65\x6E\x74\x00'
+    REQUIREDTRAITS = b'\x0F\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x54\x72\x61\x69\x74\x73\x00'
+    REQUIREMENTS = b'\x0D\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x6D\x65\x6E\x74\x73\x00'
+    DIFFICULTY = b'\x0B\x00\x00\x00\x44\x69\x66\x66\x69\x63\x75\x6C\x74\x79\x00'
+    REWARD = b'\x07\x00\x00\x00\x52\x65\x77\x61\x72\x64\x00'
+    DAYS = b'\x05\x00\x00\x00\x44\x61\x79\x73\x00'
+    COMPLETIONTAGS = b'\x0F\x00\x00\x00\x43\x6F\x6D\x70\x6C\x65\x74\x69\x6F\x6E\x54\x61\x67\x73\x00'
+    REWARDMESSAGE = b'\x0E\x00\x00\x00\x52\x65\x77\x61\x72\x64\x4D\x65\x73\x73\x61\x67\x65\x00'
+    def __init__(self, breedingtasks_data):
+        self._parse_breedingtasks_data(breedingtasks_data)
+    
+    def _parse_breedingtasks_data(self, breedingtasks_data):
+        self.breedingtask_list = []
+        
+        while len(breedingtasks_data) > 0:
+            _, displayname,         breedingtasks_data = self._try_parse_text_property(breedingtasks_data, self.DISPLAYNAME)
+            _, discription,         breedingtasks_data = self._try_parse_text_property(breedingtasks_data, self.DISCRIPTION)
+            _, requiredvariant,     breedingtasks_data = self._try_parse_struct_property(breedingtasks_data, self.REQUIREDVARIANT, self.GAMEPLAY_TAG_CONTAINER)
+            _, requiredstat,        breedingtasks_data = self._try_parse_struct_property(breedingtasks_data, self.REQUIREDSTAT, self.GAMEPLAY_TAG)
+            _, requiredfluid,       breedingtasks_data = self._try_parse_struct_property(breedingtasks_data, self.REQUIREDFLUID, self.GAMEPLAY_TAG_CONTAINER)
+            _, requiredstatvalue,   breedingtasks_data = self._try_parse_int_property(breedingtasks_data, self.REQUIREDSTATVALUE)
+            _, requiredfluidml,     breedingtasks_data = self._try_parse_int_property(breedingtasks_data, self.REQUIREDFLUIDML)
+            _, levelrequirement,    breedingtasks_data = self._try_parse_int_property(breedingtasks_data, self.LEVELREQUIREMENT)
+            _, requiredtraits,      breedingtasks_data = self._try_parse_struct_property(breedingtasks_data, self.REQUIREDTRAITS, self.GAMEPLAY_TAG_CONTAINER)
+            _, requirements,        breedingtasks_data = self._try_parse_text_property(breedingtasks_data, self.REQUIREMENTS)
+            _, difficulty,          breedingtasks_data = self._try_parse_int_property(breedingtasks_data, self.DIFFICULTY)
+            _, reward,              breedingtasks_data = self._try_parse_int_property(breedingtasks_data, self.REWARD)
+            _, days,                breedingtasks_data = self._try_parse_int_property(breedingtasks_data, self.DAYS)
+            _, completiontags,      breedingtasks_data = self._try_parse_struct_property(breedingtasks_data, self.COMPLETIONTAGS, self.GAMEPLAY_TAG_CONTAINER)
+            _, rewardmessage,       breedingtasks_data = self._try_parse_text_property(breedingtasks_data, self.REWARDMESSAGE)
+            breedingtasks_data = breedingtasks_data[len(self.NONE):]
+            breedingtask = BreedingTask(displayname, discription, requiredvariant, requiredstat, requiredfluid, requiredstatvalue, requiredfluidml, levelrequirement, requiredtraits, requirements, difficulty, reward, days, completiontags, rewardmessage, self.NONE)
+            self.breedingtask_list.append(breedingtask)
+        
+    def get_data(self):
+        return self.breedingtask_list
+
+class BreedingTask(BreedingTasks):
+    def __init__(self, displayname, discription, requiredvariant, requiredstat, requiredfluid, requiredstatvalue, requiredfluidml, levelrequirement, requiredtraits, requirements, difficulty, reward, days, completiontags, rewardmessage, remain):
+        self.displayname = displayname
+        self.discription = discription
+        _, self.requiredstat, _ = self._try_parse_name_property(requiredstat, self.TAGNAME)
+        self.requiredstatvalue = requiredstatvalue
+        self.requiredfluidml = requiredfluidml
+        self.levelrequirement = levelrequirement
+        self.requirements = requirements
+        self.difficulty = difficulty
+        self.reward = reward
+        self.days = days
+        self.rewardmessage = rewardmessage
+        self.remain = remain
+        
+        self.requiredvariant = TagContainer(requiredvariant)
+        self.requiredfluid = TagContainer(requiredfluid)
+        self.requiredtraits = TagContainer(requiredtraits)
+        self.completiontags = TagContainer(completiontags)
+    
+    def get_data(self):
+        bytes_out = []
+        bytes_out.append(self._try_get_text_property_bytes(self.displayname,    self.DISPLAYNAME))
+        bytes_out.append(self._try_get_text_property_bytes(self.discription,    self.DISCRIPTION))
+        bytes_out.append(self._try_get_struct_property_bytes(self.requiredvariant.get_data(),   self.REQUIREDVARIANT,   self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_struct_property_bytes(self._try_get_name_property_bytes(self.requiredstat, self.TAGNAME) + self.NONE, self.REQUIREDSTAT, self.GAMEPLAY_TAG))
+        bytes_out.append(self._try_get_struct_property_bytes(self.requiredfluid.get_data(),     self.REQUIREDFLUID,     self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_int_property_bytes(self.requiredstatvalue,   self.REQUIREDSTATVALUE))
+        bytes_out.append(self._try_get_int_property_bytes(self.requiredfluidml,     self.REQUIREDFLUIDML))
+        bytes_out.append(self._try_get_int_property_bytes(self.levelrequirement,    self.LEVELREQUIREMENT))
+        bytes_out.append(self._try_get_struct_property_bytes(self.requiredtraits.get_data(),    self.REQUIREDTRAITS,    self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_text_property_bytes(self.requirements,   self.REQUIREMENTS))
+        bytes_out.append(self._try_get_int_property_bytes(self.difficulty,          self.DIFFICULTY))
+        bytes_out.append(self._try_get_int_property_bytes(self.reward,              self.REWARD))
+        bytes_out.append(self._try_get_int_property_bytes(self.days,                self.DAYS))
+        bytes_out.append(self._try_get_struct_property_bytes(self.completiontags.get_data(),    self.COMPLETIONTAGS,    self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_text_property_bytes(self.rewardmessage,  self.REWARDMESSAGE))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
+
+class PlayerObtainedVariants(GenericParsers):
+    def __init__(self, playerobtainedvariants_data):
+        self._parse_playerobtainedvariants_data(playerobtainedvariants_data)
+    
+    def _parse_playerobtainedvariants_data(self, playerobtainedvariants_data):
+        self.playerobtainedvariant_list = []
+        while len(playerobtainedvariants_data) > 0:
+            variant_values, playerobtainedvariants_data = self.split_byte_list(playerobtainedvariants_data)
+            if len(variant_values) != 2:
+                raise
+            self.playerobtainedvariant_list.append(Variants(variant_values))
+    
+    def get_data(self):
+        return self.playerobtainedvariant_list
+
+class TagContainer(GenericParsers):
+    def __init__(self, tag_bytes):
+        self.tag_list, remain = self.split_byte_list(tag_bytes)
+        if remain:
+            raise
+        
+    def get_data(self):
+        bytes_out = []
+        bytes_out.append(len(self.tag_list).to_bytes(4, 'little'))
+        bytes_out.append(self.list_to_bytes(self.tag_list))
+        return self.list_to_bytes(bytes_out)
+
+class Variants(GenericParsers):
+    def __init__(self, variant_values):
+        self.variant_values = variant_values
+        
+    def get_data(self):
+        bytes_out = []
+        bytes_out.append(len(self.variant_values).to_bytes(4, 'little'))
+        bytes_out.append(self.list_to_bytes(self.variant_values))
+        return self.list_to_bytes(bytes_out)
+
+
+'''Base Save Editor Class'''
+class NephelymSaveEditor(Appearance):
     '''Class for editing saves'''
     def __init__(self, save_file=None):
         if save_file:
             self.load(save_file)
 
     def _parse_save_data(self, save_data):
-        data_header, data_monster_and_player, save_data = self._parse_array_property(save_data,  self.PLAYERMONSTER_ARRAY_PROP,     self.STRUCT_PROPERTY)
-        _, offspringbuffer,                   save_data = self._parse_offspringbuffer(save_data)
-        _, self.playersexpositions,           save_data = self._parse_playersexpositions(save_data)
-        _, self.playerspirit,                 save_data = self._parse_playerspirit(save_data)
-        _, playerspiritform_data,             save_data = self._parse_struct_property(save_data, self.PLAYERSPIRITFORM_STRUCT_PROP, self.CHATACTER_DATA)
-        _, self.playerobtainedvariants,       save_data = self._parse_playerobtainedvariants(save_data)
-        _, self.playerseenvariants,           save_data = self._parse_playerseenvariants(save_data)
-        _, self.gameflags,                    save_data = self._parse_struct_property(save_data, self.GAMEFLAGS_STRUCT_PROP,        self.GAMEPLAY_TAG_CONTAINER)
-        _, self.worldstate,                   save_data = self._parse_struct_property(save_data, self.WORLDSTATE_STRUCT_PROP,       self.SEXYWOLDSTATE)
-        _, self.breederstatprogress,          save_data = self._parse_breederstatprogress(save_data)
+        data_header, data_monster_and_player, save_data = self._try_parse_array_struct_property(save_data, self.PLAYERMONSTER,          self.PLAYERMONSTER,          self.CHARACTER_DATA)
+        _, offspringbuffer,                   save_data = self._try_parse_array_struct_property(save_data, self.OFFSPRINGBUFFER,        self.PLAYERMONSTER,          self.CHARACTER_DATA)
+        _, playersexpositions,                save_data = self._try_parse_array_struct_property(save_data, self.PLAYERSEXPOSITIONS,     self.PLAYERSEXPOSITIONS,     self.GAMEPLAY_TAG)
+        _, self.playerspirit,                 save_data = self._try_parse_int_property(save_data, self.PLAYERSPIRIT)
+        _, playerspiritform_data,             save_data = self._try_parse_struct_property(save_data, self.PLAYERSPIRITFORM,    self.CHATACTER_DATA)
+        _, playerobtainedvariants,            save_data = self._try_parse_array_struct_property(save_data, self.PLAYEROBTAINEDVARIANTS, self.PLAYEROBTAINEDVARIANTS, self.GAMEPLAY_TAG_CONTAINER)
+        _, playerseenvariants,                save_data = self._try_parse_array_struct_property(save_data, self.PLAYERSEENVARIANTS,     self.PLAYERSEENVARIANTS,     self.GAMEPLAY_TAG_CONTAINER)
+        _, gameflags,                         save_data = self._try_parse_struct_property(save_data, self.GAMEFLAGS,           self.GAMEPLAY_TAG_CONTAINER)
+        _, worldstate,                        save_data = self._try_parse_struct_property(save_data, self.WORLDSTATE,          self.SEXYWOLDSTATE)
+        _, breederstatprogress,               save_data = self._try_parse_struct_property(save_data, self.BREEDERSTATPROGRESS, self.BREEDERSTATRANKPROGRESS)
+        self.remain = save_data
         
-        self.header           = Header(data_header)
-        self.nephelyms        = self._parse_nephelyms(data_monster_and_player)
-        self.offspringbuffer  = self._parse_nephelyms(offspringbuffer)
-        self.playerspiritform = PlayerSpiritForm(playerspiritform_data)
-        self.data_footer      = save_data
+        self.header                 = Header(data_header)
+        self.nephelyms              = self._parse_nephelyms(data_monster_and_player)
+        self.playersexpositions     = PlayerSexPositions(playersexpositions)
+        self.offspringbuffer        = self._parse_nephelyms(offspringbuffer)
+        self.playerspiritform       = PlayerSpiritForm(playerspiritform_data)
+        self.playerobtainedvariants = PlayerObtainedVariants(playerobtainedvariants)
+        self.playerseenvariants     = PlayerObtainedVariants(playerseenvariants)
+        self.gameflags              = GameplayTag(gameflags)
+        self.worldstate             = WorldState(worldstate)
+        self.breederstatprogress    = BreederStatProgress(breederstatprogress)
 
     def _parse_nephelyms(self, monster_and_player_data):
         '''
@@ -2451,113 +3027,6 @@ class NephelymSaveEditor(GenericParsers):
                 data_start = position_index
             nephelyms.append(Nephelym(monster_and_player_data[nephelym_name_positions[-4]:]))
         return nephelyms
-
-    def _parse_offspringbuffer(self, save_data):
-        try:
-            pre_data, offspringbuffer, save_data = self._parse_array_property(save_data, self.OFFSPRINGBUFFER_ARRAY_PROP, self.STRUCT_PROPERTY)
-        except:
-            pre_data = b''
-            offspringbuffer = b''
-        return pre_data, offspringbuffer, save_data
-
-    def _parse_playersexpositions(self, save_data):
-        try:
-            pre_data, playersexpositions, save_data = self._parse_array_property(save_data, self.PLAYERSEXPOSITIONS_ARRAY_PROP, self.STRUCT_PROPERTY)
-        except:
-            pre_data = b''
-            playersexpositions = b''
-        return pre_data, playersexpositions, save_data
-
-    def _parse_playerspirit(self, save_data):
-        try:
-            pre_data, playerspirit, save_data = self._parse_int_property(save_data, self.PLAYERSPIRIT_INT_PROP)
-        except:
-            pre_data = b''
-            playerspirit = b''
-        return pre_data, playerspirit, save_data
-
-    def _parse_playerobtainedvariants(self, save_data):
-        try:
-            pre_data, playerobtainedvariants, save_data = self._parse_array_property(save_data, self.PLAYEROBTAINEDVARIANTS_ARRAY_PROP, self.STRUCT_PROPERTY)
-        except:
-            pre_data = b''
-            playerobtainedvariants = b''
-        return pre_data, playerobtainedvariants, save_data
-
-    def _parse_playerseenvariants(self, save_data):
-        try:
-            pre_data, playerseenvariants, save_data = self._parse_array_property(save_data, self.PLAYERSEENVARIANTS_ARRAY_PROP, self.STRUCT_PROPERTY)
-        except:
-            pre_data = b''
-            playerseenvariants = b''
-        return pre_data, playerseenvariants, save_data
-
-    def _parse_breederstatprogress(self, save_data):
-        try:
-            pre_data, breederstatprogress, save_data = self._parse_struct_property(save_data, self.BREEDERSTATPROGRESS_STRUCT_PROP, self.BREEDERSTATRANKPROGRESS)
-        except:
-            pre_data = b''
-            breederstatprogress = b''
-        return pre_data, breederstatprogress, save_data
-
-    def _get_player_monster_data(self, nephelyms, nephelym_array_name_macro):
-        nephelym_array_prop_macro = nephelym_array_name_macro + self.ARRAY_PROPERTY
-        nephelyms_bytes = self.list_to_bytes([nephelym.get_data() for nephelym in nephelyms])
-        count = len(nephelyms)
-        length_neph = len(nephelyms_bytes)
-        length_header = length_neph + len(self.CHARACTER_DATA) + 8 + len(self.STRUCT_PROPERTY) + len(nephelym_array_name_macro) + 4
-        header_new = nephelym_array_prop_macro \
-            + length_header.to_bytes(8, 'little') \
-            + self.STRUCT_ARRAY_PROPERTY \
-            + count.to_bytes(4, 'little') \
-            + nephelym_array_name_macro \
-            + self.STRUCT_PROPERTY \
-            + length_neph.to_bytes(8, 'little') \
-            + self.CHARACTER_DATA \
-            + nephelyms_bytes
-        return header_new
-
-    def _get_offspringbuffer(self):
-        if self.offspringbuffer == []:
-            data = b''
-        else:
-            data = self._get_player_monster_data(self.offspringbuffer, self.OFFSPRINGBUFFER)
-        return data
-
-    def _get_playersexpositions(self):
-        if self.playersexpositions == b'':
-            data = b''
-        else:
-            data = self._get_array_property_bytes(self.playersexpositions, self.PLAYERSEXPOSITIONS_ARRAY_PROP, self.STRUCT_PROPERTY)
-        return data
-
-    def _get_playerspirit(self):
-        if self.playerspirit == b'':
-            data = b''
-        else:
-            data = self._get_int_property_bytes(self.playerspirit, self.PLAYERSPIRIT_INT_PROP)
-        return data
-
-    def _get_playerobtainedvariants(self):
-        if self.playerobtainedvariants == b'':
-            data = b''
-        else:
-            data = self._get_array_property_bytes(self.playerobtainedvariants, self.PLAYEROBTAINEDVARIANTS_ARRAY_PROP, self.STRUCT_PROPERTY)
-        return data
-
-    def _get_playerseenvariants(self):
-        if self.playerseenvariants == b'':
-            data = b''
-        else:
-            data = self._get_array_property_bytes(self.playerseenvariants, self.PLAYERSEENVARIANTS_ARRAY_PROP, self.STRUCT_PROPERTY)
-        return data
-
-    def _get_breederstatprogress(self):
-        if self.breederstatprogress == b'':
-            data = b''
-        else:
-            data = self._get_struct_property_bytes(self.breederstatprogress,   self.BREEDERSTATPROGRESS_STRUCT_PROP,     self.BREEDERSTATRANKPROGRESS)
-        return data
 
     def _possible_nephelyms(self):
         for race in self.RACES_FEMALE:
@@ -2675,23 +3144,23 @@ class NephelymSaveEditor(GenericParsers):
         '''Return data in save file format'''
         data_out = []
         data_out.append(self.header.get_data())
-        data_out.append(self._get_player_monster_data(self.nephelyms, self.PLAYERMONSTER))
-        data_out.append(self._get_offspringbuffer())
-        data_out.append(self._get_playersexpositions())
-        data_out.append(self._get_playerspirit())
-        data_out.append(self._get_struct_property_bytes(self.playerspiritform.get_data(), self.PLAYERSPIRITFORM_STRUCT_PROP, self.CHATACTER_DATA))
-        data_out.append(self._get_playerobtainedvariants())
-        data_out.append(self._get_playerseenvariants())
-        data_out.append(self._get_struct_property_bytes(self.gameflags,                   self.GAMEFLAGS_STRUCT_PROP,        self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._get_struct_property_bytes(self.worldstate,                  self.WORLDSTATE_STRUCT_PROP,       self.SEXYWOLDSTATE))
-        data_out.append(self._get_breederstatprogress())
-        data_out.append(self.data_footer)
+        data_out.append(self._try_get_array_struct_property_bytes(self.nephelyms,                         self.PLAYERMONSTER,          self.PLAYERMONSTER,          self.CHARACTER_DATA))
+        data_out.append(self._try_get_array_struct_property_bytes(self.offspringbuffer,                   self.OFFSPRINGBUFFER,        self.OFFSPRINGBUFFER,        self.CHARACTER_DATA))
+        data_out.append(self._try_get_array_struct_property_bytes(self.playersexpositions.get_data(),     self.PLAYERSEXPOSITIONS,     self.PLAYERSEXPOSITIONS,     self.GAMEPLAY_TAG))
+        data_out.append(self._try_get_int_property_bytes(self.playerspirit, self.PLAYERSPIRIT))
+        data_out.append(self._try_get_struct_property_bytes(self.playerspiritform.get_data(),    self.PLAYERSPIRITFORM,    self.CHATACTER_DATA))
+        data_out.append(self._try_get_array_struct_property_bytes(self.playerobtainedvariants.get_data(), self.PLAYEROBTAINEDVARIANTS, self.PLAYEROBTAINEDVARIANTS, self.GAMEPLAY_TAG_CONTAINER))
+        data_out.append(self._try_get_array_struct_property_bytes(self.playerseenvariants.get_data(),     self.PLAYERSEENVARIANTS,     self.PLAYERSEENVARIANTS,     self.GAMEPLAY_TAG_CONTAINER))
+        data_out.append(self._try_get_struct_property_bytes(self.gameflags.get_data(),           self.GAMEFLAGS,           self.GAMEPLAY_TAG_CONTAINER))
+        data_out.append(self._try_get_struct_property_bytes(self.worldstate.get_data(),          self.WORLDSTATE,          self.SEXYWOLDSTATE))
+        data_out.append(self._try_get_struct_property_bytes(self.breederstatprogress.get_data(), self.BREEDERSTATPROGRESS, self.BREEDERSTATRANKPROGRESS))
+        data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
 
 if __name__ == "__main__":
     save_in       = r'0.sav'
-    save_out      = r'15.sav'
+    save_out      = r'0_.sav'
     preset_folder = r'..\CharacterPresets'
     
     # DEBUGGING: test if parsing and save of save works.
@@ -2700,6 +3169,28 @@ if __name__ == "__main__":
     if Testing:
         NephelymSaveEditor(save_in).save(save_out)
         exit()
+    
+    #Example of transfering colors from one part to another
+    if False:
+        x = NephelymSaveEditor(save_in)
+        breeder = x.nephelyms[0]
+        lowerclothingcolorb = breeder.appearance.attachmentmaterial.lowerclothingcolor.colorb
+        lowerclothingglowb = breeder.appearance.attachmentmaterial.lowerclothingcolor.glowb
+        
+        material = breeder.appearance.material
+        material.dickcolor = lowerclothingcolorb
+        material.dickglow = lowerclothingglowb
+        material.dicktipcolor = lowerclothingcolorb
+        material.dicktipglow = lowerclothingglowb
+        x.save(save_out)
+    
+    #Example Converting Old saves to Newer version of game. Nephelyms should be safe, but progress may be broken
+    if False:
+        old_save = NephelymSaveEditor(r'0.sav')
+        new_save = NephelymSaveEditor(r'1.sav')
+        old_save.header.gvas = new_save.header.gvas
+        old_save.save(r'0_.sav')
+    
     
     # Instance of Editor
     nephelym_save_editor = NephelymSaveEditor(save_in)
