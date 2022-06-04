@@ -13,6 +13,21 @@ MODIFY LOGIC IN MAIN TO PREFORM DESIRED EDITS.
 
 To execute run 'python NephelymSaveEditor.py'
 
+# Notable Features
+Here is a list of some of the functions that are already implimented in the program.
+- Duplication of Nephelyms
+- Add and Removal of Nephelyms
+- Cloning of Nephelyms in all possible sizes
+- Generation of Nephelyms from presets
+- EXPORTING Nephelyms to presets
+- Changing of Nephelym stats, rarity
+- Add and Removal of Nephelym traits
+- Changing of Nephelym Race, Sex, and name
+- Transfering Appearance to another Nephelym
+
+Saves should be fully parsed so other sub-values can be changes like individual colors in appearance, but they dont have a direct interface function.
+
+
 ## Brief
 Mostly started this because of not wanting to spend hours breeding perfect nehpelyms but it morphed into curiosity of how UE serializes it saves. Figuring out how to parse save game file data structures down to a simple form and recreating them back into a working save has been and interesting challenge. This is more of a tech exploration than a 'Proper' save editor, but included are functions to help facilitate bulk editing of a save. More ganular editing is possible but will require more logical thinking on the users end to achieve the desired changes. The main function provides examples of most higher level program functions. Functions starting with _ are ment to be internal and should only be used inside class or if debugging.
 
@@ -34,7 +49,7 @@ Lower level parsing and editing for the following classes
 
 - Moving of all macros into own class
 
-- Better Understanding of text and map properties for better generic parsing
+- Better Understanding of text, array struct, and map properties for better generic parsing
 
 - Interface functions for lower level variables like appearance and game flags
 
