@@ -422,6 +422,7 @@ class ByteMacros:
     
     MAP_PADDING = b'\x00\x00\x00\x00'
     STRUCT_PADDING = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    BOOL_PADDING = b'\x00\x00\x00\x00\x00\x00\x00\x00'
     NONE = b'\x05\x00\x00\x00\x4E\x6F\x6E\x65\x00'
     GUID_PROP = b'\x05\x00\x00\x00\x47\x75\x69\x64\x00' + STRUCT_PADDING
 
@@ -501,23 +502,13 @@ class ByteMacros:
     
     ### Preset Macros
     PRESETNAME = b'\x0B\x00\x00\x00\x50\x72\x65\x73\x65\x74\x4E\x61\x6D\x65\x00'
-    PRESETNAME_NAME_PROP = PRESETNAME + NAME_PROPERTY
     SCHEME = b'\x07\x00\x00\x00\x53\x63\x68\x65\x6D\x65\x00'
-    SCHEME_PROP_STRUCT = SCHEME + STRUCT_PROPERTY
-    COMMON = b'\x00\x00\x00\x62\x43\x6F\x6D\x6D\x6F\x6E\x00'
+    
+    COMMON = b'\x08\x00\x00\x00\x62\x43\x6F\x6D\x6D\x6F\x6E\x00'
     UNCOMMON = b'\x0A\x00\x00\x00\x62\x55\x6E\x63\x6F\x6D\x6D\x6F\x6E\x00'
     RARE = b'\x06\x00\x00\x00\x62\x52\x61\x72\x65\x00'
     UNIQUE = b'\x08\x00\x00\x00\x62\x55\x6E\x69\x71\x75\x65\x00'
     LEGENDARY = b'\x0B\x00\x00\x00\x62\x4C\x65\x67\x65\x6E\x64\x61\x72\x79\x00'
-    RARITY_PADDING = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-    
-    RARITY_COMMON    = COMMON    + BOOL_PROPERTY + RARITY_PADDING
-    RARITY_UNCOMMON  = UNCOMMON  + BOOL_PROPERTY + RARITY_PADDING
-    RARITY_RARE      = RARE      + BOOL_PROPERTY + RARITY_PADDING
-    RARITY_UNIQUE    = UNIQUE    + BOOL_PROPERTY + RARITY_PADDING
-    RARITY_LEGENDARY = LEGENDARY + BOOL_PROPERTY + RARITY_PADDING
-    
-    RARITIES = [RARITY_COMMON, RARITY_UNCOMMON, RARITY_RARE, RARITY_UNIQUE, RARITY_LEGENDARY,]
 
 class IO:
     '''Functions that deal with IO'''
@@ -672,6 +663,14 @@ class GenericParsers(DictMacros, ByteMacros, IO):
         data_end = data_start + length
         return text_bytes[:cursor], text_bytes[data_start:data_end], text_bytes[data_end:]
     
+    def _parse_bool_property(self, bool_bytes, bool_macro):
+        cursor = bool_bytes.find(bool_macro)
+        if cursor == -1:
+            raise Exception(f'Invalid Save: {bool_macro}')
+        data_start = cursor + len(bool_macro) + len(self.BOOL_PADDING)
+        data_end = data_start + 2
+        return bool_bytes[:cursor], bool_bytes[data_start:data_end], bool_bytes[data_end:]
+    
     
     def _get_float_property_bytes(self, float_bytes, float_macro):
         float_length = len(float_bytes)
@@ -765,6 +764,12 @@ class GenericParsers(DictMacros, ByteMacros, IO):
             + text_bytes
         return bytes_out
     
+    def _get_bool_property_bytes(self, bool_bytes, bool_macro):
+        bytes_out = bool_macro \
+            + self.BOOL_PADDING \
+            + bool_bytes
+        return bytes_out
+    
     
     def _try_parse_int_property(self, data_in, int_macro):
         int_macro += self.INT_PROPERTY
@@ -838,6 +843,15 @@ class GenericParsers(DictMacros, ByteMacros, IO):
             text_prop = b''
         return pre_data, text_prop, data_in
     
+    def _try_parse_bool_property(self, data_in, bool_macro):
+        bool_macro += self.BOOL_PROPERTY
+        try:
+            pre_data, bool_prop, data_in = self._parse_bool_property(data_in, bool_macro)
+        except:
+            pre_data = b''
+            bool_prop = b''
+        return pre_data, bool_prop, data_in
+    
     
     def _try_get_int_property_bytes(self, data_in, int_macro):
         if data_in == b'':
@@ -901,6 +915,14 @@ class GenericParsers(DictMacros, ByteMacros, IO):
         else:
             text_macro += self.TEXT_PROPERTY
             data_out = self._get_text_property_bytes(data_in, text_macro)
+        return data_out
+    
+    def _try_get_bool_property_bytes(self, data_in, bool_macro):
+        if data_in == b'':
+            data_out = b''
+        else:
+            bool_macro += self.BOOL_PROPERTY
+            data_out = self._get_bool_property_bytes(data_in, bool_macro)
         return data_out
     
     
@@ -1293,57 +1315,6 @@ class Nephelym(NephelymBase):
         clone.replace_father_guid()
         return clone
 
-class NephelymPreset(NephelymBase):
-    def __str__(self):
-        return f'Preset\n{self.name} {self.sex} {self.race}'
-    
-    def __init__(self, preset_file):
-        self.preset_file = preset_file
-        preset_data = self.load_save(preset_file)
-        self._parse_preset(preset_data)
-    
-    def _parse_preset(self, preset_data):
-        self.gvas,              preset_data = self._parse_gvas(preset_data)
-        _, self.name,           preset_data = self._parse_name_property(preset_data, self.PRESETNAME_NAME_PROP)
-        _, self.race, self.sex, preset_data = self._parse_variant(preset_data)
-        _, appearance,          preset_data = self._parse_struct_property(preset_data, self.SCHEME_PROP_STRUCT, self.CHARACTER_APPEARANCE)
-        _, self.rarities,       preset_data = self._parse_rarities(preset_data)
-        self.remain = preset_data
-        self.appearance = Appearance(appearance)
-    
-    def _parse_gvas(self, preset_data):
-        cursor = preset_data.find(self.PRESETNAME_NAME_PROP)
-        if cursor == -1:
-            raise Exception('Invalid Header: PRESETNAME_NAME_PROP')
-        return preset_data[:cursor], preset_data[cursor:]
-    
-    def _parse_rarities(self, preset_data):
-        rarities = []
-        data_end = 0
-        predata = 0
-        first = True
-        for rarity in self.RARITIES:
-            cursor = preset_data.find(rarity)
-            if cursor == -1:
-                continue
-            rarities.append(rarity)
-            data_end = cursor + len(rarity)
-            if first:
-                first = False
-                predata = cursor
-        return preset_data[:predata], rarities, preset_data[data_end:]
-    
-    def _get_rarities(self, rarities):
-        return self.list_to_bytes(rarities)
-    
-    def get_data(self):
-        data_out = []
-        data_out.append(self.gvas)
-        data_out.append(self._get_name_property_bytes(self.name, self.PRESETNAME_NAME_PROP))
-        data_out.append(self._get_variant_bytes([self.race, self.sex]))
-        data_out.append(self._get_struct_property_bytes(self.appearance.get_data(), self.SCHEME_PROP_STRUCT, self.CHARACTER_APPEARANCE))
-        return self.list_to_bytes(data_out)
-
 class PlayerSpiritForm(NephelymBase):
     def __init__(self, spiritform_data):
         self._parse_spiritform_data(spiritform_data)
@@ -1382,6 +1353,51 @@ class PlayerSpiritForm(NephelymBase):
         data_out.append(self._get_struct_property_bytes(self.appliedscheme, self.APPLIEDSCHEME_STRUCT_PROP, self.CHARACTER_APPLIED_SCHEME))
         data_out.append(self._get_struct_property_bytes(self.mother, self.MOTHER_STRUCT_PROP, self.CHARACTER_PARENT_DATA))
         data_out.append(self._get_struct_property_bytes(self.father, self.FATHER_STRUCT_PROP, self.CHARACTER_PARENT_DATA))
+        data_out.append(self.remain)
+        return self.list_to_bytes(data_out)
+
+
+'''Nephelym Presets Class'''
+class NephelymPreset(NephelymBase):
+    def __str__(self):
+        return f'Preset\n{self.name} {self.sex} {self.race}'
+    
+    def __init__(self, preset_file):
+        self.preset_file = preset_file
+        preset_data = self.load_save(preset_file)
+        self._parse_preset(preset_data)
+    
+    def _parse_preset(self, preset_data):
+        self.gvas,              preset_data = self._parse_gvas(preset_data)
+        _, self.name,           preset_data = self._try_parse_name_property(preset_data, self.PRESETNAME)
+        _, self.race, self.sex, preset_data = self._parse_variant(preset_data)
+        _, appearance,          preset_data = self._try_parse_struct_property(preset_data, self.SCHEME, self.CHARACTER_APPEARANCE)
+        _, self.common,         preset_data = self._try_parse_bool_property(preset_data, self.COMMON)
+        _, self.uncommon,       preset_data = self._try_parse_bool_property(preset_data, self.UNCOMMON)
+        _, self.rare,           preset_data = self._try_parse_bool_property(preset_data, self.RARE)
+        _, self.unique,         preset_data = self._try_parse_bool_property(preset_data, self.UNIQUE)
+        _, self.legendary,      preset_data = self._try_parse_bool_property(preset_data, self.LEGENDARY)
+        self.remain = preset_data
+        
+        self.appearance = Appearance(appearance)
+    
+    def _parse_gvas(self, preset_data):
+        cursor = preset_data.find(self.PRESETNAME)
+        if cursor == -1:
+            raise Exception('Invalid Header: PRESETNAME')
+        return preset_data[:cursor], preset_data[cursor:]
+    
+    def get_data(self):
+        data_out = []
+        data_out.append(self.gvas)
+        data_out.append(self._try_get_name_property_bytes(self.name, self.PRESETNAME))
+        data_out.append(self._get_variant_bytes([self.race, self.sex]))
+        data_out.append(self._try_get_struct_property_bytes(self.appearance.get_data(), self.SCHEME, self.CHARACTER_APPEARANCE))
+        data_out.append(self._try_get_bool_property_bytes(self.common,    self.COMMON))
+        data_out.append(self._try_get_bool_property_bytes(self.uncommon,  self.UNCOMMON))
+        data_out.append(self._try_get_bool_property_bytes(self.rare,      self.RARE))
+        data_out.append(self._try_get_bool_property_bytes(self.unique,    self.UNIQUE))
+        data_out.append(self._try_get_bool_property_bytes(self.legendary, self.LEGENDARY))
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
@@ -3136,9 +3152,27 @@ class NephelymSaveEditor(Appearance):
         new_nephelym = template_nephelym.clone()
         new_nephelym.change_appearance(preset)
         new_nephelym.change_name(preset.name)
-        new_nephelym.change_sex(preset.sex)
         new_nephelym.change_race(preset.race)
+        new_nephelym.change_sex(preset.sex)
         return new_nephelym
+
+    def nephelym_to_preset(self, preset_in_path, nephelym, preset_out_path=None):
+        preset_template = NephelymPreset(preset_in_path)
+        preset_template.race = nephelym.race
+        if nephelym.sex == self.SEXES['futa']:
+            preset_template.sex = self.SEXES['female']
+        else:
+            preset_template.sex = nephelym.sex
+        preset_template.name = nephelym.name
+        preset_template.appearance = nephelym.appearance
+        
+        if preset_out_path == None:
+            race_out = preset_template.race[:-1].decode('utf-8').split('Race.')[-1].replace('.','_')
+            sex_out = preset_template.sex[:-1].decode('utf-8').split('Sex.')[-1].replace('.','_')
+            name_out = preset_template.name[:-1].decode('utf-8')
+            preset_out_path = os.path.join(os.path.split(preset_in_path)[0], f'CP_{race_out}_{sex_out}_{name_out}.sav')
+        
+        self.write_save(preset_out_path, preset_template.get_data())
 
     def get_data(self):
         '''Return data in save file format'''
@@ -3165,12 +3199,11 @@ if __name__ == "__main__":
     
     # DEBUGGING: test if parsing and save of save works.
     # Files should be identical, with execption of maybe spiritform variant and some additional gameplaytags container
-    Testing = True
-    if Testing:
+    if True:
         NephelymSaveEditor(save_in).save(save_out)
         exit()
     
-    #Example of transfering colors from one part to another
+    #Example: of transfering colors from one part to another
     if False:
         x = NephelymSaveEditor(save_in)
         breeder = x.nephelyms[0]
@@ -3183,13 +3216,25 @@ if __name__ == "__main__":
         material.dicktipcolor = lowerclothingcolorb
         material.dicktipglow = lowerclothingglowb
         x.save(save_out)
+        exit()
     
-    #Example Converting Old saves to Newer version of game. Nephelyms should be safe, but progress may be broken
+    #Example: Converting Old saves to Newer version of game. Nephelyms should be safe, but progress may be broken
     if False:
         old_save = NephelymSaveEditor(r'0.sav')
         new_save = NephelymSaveEditor(r'1.sav')
         old_save.header.gvas = new_save.header.gvas
         old_save.save(r'0_.sav')
+        exit()
+    
+    
+    #Example: Saving Nephelym as a preset
+    if False:
+        x = NephelymSaveEditor(save_in)
+        breeder = x.nephelyms[0]
+        template_preset_path = os.listdir(preset_folder)[0]
+        template_preset = os.path.join(preset_folder, template_preset_path)
+        x.nephelym_to_preset(template_preset, breeder)
+        exit()
     
     
     # Instance of Editor
