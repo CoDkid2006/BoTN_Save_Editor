@@ -21,7 +21,7 @@ import struct
 def hex_to_float(bytes):
     if len(bytes) < 4:
         return 
-    return struct.unpack('f', bytes)
+    return struct.unpack('f', bytes)[0]
 
 def float_to_hex(value):
     return bytes(bytearray(struct.pack("f", value)))
@@ -413,7 +413,6 @@ class ByteMacros:
     INT_PROPERTY = b'\x0C\x00\x00\x00\x49\x6E\x74\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
     FLOAT_PROPERTY = b'\x0E\x00\x00\x00\x46\x6C\x6F\x61\x74\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
     _BYTE_PROPERTY = b'\x0D\x00\x00\x00\x42\x79\x74\x65\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
-    STRUCT_ARRAY_PROPERTY = STRUCT_PROPERTY + b'\x00'
     BYTE_PROPERTY = _BYTE_PROPERTY + b'\x01\x00\x00\x00\x00\x00\x00\x00\x05\x00\x00\x00\x4E\x6F\x6E\x65\x00\x00'
     NAME_PROPERTY = b'\x0D\x00\x00\x00\x4E\x61\x6D\x65\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
     BOOL_PROPERTY = b'\x0D\x00\x00\x00\x42\x6F\x6F\x6C\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
@@ -424,27 +423,41 @@ class ByteMacros:
     STRUCT_PADDING = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
     BOOL_PADDING = b'\x00\x00\x00\x00\x00\x00\x00\x00'
     NONE = b'\x05\x00\x00\x00\x4E\x6F\x6E\x65\x00'
-    GUID_PROP = b'\x05\x00\x00\x00\x47\x75\x69\x64\x00' + STRUCT_PADDING
-
+    GUID = b'\x05\x00\x00\x00\x47\x75\x69\x64\x00'
+    
+    
     ### Save header macros
-    GUID_HEADER = b'\x10\x00\x00\x00\x00\x00\x00\x00\x05\x00\x00\x00\x47\x75\x69\x64\x00' + STRUCT_PADDING
-    PLAYER_UNIQUE_ID = b'\x0F\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x55\x6E\x69\x71\x75\x65\x49\x44\x00' + STRUCT_PROPERTY + GUID_HEADER
+    GUID_PROP = GUID + STRUCT_PADDING
+    PLAYER_UNIQUE_ID = b'\x0F\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x55\x6E\x69\x71\x75\x65\x49\x44\x00'
     PLAYERWEALTH = b'\x0D\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x57\x65\x61\x6C\x74\x68\x00'
     PLAYERBODYFLUIDS = b'\x11\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x42\x6F\x64\x79\x46\x6C\x75\x69\x64\x73\x00'
     TAGNAME = b'\x08\x00\x00\x00\x54\x61\x67\x4E\x61\x6D\x65\x00'
+    
+    BODYFLUIDS = b'\x0B\x00\x00\x00\x42\x6F\x64\x79\x46\x6C\x75\x69\x64\x73\x00' + STRUCT_PADDING
+    
+    
+    #Player Body Fluids
+    RACETAG = b'\x08\x00\x00\x00\x52\x61\x63\x65\x54\x61\x67\x00'
+    MILKML = b'\x08\x00\x00\x00\x4D\x69\x6C\x6B\x5F\x6D\x6C\x00'
+    SEMENML = b'\x09\x00\x00\x00\x53\x65\x6D\x65\x6E\x5F\x6D\x6C\x00'
+    MAXMILKML = b'\x0B\x00\x00\x00\x4D\x61\x78\x4D\x69\x6C\x6B\x5F\x6D\x6C\x00'
+    MAXSEMENML = b'\x0C\x00\x00\x00\x4D\x61\x78\x53\x65\x6D\x65\x6E\x5F\x6D\x6C\x00'
+    
+    
     #Nephelym/Breeder Block Headers
     PLAYERMONSTER = b'\x0F\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x4D\x6F\x6E\x73\x74\x65\x72\x73\x00'
     CHARACTER_DATA = b'\x0E\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x44\x61\x74\x61\x00' + STRUCT_PADDING
-
+    
+    
     ### Individual Nephelym Macros
     PLAYER_MONSTER_NAME = b'\x05\x00\x00\x00\x4E\x61\x6D\x65\x00\x0C\x00\x00\x00\x53\x74\x72\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
-    NEPHELYM_GUID = b'\x09\x00\x00\x00\x55\x6E\x69\x71\x75\x65\x49\x44\x00' + STRUCT_PROPERTY + GUID_HEADER
+    UNIQUEID = b'\x09\x00\x00\x00\x55\x6E\x69\x71\x75\x65\x49\x44\x00'
     
-    VARIANT_STRUCT_PROP = b'\x08\x00\x00\x00\x56\x61\x72\x69\x61\x6E\x74\x00' + STRUCT_PROPERTY
+    VARIANT = b'\x08\x00\x00\x00\x56\x61\x72\x69\x61\x6E\x74\x00'
     GAMEPLAY_TAG_CONTAINER = b'\x15\x00\x00\x00\x47\x61\x6D\x65\x70\x6C\x61\x79\x54\x61\x67\x43\x6F\x6E\x74\x61\x69\x6E\x65\x72\x00' + STRUCT_PADDING
     
     
-    APPEARANCE_STRUCT_PROP = b'\x0B\x00\x00\x00\x41\x70\x70\x65\x61\x72\x61\x6E\x63\x65\x00' + STRUCT_PROPERTY
+    APPEARANCE = b'\x0B\x00\x00\x00\x41\x70\x70\x65\x61\x72\x61\x6E\x63\x65\x00'
     CHARACTER_APPEARANCE = b'\x14\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x41\x70\x70\x65\x61\x72\x61\x6E\x63\x65\x00' + STRUCT_PADDING
     
     SPLATTER_STRUCT_PROP = b'\x09\x00\x00\x00\x53\x70\x6C\x61\x74\x74\x65\x72\x00' + STRUCT_PROPERTY
@@ -473,37 +486,448 @@ class ByteMacros:
     TRAITS_STRUCT_PROP = b'\x07\x00\x00\x00\x54\x72\x61\x69\x74\x73\x00' + STRUCT_PROPERTY
     PLAYERTAGS_STRUCT_PROP = b'\x0B\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x54\x61\x67\x73\x00' + STRUCT_PROPERTY
     STATES_STRUCT_PROP = b'\x07\x00\x00\x00\x53\x74\x61\x74\x65\x73\x00' + STRUCT_PROPERTY
-    OFFSPRINGID_STRUCT_PROP = b'\x0C\x00\x00\x00\x4F\x66\x66\x73\x70\x72\x69\x6E\x67\x49\x44\x00' + STRUCT_PROPERTY
-    LASTMATEID_STRUCT_PROP = b'\x0B\x00\x00\x00\x4C\x61\x73\x74\x4D\x61\x74\x65\x49\x44\x00' + STRUCT_PROPERTY
-    LASTMATESEXCOUNT_BYTE_PROP = b'\x11\x00\x00\x00\x4C\x61\x73\x74\x4D\x61\x74\x65\x53\x65\x78\x43\x6F\x75\x6E\x74\x00' + BYTE_PROPERTY
+    OFFSPRINGID = b'\x0C\x00\x00\x00\x4F\x66\x66\x73\x70\x72\x69\x6E\x67\x49\x44\x00'
+    LASTMATEID = b'\x0B\x00\x00\x00\x4C\x61\x73\x74\x4D\x61\x74\x65\x49\x44\x00'
+    LASTMATESEXCOUNT = b'\x11\x00\x00\x00\x4C\x61\x73\x74\x4D\x61\x74\x65\x53\x65\x78\x43\x6F\x75\x6E\x74\x00'
+    
+    
+    
+    
+    
     
     ### Offspring Macros
     OFFSPRINGBUFFER = b'\x10\x00\x00\x00\x4F\x66\x66\x73\x70\x72\x69\x6E\x67\x42\x75\x66\x66\x65\x72\x00'
     
+    
     ### Spiritform Macros
-    UNIQUEID = b'\x09\x00\x00\x00\x55\x6E\x69\x71\x75\x65\x49\x44\x00'
-    SPIRITFORM_GUID = UNIQUEID + STRUCT_PROPERTY + GUID_HEADER
     PLAYERSPIRIT = b'\x0D\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x53\x70\x69\x72\x69\x74\x00'
     PLAYERSPIRITFORM = b'\x11\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x53\x70\x69\x72\x69\x74\x46\x6F\x72\x6D\x00'
     
     
     ### Footer Macros
     PLAYERSEXPOSITIONS = b'\x13\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x53\x65\x78\x50\x6F\x73\x69\x74\x69\x6F\x6E\x73\x00'
-    GAMEPLAY_TAG = b'\x0C\x00\x00\x00\x47\x61\x6D\x65\x70\x6C\x61\x79\x54\x61\x67\x00' + STRUCT_PADDING
-    CHATACTER_DATA = b'\x0E\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x44\x61\x74\x61\x00' + STRUCT_PADDING
     PLAYEROBTAINEDVARIANTS = b'\x17\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x4F\x62\x74\x61\x69\x6E\x65\x64\x56\x61\x72\x69\x61\x6E\x74\x73\x00'
-    PLAYEROBTAINEDVARIANTS_ARRAY_PROP = PLAYEROBTAINEDVARIANTS + ARRAY_PROPERTY
     PLAYERSEENVARIANTS = b'\x13\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x53\x65\x65\x6E\x56\x61\x72\x69\x61\x6E\x74\x73\x00'
     GAMEFLAGS = b'\x0A\x00\x00\x00\x47\x61\x6D\x65\x46\x6C\x61\x67\x73\x00'
     WORLDSTATE = b'\x0B\x00\x00\x00\x57\x6F\x72\x6C\x64\x53\x74\x61\x74\x65\x00'
-    SEXYWOLDSTATE = b'\x0F\x00\x00\x00\x53\x65\x78\x79\x57\x6F\x72\x6C\x64\x53\x74\x61\x74\x65\x00' + STRUCT_PADDING
     BREEDERSTATPROGRESS = b'\x14\x00\x00\x00\x42\x72\x65\x65\x64\x65\x72\x53\x74\x61\x74\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
-    BREEDERSTATRANKPROGRESS = b'\x18\x00\x00\x00\x42\x72\x65\x65\x64\x65\x72\x53\x74\x61\x74\x52\x61\x6E\x6B\x50\x72\x6F\x67\x72\x65\x73\x73\x00' + STRUCT_PADDING
+    
+    SEXY_WOLD_STATE = b'\x0F\x00\x00\x00\x53\x65\x78\x79\x57\x6F\x72\x6C\x64\x53\x74\x61\x74\x65\x00' + STRUCT_PADDING
+    GAMEPLAY_TAG = b'\x0C\x00\x00\x00\x47\x61\x6D\x65\x70\x6C\x61\x79\x54\x61\x67\x00' + STRUCT_PADDING
+    CHATACTER_DATA = b'\x0E\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x44\x61\x74\x61\x00' + STRUCT_PADDING
+    BREEDER_STAT_RANK_PROGRESS = b'\x18\x00\x00\x00\x42\x72\x65\x65\x64\x65\x72\x53\x74\x61\x74\x52\x61\x6E\x6B\x50\x72\x6F\x67\x72\x65\x73\x73\x00' + STRUCT_PADDING
+    
+    
+    #Appearance
+    TAGS  = b'\x05\x00\x00\x00\x54\x61\x67\x73\x00'
+    MORPH = b'\x06\x00\x00\x00\x4D\x6F\x72\x70\x68\x00'
+    PHYSICS = b'\x08\x00\x00\x00\x50\x68\x79\x73\x69\x63\x73\x00'
+    BASESHAPE = b'\x0A\x00\x00\x00\x42\x61\x73\x65\x53\x68\x61\x70\x65\x00'
+    CHUBBYSHAPE = b'\x0C\x00\x00\x00\x43\x68\x75\x62\x62\x79\x53\x68\x61\x70\x65\x00'
+    SLENDERSHAPE = b'\x0D\x00\x00\x00\x53\x6C\x65\x6E\x64\x65\x72\x53\x68\x61\x70\x65\x00'
+    MEATYSHAPE = b'\x0B\x00\x00\x00\x4D\x65\x61\x74\x79\x53\x68\x61\x70\x65\x00'
+    MATERIAL = b'\x09\x00\x00\x00\x4D\x61\x74\x65\x72\x69\x61\x6C\x00'
+    EYERINDEX = b'\x0A\x00\x00\x00\x45\x79\x65\x52\x49\x6E\x64\x65\x78\x00'
+    EYELINDEX = b'\x0A\x00\x00\x00\x45\x79\x65\x4C\x49\x6E\x64\x65\x78\x00'
+    EYEBROWINDEX = b'\x0D\x00\x00\x00\x45\x79\x65\x62\x72\x6F\x77\x49\x6E\x64\x65\x78\x00'
+    FACEDECORINDEX = b'\x0F\x00\x00\x00\x46\x61\x63\x65\x44\x65\x63\x6F\x72\x49\x6E\x64\x65\x78\x00'
+    BODYDECORINDEX = b'\x0F\x00\x00\x00\x42\x6F\x64\x79\x44\x65\x63\x6F\x72\x49\x6E\x64\x65\x78\x00'
+    BODYMARKSINDEX = b'\x0F\x00\x00\x00\x42\x6F\x64\x79\x4D\x61\x72\x6B\x73\x49\x6E\x64\x65\x78\x00'
+    ADDITIONALMATERIALMASKINDEX = b'\x1C\x00\x00\x00\x41\x64\x64\x69\x74\x69\x6F\x6E\x61\x6C\x4D\x61\x74\x65\x72\x69\x61\x6C\x4D\x61\x73\x6B\x49\x6E\x64\x65\x78\x00'
+    ADDITIONALMATERIALINDEX = b'\x18\x00\x00\x00\x41\x64\x64\x69\x74\x69\x6F\x6E\x61\x6C\x4D\x61\x74\x65\x72\x69\x61\x6C\x49\x6E\x64\x65\x78\x00'
+    ATTACHMENTMATERIAL = b'\x13\x00\x00\x00\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x4D\x61\x74\x65\x72\x69\x61\x6C\x00'
+    TORSOATTACHMENTINDEX = b'\x15\x00\x00\x00\x54\x6F\x72\x73\x6F\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
+    PUBICHAIRINDEX = b'\x0F\x00\x00\x00\x50\x75\x62\x69\x63\x48\x61\x69\x72\x49\x6E\x64\x65\x78\x00'
+    HEADATTACHMENTINDEX = b'\x14\x00\x00\x00\x48\x65\x61\x64\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
+    HEADEXTRAATTACHMENTINDEX = b'\x19\x00\x00\x00\x48\x65\x61\x64\x45\x78\x74\x72\x61\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
+    LEGSATTACHMENTINDEX = b'\x14\x00\x00\x00\x4C\x65\x67\x73\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
+    ARMSATTACHMENTINDEX = b'\x14\x00\x00\x00\x41\x72\x6D\x73\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
+    TAILATTACHMENTINDEX = b'\x14\x00\x00\x00\x54\x61\x69\x6C\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
+    WINGATTACHMENTINDEX = b'\x14\x00\x00\x00\x57\x69\x6E\x67\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
+    EARSATTACHMENTINDEX = b'\x14\x00\x00\x00\x45\x61\x72\x73\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
+    HAIRATTACHMENTINDEX = b'\x14\x00\x00\x00\x48\x61\x69\x72\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
+    FACIALHAIRINDEX = b'\x10\x00\x00\x00\x46\x61\x63\x69\x61\x6C\x48\x61\x69\x72\x49\x6E\x64\x65\x78\x00'
+    DICKATTACHMENTINDEX = b'\x14\x00\x00\x00\x44\x69\x63\x6B\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
+    ACCESSORYATTACHMENTINDEX = b'\x19\x00\x00\x00\x41\x63\x63\x65\x73\x73\x6F\x72\x79\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
+    COLLARATTACHMENTINDEX = b'\x16\x00\x00\x00\x43\x6F\x6C\x6C\x61\x72\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
+    AMBIENTPARTICLEATTACHMENTINDEX = b'\x1F\x00\x00\x00\x41\x6D\x62\x69\x65\x6E\x74\x50\x61\x72\x74\x69\x63\x6C\x65\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
+    UPPERCLOTHINGINDEX = b'\x13\x00\x00\x00\x55\x70\x70\x65\x72\x43\x6C\x6F\x74\x68\x69\x6E\x67\x49\x6E\x64\x65\x78\x00'
+    LOWERCLOTHINGINDEX = b'\x13\x00\x00\x00\x4C\x6F\x77\x65\x72\x43\x6C\x6F\x74\x68\x69\x6E\x67\x49\x6E\x64\x65\x78\x00'
+    UNDERWEARINDEX = b'\x0F\x00\x00\x00\x55\x6E\x64\x65\x72\x77\x65\x61\x72\x49\x6E\x64\x65\x78\x00'
+    BOOTSINDEX = b'\x0B\x00\x00\x00\x42\x6F\x6F\x74\x73\x49\x6E\x64\x65\x78\x00'
+    IDLEANIMATIONINDEX = b'\x13\x00\x00\x00\x49\x64\x6C\x65\x41\x6E\x69\x6D\x61\x74\x69\x6F\x6E\x49\x6E\x64\x65\x78\x00'
+    
+    BOUNCE_PHYSICS = b'\x0E\x00\x00\x00\x42\x6F\x75\x6E\x63\x65\x50\x68\x79\x73\x69\x63\x73\x00' + STRUCT_PADDING
+    BODY_SHAPE = b'\x0A\x00\x00\x00\x42\x6F\x64\x79\x53\x68\x61\x70\x65\x00' + STRUCT_PADDING
+    CHARACTER_MATERIAL = b'\x12\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x4D\x61\x74\x65\x72\x69\x61\x6C\x00' + STRUCT_PADDING
+    CHARACTER_ATTACHMENT_SCHEME = b'\x1A\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x53\x63\x68\x65\x6D\x65\x00' + STRUCT_PADDING
+    
+    
+    #Base Shape
+    MORPHBUSTY = b'\x0B\x00\x00\x00\x4D\x6F\x72\x70\x68\x42\x75\x73\x74\x79\x00'
+    MORPHBUXOM = b'\x0B\x00\x00\x00\x4D\x6F\x72\x70\x68\x42\x75\x78\x6F\x6D\x00'
+    MORPHPREGNANT = b'\x0E\x00\x00\x00\x4D\x6F\x72\x70\x68\x50\x72\x65\x67\x6E\x61\x6E\x74\x00'
+    PHYSICSBUSTY = b'\x0D\x00\x00\x00\x50\x68\x79\x73\x69\x63\x73\x42\x75\x73\x74\x79\x00'
+    PHYSICSBUXOM = b'\x0D\x00\x00\x00\x50\x68\x79\x73\x69\x63\x73\x42\x75\x78\x6F\x6D\x00'
+    PHYSICSPREGNANT = b'\x10\x00\x00\x00\x50\x68\x79\x73\x69\x63\x73\x50\x72\x65\x67\x6E\x61\x6E\x74\x00'
+    
+    
+    #Morph
+    FACEDEPTH = b'\x0A\x00\x00\x00\x46\x61\x63\x65\x44\x65\x70\x74\x68\x00'
+    FACEWIDTH = b'\x0A\x00\x00\x00\x46\x61\x63\x65\x57\x69\x64\x74\x68\x00'
+    EYESCLOSE = b'\x0A\x00\x00\x00\x45\x79\x65\x73\x43\x6C\x6F\x73\x65\x00'
+    EYESVERTICAL = b'\x0D\x00\x00\x00\x45\x79\x65\x73\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
+    EYESDEPTH = b'\x0A\x00\x00\x00\x45\x79\x65\x73\x44\x65\x70\x74\x68\x00'
+    EYESDISTANCE = b'\x0D\x00\x00\x00\x45\x79\x65\x73\x44\x69\x73\x74\x61\x6E\x63\x65\x00'
+    EYESSIZE = b'\x09\x00\x00\x00\x45\x79\x65\x73\x53\x69\x7A\x65\x00'
+    EYESANGLE = b'\x0A\x00\x00\x00\x45\x79\x65\x73\x41\x6E\x67\x6C\x65\x00'
+    HUMANEARSIZE = b'\x0D\x00\x00\x00\x48\x75\x6D\x61\x6E\x45\x61\x72\x53\x69\x7A\x65\x00'
+    HUMANEARPOINTEDA = b'\x11\x00\x00\x00\x48\x75\x6D\x61\x6E\x45\x61\x72\x50\x6F\x69\x6E\x74\x65\x64\x41\x00'
+    HUMANEARPOINTEDB = b'\x11\x00\x00\x00\x48\x75\x6D\x61\x6E\x45\x61\x72\x50\x6F\x69\x6E\x74\x65\x64\x42\x00'
+    HUMANEARPOINTEDC = b'\x11\x00\x00\x00\x48\x75\x6D\x61\x6E\x45\x61\x72\x50\x6F\x69\x6E\x74\x65\x64\x43\x00'
+    ATTACHEDEARSIZE = b'\x10\x00\x00\x00\x41\x74\x74\x61\x63\x68\x65\x64\x45\x61\x72\x53\x69\x7A\x65\x00'
+    HAIRSIZE = b'\x09\x00\x00\x00\x48\x61\x69\x72\x53\x69\x7A\x65\x00'
+    HAIRBACK = b'\x09\x00\x00\x00\x48\x61\x69\x72\x42\x61\x63\x6B\x00'
+    BROWVERTICAL = b'\x0D\x00\x00\x00\x42\x72\x6F\x77\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
+    BROWDEPTH = b'\x0A\x00\x00\x00\x42\x72\x6F\x77\x44\x65\x70\x74\x68\x00'
+    BROWINNERVERTICAL = b'\x12\x00\x00\x00\x42\x72\x6F\x77\x49\x6E\x6E\x65\x72\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
+    NOSEBRIDGEWIDTH = b'\x10\x00\x00\x00\x4E\x6F\x73\x65\x42\x72\x69\x64\x67\x65\x57\x69\x64\x74\x68\x00'
+    NOSEBRIDGEDEPTH = b'\x10\x00\x00\x00\x4E\x6F\x73\x65\x42\x72\x69\x64\x67\x65\x44\x65\x70\x74\x68\x00'
+    NOSEWIDTH = b'\x0A\x00\x00\x00\x4E\x6F\x73\x65\x57\x69\x64\x74\x68\x00'
+    NOSEDEPTH = b'\x0A\x00\x00\x00\x4E\x6F\x73\x65\x44\x65\x70\x74\x68\x00'
+    NOSEVERTICAL = b'\x0D\x00\x00\x00\x4E\x6F\x73\x65\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
+    NOSEANGLE = b'\x0A\x00\x00\x00\x4E\x6F\x73\x65\x41\x6E\x67\x6C\x65\x00'
+    CHEEKBONEDEPTH = b'\x0F\x00\x00\x00\x43\x68\x65\x65\x6B\x62\x6F\x6E\x65\x44\x65\x70\x74\x68\x00'
+    CHEEKBONEVERTICAL = b'\x12\x00\x00\x00\x43\x68\x65\x65\x6B\x62\x6F\x6E\x65\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
+    CHEEKBONEWIDTH = b'\x0F\x00\x00\x00\x43\x68\x65\x65\x6B\x62\x6F\x6E\x65\x57\x69\x64\x74\x68\x00'
+    CHEEKBONESIZE = b'\x0E\x00\x00\x00\x43\x68\x65\x65\x6B\x62\x6F\x6E\x65\x53\x69\x7A\x65\x00'
+    CHEEKDEPTH = b'\x0B\x00\x00\x00\x43\x68\x65\x65\x6B\x44\x65\x70\x74\x68\x00'
+    CHEEKWIDTH = b'\x0B\x00\x00\x00\x43\x68\x65\x65\x6B\x57\x69\x64\x74\x68\x00'
+    MOUTHWIDTH = b'\x0B\x00\x00\x00\x4D\x6F\x75\x74\x68\x57\x69\x64\x74\x68\x00'
+    MOUTHVERTICAL = b'\x0E\x00\x00\x00\x4D\x6F\x75\x74\x68\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
+    MOUTHDEPTH = b'\x0B\x00\x00\x00\x4D\x6F\x75\x74\x68\x44\x65\x70\x74\x68\x00'
+    MOUTHOPEN = b'\x0A\x00\x00\x00\x4D\x6F\x75\x74\x68\x4F\x70\x65\x6E\x00'
+    MOUTHCORNERSVERTICAL = b'\x15\x00\x00\x00\x4D\x6F\x75\x74\x68\x43\x6F\x72\x6E\x65\x72\x73\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
+    MOUTHCORNERSDEPTH = b'\x12\x00\x00\x00\x4D\x6F\x75\x74\x68\x43\x6F\x72\x6E\x65\x72\x73\x44\x65\x70\x74\x68\x00'
+    LIPUPPERFAT = b'\x0C\x00\x00\x00\x4C\x69\x70\x55\x70\x70\x65\x72\x46\x61\x74\x00'
+    LIPUPPERWIDTH = b'\x0E\x00\x00\x00\x4C\x69\x70\x55\x70\x70\x65\x72\x57\x69\x64\x74\x68\x00'
+    LIPUPPERDEPTH = b'\x0E\x00\x00\x00\x4C\x69\x70\x55\x70\x70\x65\x72\x44\x65\x70\x74\x68\x00'
+    LIPUPPERPEAKVERTICAL = b'\x15\x00\x00\x00\x4C\x69\x70\x55\x70\x70\x65\x72\x50\x65\x61\x6B\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
+    LIPLOWERFAT = b'\x0C\x00\x00\x00\x4C\x69\x70\x4C\x6F\x77\x65\x72\x46\x61\x74\x00'
+    LIPLOWERWIDTH = b'\x0E\x00\x00\x00\x4C\x69\x70\x4C\x6F\x77\x65\x72\x57\x69\x64\x74\x68\x00'
+    LIPLOWERDEPTH = b'\x0E\x00\x00\x00\x4C\x69\x70\x4C\x6F\x77\x65\x72\x44\x65\x70\x74\x68\x00'
+    LIPCENTERVERTICAL = b'\x12\x00\x00\x00\x4C\x69\x70\x43\x65\x6E\x74\x65\x72\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
+    LIPCURVES = b'\x0A\x00\x00\x00\x4C\x69\x70\x43\x75\x72\x76\x65\x73\x00'
+    JAWCORNERWIDTH = b'\x0F\x00\x00\x00\x4A\x61\x77\x43\x6F\x72\x6E\x65\x72\x57\x69\x64\x74\x68\x00'
+    JAWCORNERVERTICAL = b'\x12\x00\x00\x00\x4A\x61\x77\x43\x6F\x72\x6E\x65\x72\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
+    JAWWIDTH = b'\x09\x00\x00\x00\x4A\x61\x77\x57\x69\x64\x74\x68\x00'
+    JAWVERTICAL = b'\x0C\x00\x00\x00\x4A\x61\x77\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
+    CHINWIDTH = b'\x0A\x00\x00\x00\x43\x68\x69\x6E\x57\x69\x64\x74\x68\x00'
+    CHINVERTICAL = b'\x0D\x00\x00\x00\x43\x68\x69\x6E\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
+    CHINDEPTH = b'\x0A\x00\x00\x00\x43\x68\x69\x6E\x44\x65\x70\x74\x68\x00'
+    CHINFAT = b'\x08\x00\x00\x00\x43\x68\x69\x6E\x46\x61\x74\x00'
+    NECKGIRTH = b'\x0A\x00\x00\x00\x4E\x65\x63\x6B\x47\x69\x72\x74\x68\x00'
+    SHOULDERWIDTH = b'\x0E\x00\x00\x00\x53\x68\x6F\x75\x6C\x64\x65\x72\x57\x69\x64\x74\x68\x00'
+    SHOULDERSPREAD = b'\x0F\x00\x00\x00\x53\x68\x6F\x75\x6C\x64\x65\x72\x53\x70\x72\x65\x61\x64\x00'
+    SHOULDERHEIGHT = b'\x0F\x00\x00\x00\x53\x68\x6F\x75\x6C\x64\x65\x72\x48\x65\x69\x67\x68\x74\x00'
+    SHOULDERFORWARD = b'\x10\x00\x00\x00\x53\x68\x6F\x75\x6C\x64\x65\x72\x46\x6F\x72\x77\x61\x72\x64\x00'
+    UPPERARMGIRTH = b'\x0E\x00\x00\x00\x55\x70\x70\x65\x72\x61\x72\x6D\x47\x69\x72\x74\x68\x00'
+    UPPERARMFIT = b'\x0C\x00\x00\x00\x55\x70\x70\x65\x72\x61\x72\x6D\x46\x69\x74\x00'
+    UPPERBODYFIT = b'\x0D\x00\x00\x00\x55\x70\x70\x65\x72\x42\x6F\x64\x79\x46\x69\x74\x00'
+    FOREARMGIRTH = b'\x0D\x00\x00\x00\x46\x6F\x72\x65\x61\x72\x6D\x47\x69\x72\x74\x68\x00'
+    BREAST = b'\x08\x00\x00\x00\x42\x72\x65\x61\x73\x74\x73\x00'
+    BREASTCLOTHED = b'\x0F\x00\x00\x00\x42\x72\x65\x61\x73\x74\x73\x43\x6C\x6F\x74\x68\x65\x64\x00'
+    BELLYFAT = b'\x09\x00\x00\x00\x42\x65\x6C\x6C\x79\x46\x61\x74\x00'
+    BELLYMEGA = b'\x0A\x00\x00\x00\x42\x65\x6C\x6C\x79\x4D\x65\x67\x61\x00'
+    BELLYDEPTH = b'\x0B\x00\x00\x00\x42\x65\x6C\x6C\x79\x44\x65\x70\x74\x68\x00'
+    BELLYWIDTH = b'\x0B\x00\x00\x00\x42\x65\x6C\x6C\x79\x57\x69\x64\x74\x68\x00'
+    BELLYDEPTH2 = b'\x0C\x00\x00\x00\x42\x65\x6C\x6C\x79\x44\x65\x70\x74\x68\x32\x00'
+    BELLYWIDTH2 = b'\x0C\x00\x00\x00\x42\x65\x6C\x6C\x79\x57\x69\x64\x74\x68\x32\x00'
+    BELLYHEIGHT = b'\x0C\x00\x00\x00\x42\x65\x6C\x6C\x79\x48\x65\x69\x67\x68\x74\x00'
+    BELLYVERTICAL = b'\x0E\x00\x00\x00\x42\x65\x6C\x6C\x79\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
+    BELLYPREGNANT = b'\x0E\x00\x00\x00\x42\x65\x6C\x6C\x79\x50\x72\x65\x67\x6E\x61\x6E\x74\x00'
+    BELLYFIT = b'\x09\x00\x00\x00\x42\x65\x6C\x6C\x79\x46\x69\x74\x00'
+    BELLYPELVISCREASE = b'\x12\x00\x00\x00\x42\x65\x6C\x6C\x79\x50\x65\x6C\x76\x69\x73\x43\x72\x65\x61\x73\x65\x00'
+    BELLYSMOOTH = b'\x0C\x00\x00\x00\x42\x65\x6C\x6C\x79\x53\x6D\x6F\x6F\x74\x68\x00'
+    NAVELWIDTH = b'\x0B\x00\x00\x00\x4E\x61\x76\x65\x6C\x57\x69\x64\x74\x68\x00'
+    NAVELHEIGHT = b'\x0C\x00\x00\x00\x4E\x61\x76\x65\x6C\x48\x65\x69\x67\x68\x74\x00'
+    NAVELVERTICAL = b'\x0E\x00\x00\x00\x4E\x61\x76\x65\x6C\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
+    NAVELDEPTH = b'\x0B\x00\x00\x00\x4E\x61\x76\x65\x6C\x44\x65\x70\x74\x68\x00'
+    WAISTWIDTH = b'\x0B\x00\x00\x00\x57\x61\x69\x73\x74\x57\x69\x64\x74\x68\x00'
+    HIPWIDTH = b'\x09\x00\x00\x00\x48\x69\x70\x57\x69\x64\x74\x68\x00'
+    GROINGIRTH = b'\x0B\x00\x00\x00\x47\x72\x6F\x69\x6E\x47\x69\x72\x74\x68\x00'
+    VAGINAFAT = b'\x0A\x00\x00\x00\x56\x61\x67\x69\x6E\x61\x46\x61\x74\x00'
+    VAGINAOPEN = b'\x0B\x00\x00\x00\x56\x61\x67\x69\x6E\x61\x4F\x70\x65\x6E\x00'
+    BUTTSIZE = b'\x09\x00\x00\x00\x42\x75\x74\x74\x53\x69\x7A\x65\x00'
+    BUTTDEPTH = b'\x0A\x00\x00\x00\x42\x75\x74\x74\x44\x65\x70\x74\x68\x00'
+    BUTTHEIGHT = b'\x0B\x00\x00\x00\x42\x75\x74\x74\x48\x65\x69\x67\x68\x74\x00'
+    BUTTWIDTH = b'\x0A\x00\x00\x00\x42\x75\x74\x74\x57\x69\x64\x74\x68\x00'
+    BUTTCLEAVAGE = b'\x0D\x00\x00\x00\x42\x75\x74\x74\x43\x6C\x65\x61\x76\x61\x67\x65\x00'
+    BUTTVERTICAL = b'\x0D\x00\x00\x00\x42\x75\x74\x74\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
+    BUTTPROTRUDE = b'\x0D\x00\x00\x00\x42\x75\x74\x74\x50\x72\x6F\x74\x72\x75\x64\x65\x00'
+    BUTTCREASE = b'\x0B\x00\x00\x00\x42\x75\x74\x74\x43\x72\x65\x61\x73\x65\x00'
+    THIGHGIRTH = b'\x0B\x00\x00\x00\x54\x68\x69\x67\x68\x47\x69\x72\x74\x68\x00'
+    THIGHFIT = b'\x09\x00\x00\x00\x54\x68\x69\x67\x68\x46\x69\x74\x00'
+    CALFGIRTH = b'\x0A\x00\x00\x00\x43\x61\x6C\x66\x47\x69\x72\x74\x68\x00'
+    DICKBLURSHEATHOFFSET = b'\x15\x00\x00\x00\x44\x69\x63\x6B\x42\x6C\x75\x72\x53\x68\x65\x61\x74\x68\x4F\x66\x66\x73\x65\x74\x00'
+    DICKBLURSHEATHTAPERA = b'\x15\x00\x00\x00\x44\x69\x63\x6B\x42\x6C\x75\x72\x53\x68\x65\x61\x74\x68\x54\x61\x70\x65\x72\x41\x00'
+    DICKBLURSHEATHTAPERB = b'\x15\x00\x00\x00\x44\x69\x63\x6B\x42\x6C\x75\x72\x53\x68\x65\x61\x74\x68\x54\x61\x70\x65\x72\x42\x00'
+    DICKBLURSHEATHCONSTRICT = b'\x18\x00\x00\x00\x44\x69\x63\x6B\x42\x6C\x75\x72\x53\x68\x65\x61\x74\x68\x43\x6F\x6E\x73\x74\x72\x69\x63\x74\x00'
+    DICKHEADGIRTH = b'\x0E\x00\x00\x00\x44\x69\x63\x6B\x48\x65\x61\x64\x47\x69\x72\x74\x68\x00'
+    DICKLENGTH = b'\x0B\x00\x00\x00\x44\x69\x63\x6B\x4C\x65\x6E\x67\x74\x68\x00'
+    DICKSHAFTGIRTH = b'\x0F\x00\x00\x00\x44\x69\x63\x6B\x53\x68\x61\x66\x74\x47\x69\x72\x74\x68\x00'
+    DICKSIZE = b'\x09\x00\x00\x00\x44\x69\x63\x6B\x53\x69\x7A\x65\x00'
+    SCROTUMSIZE = b'\x0C\x00\x00\x00\x53\x63\x72\x6F\x74\x75\x6D\x53\x69\x7A\x65\x00'
+    TEETHSHARP = b'\x0B\x00\x00\x00\x54\x65\x65\x74\x68\x53\x68\x61\x72\x70\x00'
+    TAILSIZE = b'\x09\x00\x00\x00\x54\x61\x69\x6C\x53\x69\x7A\x65\x00'
+    WINGSSIZE = b'\x0A\x00\x00\x00\x57\x69\x6E\x67\x73\x53\x69\x7A\x65\x00'
+    LEGSPREAD = b'\x0A\x00\x00\x00\x4C\x65\x67\x53\x70\x72\x65\x61\x64\x00'
+    FULLBODYSTACKED = b'\x10\x00\x00\x00\x46\x75\x6C\x6C\x42\x6F\x64\x79\x53\x74\x61\x63\x6B\x65\x64\x00'
+    FULLBODYBULK = b'\x0D\x00\x00\x00\x46\x75\x6C\x6C\x42\x6F\x64\x79\x42\x75\x6C\x6B\x00'
+    FULLBODYCHUBBY = b'\x0F\x00\x00\x00\x46\x75\x6C\x6C\x42\x6F\x64\x79\x43\x68\x75\x62\x62\x79\x00'
+    FULLBODYSLENDER = b'\x10\x00\x00\x00\x46\x75\x6C\x6C\x42\x6F\x64\x79\x53\x6C\x65\x6E\x64\x65\x72\x00'
+    SPINEADJUST = b'\x0C\x00\x00\x00\x53\x70\x69\x6E\x65\x41\x64\x6A\x75\x73\x74\x00'
+    HEADSIZE = b'\x09\x00\x00\x00\x48\x65\x61\x64\x53\x69\x7A\x65\x00'
+    ARMSCALE_0 = b'\x0B\x00\x00\x00\x41\x72\x6D\x53\x63\x61\x6C\x65\x5F\x30\x00'
+    ARMSCALE_1 = b'\x0B\x00\x00\x00\x41\x72\x6D\x53\x63\x61\x6C\x65\x5F\x31\x00'
+    ARMSCALE_2 = b'\x0B\x00\x00\x00\x41\x72\x6D\x53\x63\x61\x6C\x65\x5F\x32\x00'
+    ARMSCALE_3 = b'\x0B\x00\x00\x00\x41\x72\x6D\x53\x63\x61\x6C\x65\x5F\x33\x00'
+    ARMSCALE_4 = b'\x0B\x00\x00\x00\x41\x72\x6D\x53\x63\x61\x6C\x65\x5F\x34\x00'
+    ARMSCALE_5 = b'\x0B\x00\x00\x00\x41\x72\x6D\x53\x63\x61\x6C\x65\x5F\x35\x00'
+    
+    BREAST_SHAPE = b'\x0C\x00\x00\x00\x42\x72\x65\x61\x73\x74\x53\x68\x61\x70\x65\x00' + STRUCT_PADDING
+    
+    
+    #Physics
+    BELLYBOUNCE =  b'\x0C\x00\x00\x00\x42\x65\x6C\x6C\x79\x42\x6F\x75\x6E\x63\x65\x00'
+    BREASTBOUNCE =  b'\x0D\x00\x00\x00\x42\x72\x65\x61\x73\x74\x42\x6F\x75\x6E\x63\x65\x00'
+    BUTTBOUNCE =  b'\x0B\x00\x00\x00\x42\x75\x74\x74\x42\x6F\x75\x6E\x63\x65\x00'
+    THIGHBOUNCE =  b'\x0C\x00\x00\x00\x54\x68\x69\x67\x68\x42\x6F\x75\x6E\x63\x65\x00'
+    
+    
+    #Breast
+    BREASTSIZE = b'\x0B\x00\x00\x00\x42\x72\x65\x61\x73\x74\x53\x69\x7A\x65\x00'
+    BREASTDEPTH = b'\x0C\x00\x00\x00\x42\x72\x65\x61\x73\x74\x44\x65\x70\x74\x68\x00'
+    BREASTHEIGHT = b'\x0D\x00\x00\x00\x42\x72\x65\x61\x73\x74\x48\x65\x69\x67\x68\x74\x00'
+    BREASTPROTRUDE = b'\x0F\x00\x00\x00\x42\x72\x65\x61\x73\x74\x50\x72\x6F\x74\x72\x75\x64\x65\x00'
+    BREASTCLEAVAGE = b'\x0F\x00\x00\x00\x42\x72\x65\x61\x73\x74\x43\x6C\x65\x61\x76\x61\x67\x65\x00'
+    BREASTVERTICAL = b'\x0F\x00\x00\x00\x42\x72\x65\x61\x73\x74\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
+    BREASTWIDTH = b'\x0C\x00\x00\x00\x42\x72\x65\x61\x73\x74\x57\x69\x64\x74\x68\x00'
+    TINYTITTIES = b'\x0C\x00\x00\x00\x54\x69\x6E\x79\x54\x69\x74\x74\x69\x65\x73\x00'
+    NIPPLERADIUS = b'\x0D\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x52\x61\x64\x69\x75\x73\x00'
+    NIPPLEFAT = b'\x0A\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x46\x61\x74\x00'
+    NIPPLEPERK = b'\x0B\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x50\x65\x72\x6B\x00'
+    AREOLAERADIUS = b'\x0E\x00\x00\x00\x41\x72\x65\x6F\x6C\x61\x65\x52\x61\x64\x69\x75\x73\x00'
+    AREOLAEFAT = b'\x0B\x00\x00\x00\x41\x72\x65\x6F\x6C\x61\x65\x46\x61\x74\x00'
+    AREOLAEDEPTH = b'\x0D\x00\x00\x00\x41\x72\x65\x6F\x6C\x61\x65\x44\x65\x70\x74\x68\x00'
+    
+    
+    #Material
+    LIGHTCOLOR = b'\x0B\x00\x00\x00\x4C\x69\x67\x68\x74\x43\x6F\x6C\x6F\x72\x00'
+    LIGHTINTENSITY = b'\x0F\x00\x00\x00\x4C\x69\x67\x68\x74\x49\x6E\x74\x65\x6E\x73\x69\x74\x79\x00'
+    EFFECTCOLOR = b'\x0C\x00\x00\x00\x45\x66\x66\x65\x63\x74\x43\x6F\x6C\x6F\x72\x00'
+    EFFECTGLOW = b'\x0B\x00\x00\x00\x45\x66\x66\x65\x63\x74\x47\x6C\x6F\x77\x00'
+    SKINCOLOR = b'\x0A\x00\x00\x00\x53\x6B\x69\x6E\x43\x6F\x6C\x6F\x72\x00'
+    MUSCLEDETAILS = b'\x0E\x00\x00\x00\x4D\x75\x73\x63\x6C\x65\x44\x65\x74\x61\x69\x6C\x73\x00'
+    SOFTDETAILS = b'\x0C\x00\x00\x00\x53\x6F\x66\x74\x44\x65\x74\x61\x69\x6C\x73\x00'
+    BODYDETAILS = b'\x0C\x00\x00\x00\x42\x6F\x64\x79\x44\x65\x74\x61\x69\x6C\x73\x00'
+    SKINFADECOLOR = b'\x0E\x00\x00\x00\x53\x6B\x69\x6E\x46\x61\x64\x65\x43\x6F\x6C\x6F\x72\x00'
+    SKINROUGHNESS = b'\x0E\x00\x00\x00\x53\x6B\x69\x6E\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
+    SKINMETAL = b'\x0A\x00\x00\x00\x53\x6B\x69\x6E\x4D\x65\x74\x61\x6C\x00'
+    SKINGLOW = b'\x09\x00\x00\x00\x53\x6B\x69\x6E\x47\x6C\x6F\x77\x00'
+    SKINSSSCOLOR = b'\x0D\x00\x00\x00\x53\x6B\x69\x6E\x53\x53\x53\x43\x6F\x6C\x6F\x72\x00'
+    SPECULAR = b'\x09\x00\x00\x00\x53\x70\x65\x63\x75\x6C\x61\x72\x00'
+    SKINFADE = b'\x09\x00\x00\x00\x53\x6B\x69\x6E\x46\x61\x64\x65\x00'
+    ANIMATEDGLOW = b'\x0D\x00\x00\x00\x41\x6E\x69\x6D\x61\x74\x65\x64\x47\x6C\x6F\x77\x00'
+    NIPPLECOLOR = b'\x0C\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x43\x6F\x6C\x6F\x72\x00'
+    NIPPLEROUGHNESS = b'\x10\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
+    NIPPLEMETAL = b'\x0C\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x4D\x65\x74\x61\x6C\x00'
+    NIPPLEGLOW = b'\x0B\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x47\x6C\x6F\x77\x00'
+    NIPPLEACCENTCOLOR = b'\x12\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x41\x63\x63\x65\x6E\x74\x43\x6F\x6C\x6F\x72\x00'
+    NIPPLEACCENTROUGHNESS = b'\x16\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x41\x63\x63\x65\x6E\x74\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
+    NIPPLEACCENTMETAL = b'\x12\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x41\x63\x63\x65\x6E\x74\x4D\x65\x74\x61\x6C\x00'
+    NIPPLEACCENTGLOW = b'\x11\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x41\x63\x63\x65\x6E\x74\x47\x6C\x6F\x77\x00'
+    VAGINACOLOR = b'\x0C\x00\x00\x00\x56\x61\x67\x69\x6E\x61\x43\x6F\x6C\x6F\x72\x00'
+    VAGINAROUGHNESS = b'\x10\x00\x00\x00\x56\x61\x67\x69\x6E\x61\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
+    VAGINAMETAL = b'\x0C\x00\x00\x00\x56\x61\x67\x69\x6E\x61\x4D\x65\x74\x61\x6C\x00'
+    VAGINAGLOW = b'\x0B\x00\x00\x00\x56\x61\x67\x69\x6E\x61\x47\x6C\x6F\x77\x00'
+    DICKBASECOLOR = b'\x0E\x00\x00\x00\x44\x69\x63\x6B\x42\x61\x73\x65\x43\x6F\x6C\x6F\x72\x00'
+    DICKCOLOR = b'\x0A\x00\x00\x00\x44\x69\x63\x6B\x43\x6F\x6C\x6F\x72\x00'
+    DICKROUGHNESS = b'\x0E\x00\x00\x00\x44\x69\x63\x6B\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
+    DICKMETAL = b'\x0A\x00\x00\x00\x44\x69\x63\x6B\x4D\x65\x74\x61\x6C\x00'
+    DICKGLOW = b'\x09\x00\x00\x00\x44\x69\x63\x6B\x47\x6C\x6F\x77\x00'
+    DICKTIPCOLOR = b'\x0D\x00\x00\x00\x44\x69\x63\x6B\x54\x69\x70\x43\x6F\x6C\x6F\x72\x00'
+    DICKTIPROUGHNESS = b'\x11\x00\x00\x00\x44\x69\x63\x6B\x54\x69\x70\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
+    DICKTIPMETAL = b'\x0D\x00\x00\x00\x44\x69\x63\x6B\x54\x69\x70\x4D\x65\x74\x61\x6C\x00'
+    DICKTIPGLOW = b'\x0C\x00\x00\x00\x44\x69\x63\x6B\x54\x69\x70\x47\x6C\x6F\x77\x00'
+    SCROTUMCOLOR = b'\x0D\x00\x00\x00\x53\x63\x72\x6F\x74\x75\x6D\x43\x6F\x6C\x6F\x72\x00'
+    SCROTUMROUGHNESS = b'\x11\x00\x00\x00\x53\x63\x72\x6F\x74\x75\x6D\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
+    SCROTUMMETAL = b'\x0D\x00\x00\x00\x53\x63\x72\x6F\x74\x75\x6D\x4D\x65\x74\x61\x6C\x00'
+    SCROTUMGLOW = b'\x0C\x00\x00\x00\x53\x63\x72\x6F\x74\x75\x6D\x47\x6C\x6F\x77\x00'
+    BLURSHEATHTINT = b'\x0F\x00\x00\x00\x42\x6C\x75\x72\x53\x68\x65\x61\x74\x68\x54\x69\x6E\x74\x00'
+    ANUSCOLOR = b'\x0A\x00\x00\x00\x41\x6E\x75\x73\x43\x6F\x6C\x6F\x72\x00'
+    ANUSROUGHNESS = b'\x0E\x00\x00\x00\x41\x6E\x75\x73\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
+    ANUSMETAL = b'\x0A\x00\x00\x00\x41\x6E\x75\x73\x4D\x65\x74\x61\x6C\x00'
+    ANUSGLOW = b'\x09\x00\x00\x00\x41\x6E\x75\x73\x47\x6C\x6F\x77\x00'
+    LIPSCOLOR = b'\x0A\x00\x00\x00\x4C\x69\x70\x73\x43\x6F\x6C\x6F\x72\x00'
+    LIPSROUGHNESS = b'\x0E\x00\x00\x00\x4C\x69\x70\x73\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
+    LIPSMETAL = b'\x0A\x00\x00\x00\x4C\x69\x70\x73\x4D\x65\x74\x61\x6C\x00'
+    LIPSGLOW = b'\x09\x00\x00\x00\x4C\x69\x70\x73\x47\x6C\x6F\x77\x00'
+    EYESOCKETCOLOR = b'\x0F\x00\x00\x00\x45\x79\x65\x53\x6F\x63\x6B\x65\x74\x43\x6F\x6C\x6F\x72\x00'
+    EYESOCKETSHADOW = b'\x10\x00\x00\x00\x45\x79\x65\x53\x6F\x63\x6B\x65\x74\x53\x68\x61\x64\x6F\x77\x00'
+    EYERIMCOLOR = b'\x0C\x00\x00\x00\x45\x79\x65\x52\x69\x6D\x43\x6F\x6C\x6F\x72\x00'
+    EYERIMGLOW = b'\x0B\x00\x00\x00\x45\x79\x65\x52\x69\x6D\x47\x6C\x6F\x77\x00'
+    EYERIMMETAL = b'\x0C\x00\x00\x00\x45\x79\x65\x52\x69\x6D\x4D\x65\x74\x61\x6C\x00'
+    EYERIMROUGHNESS = b'\x10\x00\x00\x00\x45\x79\x65\x52\x69\x6D\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
+    EYERCOLOR = b'\x0A\x00\x00\x00\x45\x79\x65\x52\x43\x6F\x6C\x6F\x72\x00'
+    EYERGLOW = b'\x09\x00\x00\x00\x45\x79\x65\x52\x47\x6C\x6F\x77\x00'
+    EYELCOLOR = b'\x0A\x00\x00\x00\x45\x79\x65\x4C\x43\x6F\x6C\x6F\x72\x00'
+    EYELGLOW = b'\x09\x00\x00\x00\x45\x79\x65\x4C\x47\x6C\x6F\x77\x00'
+    EYESCLERACOLOR = b'\x0F\x00\x00\x00\x45\x79\x65\x53\x63\x6C\x65\x72\x61\x43\x6F\x6C\x6F\x72\x00'
+    EYESCLERAGLOW = b'\x0E\x00\x00\x00\x45\x79\x65\x53\x63\x6C\x65\x72\x61\x47\x6C\x6F\x77\x00'
+    EYEROUGHNESS = b'\x0D\x00\x00\x00\x45\x79\x65\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
+    EYEMETAL = b'\x09\x00\x00\x00\x45\x79\x65\x4D\x65\x74\x61\x6C\x00'
+    WHOLEEYEMETAL = b'\x0E\x00\x00\x00\x57\x68\x6F\x6C\x65\x45\x79\x65\x4D\x65\x74\x61\x6C\x00'
+    WHOLEEYEGLOW = b'\x0D\x00\x00\x00\x57\x68\x6F\x6C\x65\x45\x79\x65\x47\x6C\x6F\x77\x00'
+    HAIRCOLOR = b'\x0A\x00\x00\x00\x48\x61\x69\x72\x43\x6F\x6C\x6F\x72\x00'
+    HAIRMETAL = b'\x0A\x00\x00\x00\x48\x61\x69\x72\x4D\x65\x74\x61\x6C\x00'
+    HAIRROUGHNESSMIN = b'\x11\x00\x00\x00\x48\x61\x69\x72\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x4D\x69\x6E\x00'
+    HAIRROUGHNESSMAX = b'\x11\x00\x00\x00\x48\x61\x69\x72\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x4D\x61\x78\x00'
+    HAIRROOTCOLOR = b'\x0E\x00\x00\x00\x48\x61\x69\x72\x52\x6F\x6F\x74\x43\x6F\x6C\x6F\x72\x00'
+    HAIRTIPCOLOR = b'\x0D\x00\x00\x00\x48\x61\x69\x72\x54\x69\x70\x43\x6F\x6C\x6F\x72\x00'
+    HAIRGLOW = b'\x09\x00\x00\x00\x48\x61\x69\x72\x47\x6C\x6F\x77\x00'
+    HAIRROUGHNESS = b'\x0E\x00\x00\x00\x48\x61\x69\x72\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
+    HAIRSCATTER = b'\x0C\x00\x00\x00\x48\x61\x69\x72\x53\x63\x61\x74\x74\x65\x72\x00'
+    HAIRHUEVARIATION = b'\x11\x00\x00\x00\x48\x61\x69\x72\x48\x75\x65\x56\x61\x72\x69\x61\x74\x69\x6F\x6E\x00'
+    HAIRVALUEVARIATION = b'\x13\x00\x00\x00\x48\x61\x69\x72\x56\x61\x6C\x75\x65\x56\x61\x72\x69\x61\x74\x69\x6F\x6E\x00'
+    HAIREDGEMASKCONTRAST = b'\x15\x00\x00\x00\x48\x61\x69\x72\x45\x64\x67\x65\x4D\x61\x73\x6B\x43\x6F\x6E\x74\x72\x61\x73\x74\x00'
+    HAIREDGEMASKMIN = b'\x10\x00\x00\x00\x48\x61\x69\x72\x45\x64\x67\x65\x4D\x61\x73\x6B\x4D\x69\x6E\x00'
+    HAIRDEPTHCONTRAST = b'\x12\x00\x00\x00\x48\x61\x69\x72\x44\x65\x70\x74\x68\x43\x6F\x6E\x74\x72\x61\x73\x74\x00'
+    HAIRDEPTHOFFSET = b'\x10\x00\x00\x00\x48\x61\x69\x72\x44\x65\x70\x74\x68\x4F\x66\x66\x73\x65\x74\x00'
+    FACIALHAIRCOLOR = b'\x10\x00\x00\x00\x46\x61\x63\x69\x61\x6C\x48\x61\x69\x72\x43\x6F\x6C\x6F\x72\x00'
+    EYEBROWCOLOR = b'\x0D\x00\x00\x00\x45\x79\x65\x62\x72\x6F\x77\x43\x6F\x6C\x6F\x72\x00'
+    EYEBROWROUGHNESS = b'\x11\x00\x00\x00\x45\x79\x65\x62\x72\x6F\x77\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
+    EYEBROWMETAL = b'\x0D\x00\x00\x00\x45\x79\x65\x62\x72\x6F\x77\x4D\x65\x74\x61\x6C\x00'
+    EYEBROWGLOW = b'\x0C\x00\x00\x00\x45\x79\x65\x62\x72\x6F\x77\x47\x6C\x6F\x77\x00'
+    FACEDECORCOLOR = b'\x0F\x00\x00\x00\x46\x61\x63\x65\x44\x65\x63\x6F\x72\x43\x6F\x6C\x6F\x72\x00'
+    FACEDECORROUGHNESS = b'\x13\x00\x00\x00\x46\x61\x63\x65\x44\x65\x63\x6F\x72\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
+    FACEDECORMETAL = b'\x0F\x00\x00\x00\x46\x61\x63\x65\x44\x65\x63\x6F\x72\x4D\x65\x74\x61\x6C\x00'
+    FACEDECORGLOW = b'\x0E\x00\x00\x00\x46\x61\x63\x65\x44\x65\x63\x6F\x72\x47\x6C\x6F\x77\x00'
+    BODYDECORCOLOR = b'\x0F\x00\x00\x00\x42\x6F\x64\x79\x44\x65\x63\x6F\x72\x43\x6F\x6C\x6F\x72\x00'
+    BODYDECORROUGHNESS = b'\x13\x00\x00\x00\x42\x6F\x64\x79\x44\x65\x63\x6F\x72\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
+    BODYDECORMETAL = b'\x0F\x00\x00\x00\x42\x6F\x64\x79\x44\x65\x63\x6F\x72\x4D\x65\x74\x61\x6C\x00'
+    BODYDECORGLOW = b'\x0E\x00\x00\x00\x42\x6F\x64\x79\x44\x65\x63\x6F\x72\x47\x6C\x6F\x77\x00'
+    BODYMARKSCOLOR = b'\x0F\x00\x00\x00\x42\x6F\x64\x79\x4D\x61\x72\x6B\x73\x43\x6F\x6C\x6F\x72\x00'
+    BODYMARKSROUGHNESS = b'\x13\x00\x00\x00\x42\x6F\x64\x79\x4D\x61\x72\x6B\x73\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
+    BODYMARKSMETAL = b'\x0F\x00\x00\x00\x42\x6F\x64\x79\x4D\x61\x72\x6B\x73\x4D\x65\x74\x61\x6C\x00'
+    BODYMARKSGLOW = b'\x0E\x00\x00\x00\x42\x6F\x64\x79\x4D\x61\x72\x6B\x73\x47\x6C\x6F\x77\x00'
+    NAILSCOLOR = b'\x0B\x00\x00\x00\x4E\x61\x69\x6C\x73\x43\x6F\x6C\x6F\x72\x00'
+    NAILSGLOW = b'\x0A\x00\x00\x00\x4E\x61\x69\x6C\x73\x47\x6C\x6F\x77\x00'
+    MAWCOLOR = b'\x09\x00\x00\x00\x4D\x61\x77\x43\x6F\x6C\x6F\x72\x00'
+    MAWGLOW = b'\x08\x00\x00\x00\x4D\x61\x77\x47\x6C\x6F\x77\x00'
+    TEETHCOLOR = b'\x0B\x00\x00\x00\x54\x65\x65\x74\x68\x43\x6F\x6C\x6F\x72\x00'
+    FURCOLORA = b'\x0A\x00\x00\x00\x46\x75\x72\x43\x6F\x6C\x6F\x72\x41\x00'
+    FURCOLORB = b'\x0A\x00\x00\x00\x46\x75\x72\x43\x6F\x6C\x6F\x72\x42\x00'
+    FURCOLORC = b'\x0A\x00\x00\x00\x46\x75\x72\x43\x6F\x6C\x6F\x72\x43\x00'
+    FURCOLORD = b'\x0A\x00\x00\x00\x46\x75\x72\x43\x6F\x6C\x6F\x72\x44\x00'
+    FURTIPCOLOR = b'\x0C\x00\x00\x00\x46\x75\x72\x54\x69\x70\x43\x6F\x6C\x6F\x72\x00'
+    PUBICFURCOLOR = b'\x0E\x00\x00\x00\x50\x75\x62\x69\x63\x46\x75\x72\x43\x6F\x6C\x6F\x72\x00'
+    PUBICFURTIPCOLOR = b'\x11\x00\x00\x00\x50\x75\x62\x69\x63\x46\x75\x72\x54\x69\x70\x43\x6F\x6C\x6F\x72\x00'
+    BODYATTACHMENTSCOLOR = b'\x15\x00\x00\x00\x42\x6F\x64\x79\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x73\x43\x6F\x6C\x6F\x72\x00'
+    ADDITIONALMATERIALTILE = b'\x17\x00\x00\x00\x41\x64\x64\x69\x74\x69\x6F\x6E\x61\x6C\x4D\x61\x74\x65\x72\x69\x61\x6C\x54\x69\x6C\x65\x00'
+    ADDITIONALMATERIALCOLOR = b'\x18\x00\x00\x00\x41\x64\x64\x69\x74\x69\x6F\x6E\x61\x6C\x4D\x61\x74\x65\x72\x69\x61\x6C\x43\x6F\x6C\x6F\x72\x00'
+    ADDITIONALMATERIALGLOW = b'\x17\x00\x00\x00\x41\x64\x64\x69\x74\x69\x6F\x6E\x61\x6C\x4D\x61\x74\x65\x72\x69\x61\x6C\x47\x6C\x6F\x77\x00'
+    ADDITIONALMATERIALUSEOFFSET = b'\x1C\x00\x00\x00\x41\x64\x64\x69\x74\x69\x6F\x6E\x61\x6C\x4D\x61\x74\x65\x72\x69\x61\x6C\x55\x73\x65\x4F\x66\x66\x73\x65\x74\x00'
+    ADDITIONALMATERIALOFFSET = b'\x19\x00\x00\x00\x41\x64\x64\x69\x74\x69\x6F\x6E\x61\x6C\x4D\x61\x74\x65\x72\x69\x61\x6C\x4F\x66\x66\x73\x65\x74\x00'
+    GLINT = b'\x06\x00\x00\x00\x47\x6C\x69\x6E\x74\x00'
+    
+    LINEAR_COLOR = b'\x0C\x00\x00\x00\x4C\x69\x6E\x65\x61\x72\x43\x6F\x6C\x6F\x72\x00' + STRUCT_PADDING
+    CHARACTER_ATTACHMENT_COLOR = b'\x19\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x43\x6F\x6C\x6F\x72\x00' + STRUCT_PADDING
+    
+    
+    #Character Attachment Color
+    COLORA = b'\x07\x00\x00\x00\x43\x6F\x6C\x6F\x72\x41\x00'
+    COLORB = b'\x07\x00\x00\x00\x43\x6F\x6C\x6F\x72\x42\x00'
+    COLORC = b'\x07\x00\x00\x00\x43\x6F\x6C\x6F\x72\x43\x00'
+    COLORD = b'\x07\x00\x00\x00\x43\x6F\x6C\x6F\x72\x44\x00'
+    GLOWA = b'\x06\x00\x00\x00\x47\x6C\x6F\x77\x41\x00'
+    GLOWB = b'\x06\x00\x00\x00\x47\x6C\x6F\x77\x42\x00'
+    GLOWC = b'\x06\x00\x00\x00\x47\x6C\x6F\x77\x43\x00'
+    GLOWD = b'\x06\x00\x00\x00\x47\x6C\x6F\x77\x44\x00'
+    METALA = b'\x07\x00\x00\x00\x4D\x65\x74\x61\x6C\x41\x00'
+    METALB = b'\x07\x00\x00\x00\x4D\x65\x74\x61\x6C\x42\x00'
+    METALC = b'\x07\x00\x00\x00\x4D\x65\x74\x61\x6C\x43\x00'
+    METALD = b'\x07\x00\x00\x00\x4D\x65\x74\x61\x6C\x44\x00'
+    ROUGHNESSMIN = b'\x0D\x00\x00\x00\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x4D\x69\x6E\x00'
+    ROUGHNESSMAX = b'\x0D\x00\x00\x00\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x4D\x61\x78\x00'
+    UNDERFURADJUST = b'\x0F\x00\x00\x00\x55\x6E\x64\x65\x72\x46\x75\x72\x41\x64\x6A\x75\x73\x74\x00'
+    
+    
+    #Attachment Material
+    ACCESSORYCOLOR = b'\x0F\x00\x00\x00\x41\x63\x63\x65\x73\x73\x6F\x72\x79\x43\x6F\x6C\x6F\x72\x00'
+    UPPERCLOTHINGCOLOR = b'\x13\x00\x00\x00\x55\x70\x70\x65\x72\x43\x6C\x6F\x74\x68\x69\x6E\x67\x43\x6F\x6C\x6F\x72\x00'
+    LOWERCLOTHINGCOLOR = b'\x13\x00\x00\x00\x4C\x6F\x77\x65\x72\x43\x6C\x6F\x74\x68\x69\x6E\x67\x43\x6F\x6C\x6F\x72\x00'
+    UNDERWEARCOLOR = b'\x0F\x00\x00\x00\x55\x6E\x64\x65\x72\x77\x65\x61\x72\x43\x6F\x6C\x6F\x72\x00'
+    BOOTSCOLOR = b'\x0B\x00\x00\x00\x42\x6F\x6F\x74\x73\x43\x6F\x6C\x6F\x72\x00'
+    
+    
+    #Monster Levels
+    LEVEL = b'\x06\x00\x00\x00\x4C\x65\x76\x65\x6C\x00'
+    PROGRESS = b'\x09\x00\x00\x00\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
+    
+    
+    #Breeder Stat Progression
+    STRENGTHPROGRESS =  b'\x11\x00\x00\x00\x53\x74\x72\x65\x6E\x67\x74\x68\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
+    DEXTERITYPROGRESS = b'\x12\x00\x00\x00\x44\x65\x78\x74\x65\x72\x69\x74\x79\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
+    WILLPOWERPROGRESS = b'\x12\x00\x00\x00\x57\x69\x6C\x6C\x70\x6F\x77\x65\x72\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
+    ALLUREPROGRESS =    b'\x0F\x00\x00\x00\x41\x6C\x6C\x75\x72\x65\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
+    FERTILITYPROGRESS = b'\x12\x00\x00\x00\x46\x65\x72\x74\x69\x6C\x69\x74\x79\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
+    
+    
+    #World State
+    SECONDS = b'\x08\x00\x00\x00\x53\x65\x63\x6F\x6E\x64\x73\x00'
+    MINUTE = b'\x07\x00\x00\x00\x4D\x69\x6E\x75\x74\x65\x00'
+    HOUR = b'\x05\x00\x00\x00\x48\x6F\x75\x72\x00'
+    DAY = b'\x04\x00\x00\x00\x44\x61\x79\x00'
+    MONTH = b'\x06\x00\x00\x00\x4D\x6F\x6E\x74\x68\x00'
+    ACTIVETRAVELSHRINES = b'\x14\x00\x00\x00\x41\x63\x74\x69\x76\x65\x54\x72\x61\x76\x65\x6C\x53\x68\x72\x69\x6E\x65\x73\x00'
+    ACQUIREDRANCHUPGRADES = b'\x16\x00\x00\x00\x41\x63\x71\x75\x69\x72\x65\x64\x52\x61\x6E\x63\x68\x55\x70\x67\x72\x61\x64\x65\x73\x00'
+    DIALOGUESTATES = b'\x0F\x00\x00\x00\x44\x69\x61\x6C\x6F\x67\x75\x65\x53\x74\x61\x74\x65\x73\x00'
+    MONSTERLEVELS = b'\x0E\x00\x00\x00\x4D\x6F\x6E\x73\x74\x65\x72\x4C\x65\x76\x65\x6C\x73\x00'
+    FERNFED = b'\x08\x00\x00\x00\x46\x65\x72\x6E\x46\x65\x64\x00'
+    BREEDINGTASKS = b'\x0E\x00\x00\x00\x42\x72\x65\x65\x64\x69\x6E\x67\x54\x61\x73\x6B\x73\x00'
+    SPECIALBREEDINGTASKS = b'\x15\x00\x00\x00\x53\x70\x65\x63\x69\x61\x6C\x42\x72\x65\x65\x64\x69\x6E\x67\x54\x61\x73\x6B\x73\x00'
+    DAYSSINCEBREEDINGTASKREFRESH = b'\x1D\x00\x00\x00\x44\x61\x79\x73\x53\x69\x6E\x63\x65\x42\x72\x65\x65\x64\x69\x6E\x67\x54\x61\x73\x6B\x52\x65\x66\x72\x65\x73\x68\x00'
+    
+    DIALOGUE_STATE = b'\x0E\x00\x00\x00\x44\x69\x61\x6C\x6F\x67\x75\x65\x53\x74\x61\x74\x65\x00' + STRUCT_PADDING
+    BREEDING_TASK = b'\x0D\x00\x00\x00\x42\x72\x65\x65\x64\x69\x6E\x67\x54\x61\x73\x6B\x00' + STRUCT_PADDING
+    
+    
+    #Dialogue State
+    NPC = b'\x04\x00\x00\x00\x4E\x50\x43\x00'
+    
+    
+    #Breeding Task
+    DISPLAYNAME = b'\x0C\x00\x00\x00\x44\x69\x73\x70\x6C\x61\x79\x4E\x61\x6D\x65\x00'
+    DISCRIPTION = b'\x0C\x00\x00\x00\x44\x65\x73\x63\x72\x69\x70\x74\x69\x6F\x6E\x00'
+    REQUIREDVARIANT = b'\x10\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x56\x61\x72\x69\x61\x6E\x74\x00'
+    REQUIREDSTAT = b'\x0D\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x53\x74\x61\x74\x00'
+    REQUIREDFLUID = b'\x0E\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x46\x6C\x75\x69\x64\x00'
+    REQUIREDSTATVALUE = b'\x12\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x53\x74\x61\x74\x56\x61\x6C\x75\x65\x00'
+    REQUIREDFLUIDML = b'\x11\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x46\x6C\x75\x69\x64\x5F\x6D\x6C\x00'
+    LEVELREQUIREMENT = b'\x11\x00\x00\x00\x4C\x65\x76\x65\x6C\x52\x65\x71\x75\x69\x72\x65\x6D\x65\x6E\x74\x00'
+    REQUIREDTRAITS = b'\x0F\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x54\x72\x61\x69\x74\x73\x00'
+    REQUIREMENTS = b'\x0D\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x6D\x65\x6E\x74\x73\x00'
+    DIFFICULTY = b'\x0B\x00\x00\x00\x44\x69\x66\x66\x69\x63\x75\x6C\x74\x79\x00'
+    REWARD = b'\x07\x00\x00\x00\x52\x65\x77\x61\x72\x64\x00'
+    DAYS = b'\x05\x00\x00\x00\x44\x61\x79\x73\x00'
+    COMPLETIONTAGS = b'\x0F\x00\x00\x00\x43\x6F\x6D\x70\x6C\x65\x74\x69\x6F\x6E\x54\x61\x67\x73\x00'
+    REWARDMESSAGE = b'\x0E\x00\x00\x00\x52\x65\x77\x61\x72\x64\x4D\x65\x73\x73\x61\x67\x65\x00'
+    
     
     ### Preset Macros
     PRESETNAME = b'\x0B\x00\x00\x00\x50\x72\x65\x73\x65\x74\x4E\x61\x6D\x65\x00'
     SCHEME = b'\x07\x00\x00\x00\x53\x63\x68\x65\x6D\x65\x00'
-    
     COMMON = b'\x08\x00\x00\x00\x62\x43\x6F\x6D\x6D\x6F\x6E\x00'
     UNCOMMON = b'\x0A\x00\x00\x00\x62\x55\x6E\x63\x6F\x6D\x6D\x6F\x6E\x00'
     RARE = b'\x06\x00\x00\x00\x62\x52\x61\x72\x65\x00'
@@ -606,14 +1030,6 @@ class GenericParsers(DictMacros, ByteMacros, IO):
         data_start = cursor + len(byte_macro)
         data_end = data_start + 1
         return byte_bytes[:cursor], byte_bytes[data_start:data_end], byte_bytes[data_end:]
-    
-    def _parse_guid(self, guid_bytes, guid_macro):
-        '''Parses guid from datablock'''
-        cursor = guid_bytes.find(guid_macro)
-        if cursor == -1:
-            raise Exception(f'Invalid Save: {guid_macro}')
-        guid_start = cursor + len(guid_macro)
-        return guid_bytes[:cursor], guid_bytes[guid_start:guid_start + 16], guid_bytes[guid_start + 16:]
     
     def _parse_map_property(self, map_bytes, map_macro, child_macro):
         cursor = map_bytes.find(map_macro)
@@ -724,10 +1140,6 @@ class GenericParsers(DictMacros, ByteMacros, IO):
             + byte_bytes
         return bytes_out
     
-    def _get_guid_bytes(self, guid_bytes, guid_macro):
-        '''Rebuild guid string'''
-        return guid_macro + guid_bytes
-    
     def _get_map_property_bytes(self, map_bytes, map_macro, child_macro):
         child_macro += child_macro + b'\x00'
         map_length = len(map_bytes)
@@ -825,6 +1237,15 @@ class GenericParsers(DictMacros, ByteMacros, IO):
             name_prop = b''
         return pre_data, name_prop, data_in
     
+    def _try_parse_byte_property(self, data_in, byte_macro):
+        byte_macro += self.BYTE_PROPERTY
+        try:
+            pre_data, byte_prop, data_in = self._parse_byte_property(data_in, byte_macro)
+        except Exception as e:
+            pre_data = b''
+            byte_prop = b''
+        return pre_data, byte_prop, data_in
+    
     def _try_parse_array_struct_property(self, data_in, array_macro, struct_macro, child_macro):
         array_macro += self.ARRAY_PROPERTY
         try:
@@ -901,6 +1322,14 @@ class GenericParsers(DictMacros, ByteMacros, IO):
             data = self._get_name_property_bytes(data_in, name_macro)
         return data
     
+    def _try_get_byte_property_bytes(self, data_in, byte_macro):
+        if data_in == b'':
+            data = b''
+        else:
+            byte_macro += self.BYTE_PROPERTY
+            data = self._get_byte_property_bytes(data_in, byte_macro)
+        return data
+    
     def _try_get_array_struct_property_bytes(self, data_in, array_macro, struct_macro, child_macro):
         if data_in == []:
             data_out = b''
@@ -937,7 +1366,7 @@ class GenericParsers(DictMacros, ByteMacros, IO):
         for x in byte_list:
             out_array.extend(x)
         return bytes(out_array)
-
+    
     def split_byte_list(self, bytes_in):
         out_list = []
         if len(bytes_in) > 0:
@@ -949,45 +1378,36 @@ class GenericParsers(DictMacros, ByteMacros, IO):
                 out_list.append(data)
                 bytes_in = bytes_in[4+length:]
         return out_list, bytes_in
-
+    
+    def append_length(self, bytes_in):
+        length = len(bytes_in)
+        return length.to_bytes(4, 'little') + bytes_in
+    
 
 '''Header Classes'''
 class Header(GenericParsers):
     '''Header Parser'''
-    BODYFLUIDS = b'\x0B\x00\x00\x00\x42\x6F\x64\x79\x46\x6C\x75\x69\x64\x73\x00' + ByteMacros.STRUCT_PADDING
     def __init__(self, header_data):
         self._parse_header_data(header_data)
     
     def _parse_header_data(self, header_data):
-        self.gvas,            header_data = self._parse_gvas(header_data)
-        _, self.playerguid,   header_data = self._parse_guid(header_data, self.PLAYER_UNIQUE_ID)
-        _, self.playerwealth, header_data = self._try_parse_array_property(header_data, self.PLAYERWEALTH, self.INT_PROPERTY, 4)
-        _, playerbodyfluids,  header_data = self._try_parse_array_struct_property(header_data, self.PLAYERBODYFLUIDS, self.PLAYERBODYFLUIDS, self.BODYFLUIDS)
+        self.gvas, self.playerguid,   header_data = self._try_parse_struct_property(header_data,       self.PLAYER_UNIQUE_ID, self.GUID_PROP)
+        _,         self.playerwealth, header_data = self._try_parse_array_property(header_data,        self.PLAYERWEALTH,     self.INT_PROPERTY, 4)
+        _,         playerbodyfluids,  header_data = self._try_parse_array_struct_property(header_data, self.PLAYERBODYFLUIDS, self.PLAYERBODYFLUIDS, self.BODYFLUIDS)
         self.remain = header_data
         
         self.playerbodyfluids = PlayerBodyFluids(playerbodyfluids)
     
-    def _parse_gvas(self, header_data):
-        cursor = header_data.find(self.PLAYER_UNIQUE_ID)
-        if cursor == -1:
-            raise Exception('Invalid Header: PLAYER_UNIQUE_ID')
-        return header_data[:cursor], header_data[cursor:]
-    
     def get_data(self):
         data_out = []
         data_out.append(self.gvas)
-        data_out.append(self._get_guid_bytes(self.playerguid, self.PLAYER_UNIQUE_ID))
-        data_out.append(self._try_get_array_property_bytes(self.playerwealth, self.PLAYERWEALTH, self.INT_PROPERTY, 4))
-        data_out.append(self._try_get_array_struct_property_bytes(self.playerbodyfluids.get_data(), self.PLAYERBODYFLUIDS, self.PLAYERBODYFLUIDS, self.BODYFLUIDS))
+        data_out.append(self._try_get_struct_property_bytes(self.playerguid,  self.PLAYER_UNIQUE_ID, self.GUID_PROP))
+        data_out.append(self._try_get_array_property_bytes(self.playerwealth, self.PLAYERWEALTH,     self.INT_PROPERTY, 4))
+        data_out.append(self._try_get_array_struct_property_bytes(self.playerbodyfluids.get_data(),  self.PLAYERBODYFLUIDS, self.PLAYERBODYFLUIDS, self.BODYFLUIDS))
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
 class PlayerBodyFluids(GenericParsers):
-    RACETAG = b'\x08\x00\x00\x00\x52\x61\x63\x65\x54\x61\x67\x00'
-    MILKML = b'\x08\x00\x00\x00\x4D\x69\x6C\x6B\x5F\x6D\x6C\x00'
-    SEMENML = b'\x09\x00\x00\x00\x53\x65\x6D\x65\x6E\x5F\x6D\x6C\x00'
-    MAXMILKML = b'\x0B\x00\x00\x00\x4D\x61\x78\x4D\x69\x6C\x6B\x5F\x6D\x6C\x00'
-    MAXSEMENML = b'\x0C\x00\x00\x00\x4D\x61\x78\x53\x65\x6D\x65\x6E\x5F\x6D\x6C\x00'
     def __init__(self, playerbodyfluids_data):
         self._parse_playerbodyfluids_data(playerbodyfluids_data)
     
@@ -1005,7 +1425,7 @@ class PlayerBodyFluids(GenericParsers):
     def get_data(self):
         return self.bodyfluids
 
-class BodyFluid(PlayerBodyFluids):
+class BodyFluid(GenericParsers):
     def __init__(self, racetag, milkml, semenml, maxmilkml, maxsemenml, remain):
         _, self.racetag, _ = self._try_parse_name_property(racetag, self.TAGNAME)
         self.milkml = milkml
@@ -1040,9 +1460,9 @@ class NephelymBase(GenericParsers):
     
     def _parse_nephelym_data(self, nephelym_data):
         _, self.name,             nephelym_data = self._parse_name(nephelym_data)
-        _, self.guid,             nephelym_data = self._parse_guid(nephelym_data, self.NEPHELYM_GUID)
-        _, self.race, self.sex,   nephelym_data = self._parse_variant(nephelym_data)
-        _, appearance,            nephelym_data = self._parse_struct_property(nephelym_data, self.APPEARANCE_STRUCT_PROP,    self.CHARACTER_APPEARANCE)
+        _, self.guid,             nephelym_data = self._try_parse_struct_property(nephelym_data, self.UNIQUEID, self.GUID_PROP)
+        _, variant,               nephelym_data = self._try_parse_struct_property(nephelym_data, self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER)
+        _, appearance,            nephelym_data = self._try_parse_struct_property(nephelym_data, self.APPEARANCE,    self.CHARACTER_APPEARANCE)
         _, self.splatter,         nephelym_data = self._parse_struct_property(nephelym_data, self.SPLATTER_STRUCT_PROP,      self.FLUID_SPLATTER)
         _, self.citargetvalue,    nephelym_data = self._parse_struct_property(nephelym_data, self.CITARGETVALUE_STRUCT_PROP, self.CHARACTER_MORPH)
         _, self.cibuffer,         nephelym_data = self._parse_struct_property(nephelym_data, self.CIBUFFER_STRUCT_PROP,      self.CHARACTER_MORPH)
@@ -1055,11 +1475,13 @@ class NephelymBase(GenericParsers):
         _, self.traits,           nephelym_data = self._parse_traits(nephelym_data)
         _, self.playertags,       nephelym_data = self._parse_struct_property(nephelym_data, self.PLAYERTAGS_STRUCT_PROP,    self.GAMEPLAY_TAG_CONTAINER)
         _, self.states,           nephelym_data = self._parse_struct_property(nephelym_data, self.STATES_STRUCT_PROP,        self.GAMEPLAY_TAG_CONTAINER)
-        _, self.offspringid,      nephelym_data = self._parse_struct_property(nephelym_data, self.OFFSPRINGID_STRUCT_PROP,   self.GUID_PROP)
-        _, self.lastmateid,       nephelym_data = self._parse_struct_property(nephelym_data, self.LASTMATEID_STRUCT_PROP,    self.GUID_PROP)
-        _, self.lastmatesexcount, nephelym_data = self._parse_byte_property(nephelym_data, self.LASTMATESEXCOUNT_BYTE_PROP)
-        self.appearance = Appearance(appearance)
+        _, self.offspringid,      nephelym_data = self._try_parse_struct_property(nephelym_data, self.OFFSPRINGID,   self.GUID_PROP)
+        _, self.lastmateid,       nephelym_data = self._try_parse_struct_property(nephelym_data, self.LASTMATEID,    self.GUID_PROP)
+        _, self.lastmatesexcount, nephelym_data = self._try_parse_byte_property(nephelym_data, self.LASTMATESEXCOUNT)
         self.remain = nephelym_data
+        
+        self.variant = Variant(variant)
+        self.appearance = Appearance(appearance)
     
     def _parse_traits(self, nephelym_data):
         cursor = nephelym_data.find(self.TRAITS_STRUCT_PROP)
@@ -1068,14 +1490,6 @@ class NephelymBase(GenericParsers):
         traits_index = cursor + len(self.TRAITS_STRUCT_PROP) + 8
         _, traits, post_block = self._parse_gameplaytags(nephelym_data[traits_index:])
         return nephelym_data[:cursor], traits, post_block
-    
-    def _parse_variant(self, nephelym_data):
-        cursor = nephelym_data.find(self.VARIANT_STRUCT_PROP)
-        if cursor == -1:
-            raise Exception('Invalid Nephelym: VARIANT_STRUCT_PROP')
-        tags_index = cursor + len(self.VARIANT_STRUCT_PROP) + 8
-        _, tags, post_block = self._parse_gameplaytags(nephelym_data[tags_index:])
-        return nephelym_data[:cursor], tags[0], tags[1], post_block
     
     def _parse_gameplaytags(self, nephelym_data):
         '''Parse Gameplay tag Containers'''
@@ -1107,14 +1521,6 @@ class NephelymBase(GenericParsers):
         gameplay_tags_bytes = self._get_gameplaytags(traits)
         tags_length = len(gameplay_tags_bytes) - len(self.GAMEPLAY_TAG_CONTAINER)
         bytes_out = self.TRAITS_STRUCT_PROP \
-            + tags_length.to_bytes(8, 'little') \
-            + gameplay_tags_bytes
-        return bytes_out
-    
-    def _get_variant_bytes(self, tags):
-        gameplay_tags_bytes = self._get_gameplaytags(tags)
-        tags_length = len(gameplay_tags_bytes) - len(self.GAMEPLAY_TAG_CONTAINER)
-        bytes_out = self.VARIANT_STRUCT_PROP \
             + tags_length.to_bytes(8, 'little') \
             + gameplay_tags_bytes
         return bytes_out
@@ -1155,33 +1561,36 @@ class NephelymBase(GenericParsers):
     
     def _check_sex(self):
         '''Check if the new sex is a possibility for the race'''
-        if self.race in self.SEX_RACE[self.sex].values():
+        if self.variant.race in self.SEX_RACE[self.variant.sex].values():
             return
         else:
             for sex in self.SEXES:
-                self.sex = self.SEXES[sex]
-                if self.race in self.SEX_RACE[self.sex].values():
+                self.variant.sex = self.SEXES[sex]
+                if self.variant.race in self.SEX_RACE[self.variant.sex].values():
                     return
+        raise Exception(f'Unable to find a suitable sex-race pairing for {self.variant.race}')
     
     def change_appearance(self, nephelym):
         self.appearance = nephelym.appearance
     
     def change_race(self, race):
         if race in self.RACES:
-            self.race = self.RACES[race]
+            race = self.RACES[race]
         elif race in self.RACES.values():
-            self.race = race
+            race = race
         else:
             raise Exception(f'{race} not a valid race')
+        self.variant.race = race
         self._check_sex()
     
     def change_sex(self, sex):
         if sex in self.SEXES:
-            self.sex = self.SEXES[sex]
+            sex = self.SEXES[sex]
         elif sex in self.SEXES.values():
-            self.sex = sex
+            sex = sex
         else:
             raise Exception(f'{sex} not a valid sex')
+        self.variant.sex = sex
         self._check_sex()
     
     def get_data(self):
@@ -1191,9 +1600,9 @@ class NephelymBase(GenericParsers):
         '''
         data_out = []
         data_out.append(self._get_name_bytes(self.name))
-        data_out.append(self._get_guid_bytes(self.guid, self.NEPHELYM_GUID))
-        data_out.append(self._get_variant_bytes([self.race, self.sex, ]))
-        data_out.append(self._get_struct_property_bytes(self.appearance.get_data(), self.APPEARANCE_STRUCT_PROP, self.CHARACTER_APPEARANCE))
+        data_out.append(self._try_get_struct_property_bytes(self.guid, self.UNIQUEID, self.GUID_PROP))
+        data_out.append(self._try_get_struct_property_bytes(self.variant.get_data(), self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER))
+        data_out.append(self._try_get_struct_property_bytes(self.appearance.get_data(), self.APPEARANCE, self.CHARACTER_APPEARANCE))
         data_out.append(self._get_struct_property_bytes(self.splatter, self.SPLATTER_STRUCT_PROP, self.FLUID_SPLATTER))
         data_out.append(self._get_struct_property_bytes(self.citargetvalue, self.CITARGETVALUE_STRUCT_PROP, self.CHARACTER_MORPH))
         data_out.append(self._get_struct_property_bytes(self.cibuffer, self.CIBUFFER_STRUCT_PROP, self.CHARACTER_MORPH))
@@ -1206,9 +1615,9 @@ class NephelymBase(GenericParsers):
         data_out.append(self._get_traits_bytes(self.traits))
         data_out.append(self._get_struct_property_bytes(self.playertags, self.PLAYERTAGS_STRUCT_PROP, self.GAMEPLAY_TAG_CONTAINER))
         data_out.append(self._get_struct_property_bytes(self.states, self.STATES_STRUCT_PROP, self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._get_struct_property_bytes(self.offspringid, self.OFFSPRINGID_STRUCT_PROP, self.GUID_PROP))
-        data_out.append(self._get_struct_property_bytes(self.lastmateid, self.LASTMATEID_STRUCT_PROP, self.GUID_PROP))
-        data_out.append(self._get_byte_property_bytes(self.lastmatesexcount, self.LASTMATESEXCOUNT_BYTE_PROP))
+        data_out.append(self._try_get_struct_property_bytes(self.offspringid, self.OFFSPRINGID, self.GUID_PROP))
+        data_out.append(self._try_get_struct_property_bytes(self.lastmateid, self.LASTMATEID, self.GUID_PROP))
+        data_out.append(self._try_get_byte_property_bytes(self.lastmatesexcount, self.LASTMATESEXCOUNT))
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
     
@@ -1320,42 +1729,50 @@ class PlayerSpiritForm(NephelymBase):
         self._parse_spiritform_data(spiritform_data)
     
     def _parse_spiritform_data(self, spiritform_data):
-        _, self.guid,           spiritform_data = self._parse_guid(spiritform_data, self.SPIRITFORM_GUID)
-        _, self.race, self.sex, spiritform_data = self._parse_race_sex(spiritform_data)
-        _, appearance,          spiritform_data = self._parse_struct_property(spiritform_data, self.APPEARANCE_STRUCT_PROP,    self.CHARACTER_APPEARANCE)
+        _, self.guid,           spiritform_data = self._try_parse_struct_property(spiritform_data, self.UNIQUEID, self.GUID_PROP)
+        _, variant,             spiritform_data = self._try_parse_struct_property(spiritform_data, self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER)
+        _, appearance,          spiritform_data = self._try_parse_struct_property(spiritform_data, self.APPEARANCE,    self.CHARACTER_APPEARANCE)
         _, self.appliedscheme,  spiritform_data = self._parse_struct_property(spiritform_data, self.APPLIEDSCHEME_STRUCT_PROP, self.CHARACTER_APPLIED_SCHEME)
         _, self.mother,         spiritform_data = self._parse_struct_property(spiritform_data, self.MOTHER_STRUCT_PROP,        self.CHARACTER_PARENT_DATA)
         _, self.father,         spiritform_data = self._parse_struct_property(spiritform_data, self.FATHER_STRUCT_PROP,        self.CHARACTER_PARENT_DATA)
         self.remain = spiritform_data
+        
+        self.variant = Variant(variant)
         self.appearance = Appearance(appearance)
-    
-    def _parse_race_sex(self, nephelym_data):
-        '''Spiritform doesn't have variant block if using games default spiritform for female. Female Vulpuss'''
-        try:
-            pre_data, race, sex, nephelym_data = self._parse_variant(nephelym_data)
-        except:
-            race = self.RACES_FEMALE['vulpuss']
-            sex = self.SEXES['female']
-            pre_data = b''
-        return pre_data, race, sex, nephelym_data
     
     def change_form(self, nephelym):
         '''Update spirit form to be incoming nephelym'''
         self.change_appearance(nephelym)
-        self.change_sex(nephelym.sex)
-        self.change_race(nephelym.race)
+        self.change_sex(nephelym.variant.sex)
+        self.change_race(nephelym.variant.race)
     
     def get_data(self):
         data_out = []
-        data_out.append(self._get_guid_bytes(self.guid, self.SPIRITFORM_GUID))
-        data_out.append(self._get_variant_bytes([self.race, self.sex, ]))
-        data_out.append(self._get_struct_property_bytes(self.appearance.get_data(), self.APPEARANCE_STRUCT_PROP, self.CHARACTER_APPEARANCE))
+        data_out.append(self._try_get_struct_property_bytes(self.guid, self.UNIQUEID, self.GUID_PROP))
+        data_out.append(self._try_get_struct_property_bytes(self.variant.get_data(), self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER))
+        data_out.append(self._try_get_struct_property_bytes(self.appearance.get_data(), self.APPEARANCE, self.CHARACTER_APPEARANCE))
         data_out.append(self._get_struct_property_bytes(self.appliedscheme, self.APPLIEDSCHEME_STRUCT_PROP, self.CHARACTER_APPLIED_SCHEME))
         data_out.append(self._get_struct_property_bytes(self.mother, self.MOTHER_STRUCT_PROP, self.CHARACTER_PARENT_DATA))
         data_out.append(self._get_struct_property_bytes(self.father, self.FATHER_STRUCT_PROP, self.CHARACTER_PARENT_DATA))
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
+
+class Parent(GenericParsers):
+    def __init__(self, parent_data):
+        self._parse_parent_data(parent_data)
+    
+    def _parse_parent_data(parent_data):
+        _, variant, parent_data = self._try_parse_struct_property(parent_data, self.VARIANT, self.GAMEPLAY_TAG_CONTAINER)
+        print(variant)
+        print(parent_data)
+        exit()
+        
+    def get_data(self):
+        bytes_out = []
+        bytes_out.append(len(self.tag_list).to_bytes(4, 'little'))
+        bytes_out.append(self.list_to_bytes(self.tag_list))
+        return self.list_to_bytes(bytes_out)
 
 '''Nephelym Presets Class'''
 class NephelymPreset(NephelymBase):
@@ -1404,65 +1821,22 @@ class NephelymPreset(NephelymBase):
 
 '''Appearance Classes'''
 class Appearance(GenericParsers):
-    TAGS  = b'\x05\x00\x00\x00\x54\x61\x67\x73\x00'
-    MORPH = b'\x06\x00\x00\x00\x4D\x6F\x72\x70\x68\x00'
-    PHYSICS = b'\x08\x00\x00\x00\x50\x68\x79\x73\x69\x63\x73\x00'
-    BASESHAPE = b'\x0A\x00\x00\x00\x42\x61\x73\x65\x53\x68\x61\x70\x65\x00'
-    CHUBBYSHAPE = b'\x0C\x00\x00\x00\x43\x68\x75\x62\x62\x79\x53\x68\x61\x70\x65\x00'
-    SLENDERSHAPE = b'\x0D\x00\x00\x00\x53\x6C\x65\x6E\x64\x65\x72\x53\x68\x61\x70\x65\x00'
-    MEATYSHAPE = b'\x0B\x00\x00\x00\x4D\x65\x61\x74\x79\x53\x68\x61\x70\x65\x00'
-    MATERIAL = b'\x09\x00\x00\x00\x4D\x61\x74\x65\x72\x69\x61\x6C\x00'
-    EYERINDEX = b'\x0A\x00\x00\x00\x45\x79\x65\x52\x49\x6E\x64\x65\x78\x00'
-    EYELINDEX = b'\x0A\x00\x00\x00\x45\x79\x65\x4C\x49\x6E\x64\x65\x78\x00'
-    EYEBROWINDEX = b'\x0D\x00\x00\x00\x45\x79\x65\x62\x72\x6F\x77\x49\x6E\x64\x65\x78\x00'
-    FACEDECORINDEX = b'\x0F\x00\x00\x00\x46\x61\x63\x65\x44\x65\x63\x6F\x72\x49\x6E\x64\x65\x78\x00'
-    BODYDECORINDEX = b'\x0F\x00\x00\x00\x42\x6F\x64\x79\x44\x65\x63\x6F\x72\x49\x6E\x64\x65\x78\x00'
-    BODYMARKSINDEX = b'\x0F\x00\x00\x00\x42\x6F\x64\x79\x4D\x61\x72\x6B\x73\x49\x6E\x64\x65\x78\x00'
-    ADDITIONALMATERIALMASKINDEX = b'\x1C\x00\x00\x00\x41\x64\x64\x69\x74\x69\x6F\x6E\x61\x6C\x4D\x61\x74\x65\x72\x69\x61\x6C\x4D\x61\x73\x6B\x49\x6E\x64\x65\x78\x00'
-    ADDITIONALMATERIALINDEX = b'\x18\x00\x00\x00\x41\x64\x64\x69\x74\x69\x6F\x6E\x61\x6C\x4D\x61\x74\x65\x72\x69\x61\x6C\x49\x6E\x64\x65\x78\x00'
-    ATTACHMENTMATERIAL = b'\x13\x00\x00\x00\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x4D\x61\x74\x65\x72\x69\x61\x6C\x00'
-    TORSOATTACHMENTINDEX = b'\x15\x00\x00\x00\x54\x6F\x72\x73\x6F\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
-    PUBICHAIRINDEX = b'\x0F\x00\x00\x00\x50\x75\x62\x69\x63\x48\x61\x69\x72\x49\x6E\x64\x65\x78\x00'
-    HEADATTACHMENTINDEX = b'\x14\x00\x00\x00\x48\x65\x61\x64\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
-    HEADEXTRAATTACHMENTINDEX = b'\x19\x00\x00\x00\x48\x65\x61\x64\x45\x78\x74\x72\x61\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
-    LEGSATTACHMENTINDEX = b'\x14\x00\x00\x00\x4C\x65\x67\x73\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
-    ARMSATTACHMENTINDEX = b'\x14\x00\x00\x00\x41\x72\x6D\x73\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
-    TAILATTACHMENTINDEX = b'\x14\x00\x00\x00\x54\x61\x69\x6C\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
-    WINGATTACHMENTINDEX = b'\x14\x00\x00\x00\x57\x69\x6E\x67\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
-    EARSATTACHMENTINDEX = b'\x14\x00\x00\x00\x45\x61\x72\x73\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
-    HAIRATTACHMENTINDEX = b'\x14\x00\x00\x00\x48\x61\x69\x72\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
-    FACIALHAIRINDEX = b'\x10\x00\x00\x00\x46\x61\x63\x69\x61\x6C\x48\x61\x69\x72\x49\x6E\x64\x65\x78\x00'
-    DICKATTACHMENTINDEX = b'\x14\x00\x00\x00\x44\x69\x63\x6B\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
-    ACCESSORYATTACHMENTINDEX = b'\x19\x00\x00\x00\x41\x63\x63\x65\x73\x73\x6F\x72\x79\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
-    COLLARATTACHMENTINDEX = b'\x16\x00\x00\x00\x43\x6F\x6C\x6C\x61\x72\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
-    AMBIENTPARTICLEATTACHMENTINDEX = b'\x1F\x00\x00\x00\x41\x6D\x62\x69\x65\x6E\x74\x50\x61\x72\x74\x69\x63\x6C\x65\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x49\x6E\x64\x65\x78\x00'
-    UPPERCLOTHINGINDEX = b'\x13\x00\x00\x00\x55\x70\x70\x65\x72\x43\x6C\x6F\x74\x68\x69\x6E\x67\x49\x6E\x64\x65\x78\x00'
-    LOWERCLOTHINGINDEX = b'\x13\x00\x00\x00\x4C\x6F\x77\x65\x72\x43\x6C\x6F\x74\x68\x69\x6E\x67\x49\x6E\x64\x65\x78\x00'
-    UNDERWEARINDEX = b'\x0F\x00\x00\x00\x55\x6E\x64\x65\x72\x77\x65\x61\x72\x49\x6E\x64\x65\x78\x00'
-    BOOTSINDEX = b'\x0B\x00\x00\x00\x42\x6F\x6F\x74\x73\x49\x6E\x64\x65\x78\x00'
-    IDLEANIMATIONINDEX = b'\x13\x00\x00\x00\x49\x64\x6C\x65\x41\x6E\x69\x6D\x61\x74\x69\x6F\x6E\x49\x6E\x64\x65\x78\x00'
-    
-    BOUNCE_PHYSICS = b'\x0E\x00\x00\x00\x42\x6F\x75\x6E\x63\x65\x50\x68\x79\x73\x69\x63\x73\x00' + ByteMacros.STRUCT_PADDING
-    BODY_SHAPE = b'\x0A\x00\x00\x00\x42\x6F\x64\x79\x53\x68\x61\x70\x65\x00' + ByteMacros.STRUCT_PADDING
-    CHARACTER_MATERIAL = b'\x12\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x4D\x61\x74\x65\x72\x69\x61\x6C\x00' + ByteMacros.STRUCT_PADDING
-    CHARACTER_ATTACHMENT_SCHEME = b'\x1A\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x53\x63\x68\x65\x6D\x65\x00' + ByteMacros.STRUCT_PADDING
-    
     def __init__(self, appearance_data):
         self._parse_appearance_data(appearance_data)
     
     def _parse_appearance_data(self, appearance_data):
-        _, tags,                                appearance_data = self._try_parse_struct_property(appearance_data, self.TAGS, self.GAMEPLAY_TAG_CONTAINER)
-        _, morph,                               appearance_data = self._try_parse_struct_property(appearance_data, self.MORPH,       self.CHARACTER_MORPH)
+        _, tags,                                appearance_data = self._try_parse_struct_property(appearance_data, self.TAGS,         self.GAMEPLAY_TAG_CONTAINER)
+        _, morph,                               appearance_data = self._try_parse_struct_property(appearance_data, self.MORPH,        self.CHARACTER_MORPH)
         if appearance_data[:len(self.PHYSICS)] == self.PHYSICS:
-            _, physics,                         appearance_data = self._try_parse_struct_property(appearance_data, self.PHYSICS, self.BOUNCE_PHYSICS)
-            _, baseshape,                       appearance_data = self._try_parse_struct_property(appearance_data, self.BASESHAPE, self.BODY_SHAPE)
+            _, physics,                         appearance_data = self._try_parse_struct_property(appearance_data, self.PHYSICS,      self.BOUNCE_PHYSICS)
+            _, baseshape,                       appearance_data = self._try_parse_struct_property(appearance_data, self.BASESHAPE,    self.BODY_SHAPE)
         else: #SpiritForm has physics after BaseShape
-            _, baseshape,                       appearance_data = self._try_parse_struct_property(appearance_data, self.BASESHAPE, self.BODY_SHAPE)
-            _, physics,                         appearance_data = self._try_parse_struct_property(appearance_data, self.PHYSICS, self.BOUNCE_PHYSICS)
-        _, chubbyshape,                         appearance_data = self._try_parse_struct_property(appearance_data, self.CHUBBYSHAPE,       self.BODY_SHAPE)
-        _, slendershape,                        appearance_data = self._try_parse_struct_property(appearance_data, self.SLENDERSHAPE,       self.BODY_SHAPE)
-        _, meatyshape,                          appearance_data = self._try_parse_struct_property(appearance_data, self.MEATYSHAPE,       self.BODY_SHAPE)
-        _, material,                            appearance_data = self._try_parse_struct_property(appearance_data, self.MATERIAL,       self.CHARACTER_MATERIAL)
+            _, baseshape,                       appearance_data = self._try_parse_struct_property(appearance_data, self.BASESHAPE,    self.BODY_SHAPE)
+            _, physics,                         appearance_data = self._try_parse_struct_property(appearance_data, self.PHYSICS,      self.BOUNCE_PHYSICS)
+        _, chubbyshape,                         appearance_data = self._try_parse_struct_property(appearance_data, self.CHUBBYSHAPE,  self.BODY_SHAPE)
+        _, slendershape,                        appearance_data = self._try_parse_struct_property(appearance_data, self.SLENDERSHAPE, self.BODY_SHAPE)
+        _, meatyshape,                          appearance_data = self._try_parse_struct_property(appearance_data, self.MEATYSHAPE,   self.BODY_SHAPE)
+        _, material,                            appearance_data = self._try_parse_struct_property(appearance_data, self.MATERIAL,     self.CHARACTER_MATERIAL)
         _, self.eyerindex,                      appearance_data = self._try_parse_int_property(appearance_data, self.EYERINDEX)
         _, self.eyelindex,                      appearance_data = self._try_parse_int_property(appearance_data, self.EYELINDEX)
         _, self.eyebrowindex,                   appearance_data = self._try_parse_int_property(appearance_data, self.EYEBROWINDEX)
@@ -1546,13 +1920,7 @@ class Appearance(GenericParsers):
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
-class BaseShape(Appearance):
-    MORPHBUSTY = b'\x0B\x00\x00\x00\x4D\x6F\x72\x70\x68\x42\x75\x73\x74\x79\x00'
-    MORPHBUXOM = b'\x0B\x00\x00\x00\x4D\x6F\x72\x70\x68\x42\x75\x78\x6F\x6D\x00'
-    MORPHPREGNANT = b'\x0E\x00\x00\x00\x4D\x6F\x72\x70\x68\x50\x72\x65\x67\x6E\x61\x6E\x74\x00'
-    PHYSICSBUSTY = b'\x0D\x00\x00\x00\x50\x68\x79\x73\x69\x63\x73\x42\x75\x73\x74\x79\x00'
-    PHYSICSBUXOM = b'\x0D\x00\x00\x00\x50\x68\x79\x73\x69\x63\x73\x42\x75\x78\x6F\x6D\x00'
-    PHYSICSPREGNANT = b'\x10\x00\x00\x00\x50\x68\x79\x73\x69\x63\x73\x50\x72\x65\x67\x6E\x61\x6E\x74\x00'
+class BaseShape(GenericParsers):
     def __init__(self, shape_data):
         self._parse_shape_data(shape_data)
     
@@ -1589,132 +1957,7 @@ class BaseShape(Appearance):
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
-class Morph(Appearance):
-    FACEDEPTH = b'\x0A\x00\x00\x00\x46\x61\x63\x65\x44\x65\x70\x74\x68\x00'
-    FACEWIDTH = b'\x0A\x00\x00\x00\x46\x61\x63\x65\x57\x69\x64\x74\x68\x00'
-    EYESCLOSE = b'\x0A\x00\x00\x00\x45\x79\x65\x73\x43\x6C\x6F\x73\x65\x00'
-    EYESVERTICAL = b'\x0D\x00\x00\x00\x45\x79\x65\x73\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
-    EYESDEPTH = b'\x0A\x00\x00\x00\x45\x79\x65\x73\x44\x65\x70\x74\x68\x00'
-    EYESDISTANCE = b'\x0D\x00\x00\x00\x45\x79\x65\x73\x44\x69\x73\x74\x61\x6E\x63\x65\x00'
-    EYESSIZE = b'\x09\x00\x00\x00\x45\x79\x65\x73\x53\x69\x7A\x65\x00'
-    EYESANGLE = b'\x0A\x00\x00\x00\x45\x79\x65\x73\x41\x6E\x67\x6C\x65\x00'
-    HUMANEARSIZE = b'\x0D\x00\x00\x00\x48\x75\x6D\x61\x6E\x45\x61\x72\x53\x69\x7A\x65\x00'
-    HUMANEARPOINTEDA = b'\x11\x00\x00\x00\x48\x75\x6D\x61\x6E\x45\x61\x72\x50\x6F\x69\x6E\x74\x65\x64\x41\x00'
-    HUMANEARPOINTEDB = b'\x11\x00\x00\x00\x48\x75\x6D\x61\x6E\x45\x61\x72\x50\x6F\x69\x6E\x74\x65\x64\x42\x00'
-    HUMANEARPOINTEDC = b'\x11\x00\x00\x00\x48\x75\x6D\x61\x6E\x45\x61\x72\x50\x6F\x69\x6E\x74\x65\x64\x43\x00'
-    ATTACHEDEARSIZE = b'\x10\x00\x00\x00\x41\x74\x74\x61\x63\x68\x65\x64\x45\x61\x72\x53\x69\x7A\x65\x00'
-    HAIRSIZE = b'\x09\x00\x00\x00\x48\x61\x69\x72\x53\x69\x7A\x65\x00'
-    HAIRBACK = b'\x09\x00\x00\x00\x48\x61\x69\x72\x42\x61\x63\x6B\x00'
-    BROWVERTICAL = b'\x0D\x00\x00\x00\x42\x72\x6F\x77\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
-    BROWDEPTH = b'\x0A\x00\x00\x00\x42\x72\x6F\x77\x44\x65\x70\x74\x68\x00'
-    BROWINNERVERTICAL = b'\x12\x00\x00\x00\x42\x72\x6F\x77\x49\x6E\x6E\x65\x72\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
-    NOSEBRIDGEWIDTH = b'\x10\x00\x00\x00\x4E\x6F\x73\x65\x42\x72\x69\x64\x67\x65\x57\x69\x64\x74\x68\x00'
-    NOSEBRIDGEDEPTH = b'\x10\x00\x00\x00\x4E\x6F\x73\x65\x42\x72\x69\x64\x67\x65\x44\x65\x70\x74\x68\x00'
-    NOSEWIDTH = b'\x0A\x00\x00\x00\x4E\x6F\x73\x65\x57\x69\x64\x74\x68\x00'
-    NOSEDEPTH = b'\x0A\x00\x00\x00\x4E\x6F\x73\x65\x44\x65\x70\x74\x68\x00'
-    NOSEVERTICAL = b'\x0D\x00\x00\x00\x4E\x6F\x73\x65\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
-    NOSEANGLE = b'\x0A\x00\x00\x00\x4E\x6F\x73\x65\x41\x6E\x67\x6C\x65\x00'
-    CHEEKBONEDEPTH = b'\x0F\x00\x00\x00\x43\x68\x65\x65\x6B\x62\x6F\x6E\x65\x44\x65\x70\x74\x68\x00'
-    CHEEKBONEVERTICAL = b'\x12\x00\x00\x00\x43\x68\x65\x65\x6B\x62\x6F\x6E\x65\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
-    CHEEKBONEWIDTH = b'\x0F\x00\x00\x00\x43\x68\x65\x65\x6B\x62\x6F\x6E\x65\x57\x69\x64\x74\x68\x00'
-    CHEEKBONESIZE = b'\x0E\x00\x00\x00\x43\x68\x65\x65\x6B\x62\x6F\x6E\x65\x53\x69\x7A\x65\x00'
-    CHEEKDEPTH = b'\x0B\x00\x00\x00\x43\x68\x65\x65\x6B\x44\x65\x70\x74\x68\x00'
-    CHEEKWIDTH = b'\x0B\x00\x00\x00\x43\x68\x65\x65\x6B\x57\x69\x64\x74\x68\x00'
-    MOUTHWIDTH = b'\x0B\x00\x00\x00\x4D\x6F\x75\x74\x68\x57\x69\x64\x74\x68\x00'
-    MOUTHVERTICAL = b'\x0E\x00\x00\x00\x4D\x6F\x75\x74\x68\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
-    MOUTHDEPTH = b'\x0B\x00\x00\x00\x4D\x6F\x75\x74\x68\x44\x65\x70\x74\x68\x00'
-    MOUTHOPEN = b'\x0A\x00\x00\x00\x4D\x6F\x75\x74\x68\x4F\x70\x65\x6E\x00'
-    MOUTHCORNERSVERTICAL = b'\x15\x00\x00\x00\x4D\x6F\x75\x74\x68\x43\x6F\x72\x6E\x65\x72\x73\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
-    MOUTHCORNERSDEPTH = b'\x12\x00\x00\x00\x4D\x6F\x75\x74\x68\x43\x6F\x72\x6E\x65\x72\x73\x44\x65\x70\x74\x68\x00'
-    LIPUPPERFAT = b'\x0C\x00\x00\x00\x4C\x69\x70\x55\x70\x70\x65\x72\x46\x61\x74\x00'
-    LIPUPPERWIDTH = b'\x0E\x00\x00\x00\x4C\x69\x70\x55\x70\x70\x65\x72\x57\x69\x64\x74\x68\x00'
-    LIPUPPERDEPTH = b'\x0E\x00\x00\x00\x4C\x69\x70\x55\x70\x70\x65\x72\x44\x65\x70\x74\x68\x00'
-    LIPUPPERPEAKVERTICAL = b'\x15\x00\x00\x00\x4C\x69\x70\x55\x70\x70\x65\x72\x50\x65\x61\x6B\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
-    LIPLOWERFAT = b'\x0C\x00\x00\x00\x4C\x69\x70\x4C\x6F\x77\x65\x72\x46\x61\x74\x00'
-    LIPLOWERWIDTH = b'\x0E\x00\x00\x00\x4C\x69\x70\x4C\x6F\x77\x65\x72\x57\x69\x64\x74\x68\x00'
-    LIPLOWERDEPTH = b'\x0E\x00\x00\x00\x4C\x69\x70\x4C\x6F\x77\x65\x72\x44\x65\x70\x74\x68\x00'
-    LIPCENTERVERTICAL = b'\x12\x00\x00\x00\x4C\x69\x70\x43\x65\x6E\x74\x65\x72\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
-    LIPCURVES = b'\x0A\x00\x00\x00\x4C\x69\x70\x43\x75\x72\x76\x65\x73\x00'
-    JAWCORNERWIDTH = b'\x0F\x00\x00\x00\x4A\x61\x77\x43\x6F\x72\x6E\x65\x72\x57\x69\x64\x74\x68\x00'
-    JAWCORNERVERTICAL = b'\x12\x00\x00\x00\x4A\x61\x77\x43\x6F\x72\x6E\x65\x72\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
-    JAWWIDTH = b'\x09\x00\x00\x00\x4A\x61\x77\x57\x69\x64\x74\x68\x00'
-    JAWVERTICAL = b'\x0C\x00\x00\x00\x4A\x61\x77\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
-    CHINWIDTH = b'\x0A\x00\x00\x00\x43\x68\x69\x6E\x57\x69\x64\x74\x68\x00'
-    CHINVERTICAL = b'\x0D\x00\x00\x00\x43\x68\x69\x6E\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
-    CHINDEPTH = b'\x0A\x00\x00\x00\x43\x68\x69\x6E\x44\x65\x70\x74\x68\x00'
-    CHINFAT = b'\x08\x00\x00\x00\x43\x68\x69\x6E\x46\x61\x74\x00'
-    NECKGIRTH = b'\x0A\x00\x00\x00\x4E\x65\x63\x6B\x47\x69\x72\x74\x68\x00'
-    SHOULDERWIDTH = b'\x0E\x00\x00\x00\x53\x68\x6F\x75\x6C\x64\x65\x72\x57\x69\x64\x74\x68\x00'
-    SHOULDERSPREAD = b'\x0F\x00\x00\x00\x53\x68\x6F\x75\x6C\x64\x65\x72\x53\x70\x72\x65\x61\x64\x00'
-    SHOULDERHEIGHT = b'\x0F\x00\x00\x00\x53\x68\x6F\x75\x6C\x64\x65\x72\x48\x65\x69\x67\x68\x74\x00'
-    SHOULDERFORWARD = b'\x10\x00\x00\x00\x53\x68\x6F\x75\x6C\x64\x65\x72\x46\x6F\x72\x77\x61\x72\x64\x00'
-    UPPERARMGIRTH = b'\x0E\x00\x00\x00\x55\x70\x70\x65\x72\x61\x72\x6D\x47\x69\x72\x74\x68\x00'
-    UPPERARMFIT = b'\x0C\x00\x00\x00\x55\x70\x70\x65\x72\x61\x72\x6D\x46\x69\x74\x00'
-    UPPERBODYFIT = b'\x0D\x00\x00\x00\x55\x70\x70\x65\x72\x42\x6F\x64\x79\x46\x69\x74\x00'
-    FOREARMGIRTH = b'\x0D\x00\x00\x00\x46\x6F\x72\x65\x61\x72\x6D\x47\x69\x72\x74\x68\x00'
-    BREAST = b'\x08\x00\x00\x00\x42\x72\x65\x61\x73\x74\x73\x00'
-    BREASTCLOTHED = b'\x0F\x00\x00\x00\x42\x72\x65\x61\x73\x74\x73\x43\x6C\x6F\x74\x68\x65\x64\x00'
-    
-    BELLYFAT = b'\x09\x00\x00\x00\x42\x65\x6C\x6C\x79\x46\x61\x74\x00'
-    BELLYMEGA = b'\x0A\x00\x00\x00\x42\x65\x6C\x6C\x79\x4D\x65\x67\x61\x00'
-    BELLYDEPTH = b'\x0B\x00\x00\x00\x42\x65\x6C\x6C\x79\x44\x65\x70\x74\x68\x00'
-    BELLYWIDTH = b'\x0B\x00\x00\x00\x42\x65\x6C\x6C\x79\x57\x69\x64\x74\x68\x00'
-    BELLYDEPTH2 = b'\x0C\x00\x00\x00\x42\x65\x6C\x6C\x79\x44\x65\x70\x74\x68\x32\x00'
-    BELLYWIDTH2 = b'\x0C\x00\x00\x00\x42\x65\x6C\x6C\x79\x57\x69\x64\x74\x68\x32\x00'
-    BELLYHEIGHT = b'\x0C\x00\x00\x00\x42\x65\x6C\x6C\x79\x48\x65\x69\x67\x68\x74\x00'
-    BELLYVERTICAL = b'\x0E\x00\x00\x00\x42\x65\x6C\x6C\x79\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
-    BELLYPREGNANT = b'\x0E\x00\x00\x00\x42\x65\x6C\x6C\x79\x50\x72\x65\x67\x6E\x61\x6E\x74\x00'
-    BELLYFIT = b'\x09\x00\x00\x00\x42\x65\x6C\x6C\x79\x46\x69\x74\x00'
-    BELLYPELVISCREASE = b'\x12\x00\x00\x00\x42\x65\x6C\x6C\x79\x50\x65\x6C\x76\x69\x73\x43\x72\x65\x61\x73\x65\x00'
-    BELLYSMOOTH = b'\x0C\x00\x00\x00\x42\x65\x6C\x6C\x79\x53\x6D\x6F\x6F\x74\x68\x00'
-    NAVELWIDTH = b'\x0B\x00\x00\x00\x4E\x61\x76\x65\x6C\x57\x69\x64\x74\x68\x00'
-    NAVELHEIGHT = b'\x0C\x00\x00\x00\x4E\x61\x76\x65\x6C\x48\x65\x69\x67\x68\x74\x00'
-    NAVELVERTICAL = b'\x0E\x00\x00\x00\x4E\x61\x76\x65\x6C\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
-    NAVELDEPTH = b'\x0B\x00\x00\x00\x4E\x61\x76\x65\x6C\x44\x65\x70\x74\x68\x00'
-    WAISTWIDTH = b'\x0B\x00\x00\x00\x57\x61\x69\x73\x74\x57\x69\x64\x74\x68\x00'
-    HIPWIDTH = b'\x09\x00\x00\x00\x48\x69\x70\x57\x69\x64\x74\x68\x00'
-    GROINGIRTH = b'\x0B\x00\x00\x00\x47\x72\x6F\x69\x6E\x47\x69\x72\x74\x68\x00'
-    VAGINAFAT = b'\x0A\x00\x00\x00\x56\x61\x67\x69\x6E\x61\x46\x61\x74\x00'
-    VAGINAOPEN = b'\x0B\x00\x00\x00\x56\x61\x67\x69\x6E\x61\x4F\x70\x65\x6E\x00'
-    BUTTSIZE = b'\x09\x00\x00\x00\x42\x75\x74\x74\x53\x69\x7A\x65\x00'
-    BUTTDEPTH = b'\x0A\x00\x00\x00\x42\x75\x74\x74\x44\x65\x70\x74\x68\x00'
-    BUTTHEIGHT = b'\x0B\x00\x00\x00\x42\x75\x74\x74\x48\x65\x69\x67\x68\x74\x00'
-    BUTTWIDTH = b'\x0A\x00\x00\x00\x42\x75\x74\x74\x57\x69\x64\x74\x68\x00'
-    BUTTCLEAVAGE = b'\x0D\x00\x00\x00\x42\x75\x74\x74\x43\x6C\x65\x61\x76\x61\x67\x65\x00'
-    BUTTVERTICAL = b'\x0D\x00\x00\x00\x42\x75\x74\x74\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
-    BUTTPROTRUDE = b'\x0D\x00\x00\x00\x42\x75\x74\x74\x50\x72\x6F\x74\x72\x75\x64\x65\x00'
-    BUTTCREASE = b'\x0B\x00\x00\x00\x42\x75\x74\x74\x43\x72\x65\x61\x73\x65\x00'
-    THIGHGIRTH = b'\x0B\x00\x00\x00\x54\x68\x69\x67\x68\x47\x69\x72\x74\x68\x00'
-    THIGHFIT = b'\x09\x00\x00\x00\x54\x68\x69\x67\x68\x46\x69\x74\x00'
-    CALFGIRTH = b'\x0A\x00\x00\x00\x43\x61\x6C\x66\x47\x69\x72\x74\x68\x00'
-    DICKBLURSHEATHOFFSET = b'\x15\x00\x00\x00\x44\x69\x63\x6B\x42\x6C\x75\x72\x53\x68\x65\x61\x74\x68\x4F\x66\x66\x73\x65\x74\x00'
-    DICKBLURSHEATHTAPERA = b'\x15\x00\x00\x00\x44\x69\x63\x6B\x42\x6C\x75\x72\x53\x68\x65\x61\x74\x68\x54\x61\x70\x65\x72\x41\x00'
-    DICKBLURSHEATHTAPERB = b'\x15\x00\x00\x00\x44\x69\x63\x6B\x42\x6C\x75\x72\x53\x68\x65\x61\x74\x68\x54\x61\x70\x65\x72\x42\x00'
-    DICKBLURSHEATHCONSTRICT = b'\x18\x00\x00\x00\x44\x69\x63\x6B\x42\x6C\x75\x72\x53\x68\x65\x61\x74\x68\x43\x6F\x6E\x73\x74\x72\x69\x63\x74\x00'
-    DICKHEADGIRTH = b'\x0E\x00\x00\x00\x44\x69\x63\x6B\x48\x65\x61\x64\x47\x69\x72\x74\x68\x00'
-    DICKLENGTH = b'\x0B\x00\x00\x00\x44\x69\x63\x6B\x4C\x65\x6E\x67\x74\x68\x00'
-    DICKSHAFTGIRTH = b'\x0F\x00\x00\x00\x44\x69\x63\x6B\x53\x68\x61\x66\x74\x47\x69\x72\x74\x68\x00'
-    DICKSIZE = b'\x09\x00\x00\x00\x44\x69\x63\x6B\x53\x69\x7A\x65\x00'
-    SCROTUMSIZE = b'\x0C\x00\x00\x00\x53\x63\x72\x6F\x74\x75\x6D\x53\x69\x7A\x65\x00'
-    TEETHSHARP = b'\x0B\x00\x00\x00\x54\x65\x65\x74\x68\x53\x68\x61\x72\x70\x00'
-    TAILSIZE = b'\x09\x00\x00\x00\x54\x61\x69\x6C\x53\x69\x7A\x65\x00'
-    WINGSSIZE = b'\x0A\x00\x00\x00\x57\x69\x6E\x67\x73\x53\x69\x7A\x65\x00'
-    LEGSPREAD = b'\x0A\x00\x00\x00\x4C\x65\x67\x53\x70\x72\x65\x61\x64\x00'
-    FULLBODYSTACKED = b'\x10\x00\x00\x00\x46\x75\x6C\x6C\x42\x6F\x64\x79\x53\x74\x61\x63\x6B\x65\x64\x00'
-    FULLBODYBULK = b'\x0D\x00\x00\x00\x46\x75\x6C\x6C\x42\x6F\x64\x79\x42\x75\x6C\x6B\x00'
-    FULLBODYCHUBBY = b'\x0F\x00\x00\x00\x46\x75\x6C\x6C\x42\x6F\x64\x79\x43\x68\x75\x62\x62\x79\x00'
-    FULLBODYSLENDER = b'\x10\x00\x00\x00\x46\x75\x6C\x6C\x42\x6F\x64\x79\x53\x6C\x65\x6E\x64\x65\x72\x00'
-    SPINEADJUST = b'\x0C\x00\x00\x00\x53\x70\x69\x6E\x65\x41\x64\x6A\x75\x73\x74\x00'
-    HEADSIZE = b'\x09\x00\x00\x00\x48\x65\x61\x64\x53\x69\x7A\x65\x00'
-    ARMSCALE_0 = b'\x0B\x00\x00\x00\x41\x72\x6D\x53\x63\x61\x6C\x65\x5F\x30\x00'
-    ARMSCALE_1 = b'\x0B\x00\x00\x00\x41\x72\x6D\x53\x63\x61\x6C\x65\x5F\x31\x00'
-    ARMSCALE_2 = b'\x0B\x00\x00\x00\x41\x72\x6D\x53\x63\x61\x6C\x65\x5F\x32\x00'
-    ARMSCALE_3 = b'\x0B\x00\x00\x00\x41\x72\x6D\x53\x63\x61\x6C\x65\x5F\x33\x00'
-    ARMSCALE_4 = b'\x0B\x00\x00\x00\x41\x72\x6D\x53\x63\x61\x6C\x65\x5F\x34\x00'
-    ARMSCALE_5 = b'\x0B\x00\x00\x00\x41\x72\x6D\x53\x63\x61\x6C\x65\x5F\x35\x00'
-
-    BREASTSHAPE = b'\x0C\x00\x00\x00\x42\x72\x65\x61\x73\x74\x53\x68\x61\x70\x65\x00' + ByteMacros.STRUCT_PADDING
-
+class Morph(GenericParsers):
     def __init__(self, morph_data):
         self._parse_morph_data(morph_data)
     
@@ -1782,8 +2025,8 @@ class Morph(Appearance):
         _, self.upperbodyfit,            morph_data = self._try_parse_float_property(morph_data, self.UPPERBODYFIT)
         _, self.forearmgirth,            morph_data = self._try_parse_float_property(morph_data, self.FOREARMGIRTH)
         
-        _, breast,                       morph_data = self._try_parse_struct_property(morph_data, self.BREAST, self.BREASTSHAPE)
-        _, breastclothed,                morph_data = self._try_parse_struct_property(morph_data, self.BREASTCLOTHED, self.BREASTSHAPE)
+        _, breast,                       morph_data = self._try_parse_struct_property(morph_data, self.BREAST, self.BREAST_SHAPE)
+        _, breastclothed,                morph_data = self._try_parse_struct_property(morph_data, self.BREASTCLOTHED, self.BREAST_SHAPE)
         
         _, self.bellyfat,                morph_data = self._try_parse_float_property(morph_data, self.BELLYFAT)
         _, self.bellymega,               morph_data = self._try_parse_float_property(morph_data, self.BELLYMEGA)
@@ -1912,8 +2155,8 @@ class Morph(Appearance):
         data_out.append(self._try_get_float_property_bytes(self.upperbodyfit, self.UPPERBODYFIT))
         data_out.append(self._try_get_float_property_bytes(self.forearmgirth, self.FOREARMGIRTH))
 
-        data_out.append(self._try_get_struct_property_bytes(self.breast.get_data(), self.BREAST, self.BREASTSHAPE))
-        data_out.append(self._try_get_struct_property_bytes(self.breastclothed.get_data(), self.BREASTCLOTHED, self.BREASTSHAPE))
+        data_out.append(self._try_get_struct_property_bytes(self.breast.get_data(), self.BREAST, self.BREAST_SHAPE))
+        data_out.append(self._try_get_struct_property_bytes(self.breastclothed.get_data(), self.BREASTCLOTHED, self.BREAST_SHAPE))
 
         data_out.append(self._try_get_float_property_bytes(self.bellyfat, self.BELLYFAT))
         data_out.append(self._try_get_float_property_bytes(self.bellymega, self.BELLYMEGA))
@@ -1975,12 +2218,7 @@ class Morph(Appearance):
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
-class Physics(Appearance):
-    BELLYBOUNCE =  b'\x0C\x00\x00\x00\x42\x65\x6C\x6C\x79\x42\x6F\x75\x6E\x63\x65\x00'
-    BREASTBOUNCE =  b'\x0D\x00\x00\x00\x42\x72\x65\x61\x73\x74\x42\x6F\x75\x6E\x63\x65\x00'
-    BUTTBOUNCE =  b'\x0B\x00\x00\x00\x42\x75\x74\x74\x42\x6F\x75\x6E\x63\x65\x00'
-    THIGHBOUNCE =  b'\x0C\x00\x00\x00\x54\x68\x69\x67\x68\x42\x6F\x75\x6E\x63\x65\x00'
-    
+class Physics(GenericParsers):
     def __init__(self, physics_data):
         self._parse_physics_data(physics_data)
     
@@ -2000,22 +2238,7 @@ class Physics(Appearance):
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
-class Breast(Appearance):
-    BREASTSIZE = b'\x0B\x00\x00\x00\x42\x72\x65\x61\x73\x74\x53\x69\x7A\x65\x00'
-    BREASTDEPTH = b'\x0C\x00\x00\x00\x42\x72\x65\x61\x73\x74\x44\x65\x70\x74\x68\x00'
-    BREASTHEIGHT = b'\x0D\x00\x00\x00\x42\x72\x65\x61\x73\x74\x48\x65\x69\x67\x68\x74\x00'
-    BREASTPROTRUDE = b'\x0F\x00\x00\x00\x42\x72\x65\x61\x73\x74\x50\x72\x6F\x74\x72\x75\x64\x65\x00'
-    BREASTCLEAVAGE = b'\x0F\x00\x00\x00\x42\x72\x65\x61\x73\x74\x43\x6C\x65\x61\x76\x61\x67\x65\x00'
-    BREASTVERTICAL = b'\x0F\x00\x00\x00\x42\x72\x65\x61\x73\x74\x56\x65\x72\x74\x69\x63\x61\x6C\x00'
-    BREASTWIDTH = b'\x0C\x00\x00\x00\x42\x72\x65\x61\x73\x74\x57\x69\x64\x74\x68\x00'
-    TINYTITTIES = b'\x0C\x00\x00\x00\x54\x69\x6E\x79\x54\x69\x74\x74\x69\x65\x73\x00'
-    NIPPLERADIUS = b'\x0D\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x52\x61\x64\x69\x75\x73\x00'
-    NIPPLEFAT = b'\x0A\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x46\x61\x74\x00'
-    NIPPLEPERK = b'\x0B\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x50\x65\x72\x6B\x00'
-    AREOLAERADIUS = b'\x0E\x00\x00\x00\x41\x72\x65\x6F\x6C\x61\x65\x52\x61\x64\x69\x75\x73\x00'
-    AREOLAEFAT = b'\x0B\x00\x00\x00\x41\x72\x65\x6F\x6C\x61\x65\x46\x61\x74\x00'
-    AREOLAEDEPTH = b'\x0D\x00\x00\x00\x41\x72\x65\x6F\x6C\x61\x65\x44\x65\x70\x74\x68\x00'
-    
+class Breast(GenericParsers):
     def __init__(self, breast_data):
         self._parse_breast_data(breast_data)
     
@@ -2075,206 +2298,84 @@ class Breast(Appearance):
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
-class Material(Appearance):
-    LIGHTCOLOR = b'\x0B\x00\x00\x00\x4C\x69\x67\x68\x74\x43\x6F\x6C\x6F\x72\x00'
-    LIGHTINTENSITY = b'\x0F\x00\x00\x00\x4C\x69\x67\x68\x74\x49\x6E\x74\x65\x6E\x73\x69\x74\x79\x00'
-    EFFECTCOLOR = b'\x0C\x00\x00\x00\x45\x66\x66\x65\x63\x74\x43\x6F\x6C\x6F\x72\x00'
-    EFFECTGLOW = b'\x0B\x00\x00\x00\x45\x66\x66\x65\x63\x74\x47\x6C\x6F\x77\x00'
-    SKINCOLOR = b'\x0A\x00\x00\x00\x53\x6B\x69\x6E\x43\x6F\x6C\x6F\x72\x00'
-    MUSCLEDETAILS = b'\x0E\x00\x00\x00\x4D\x75\x73\x63\x6C\x65\x44\x65\x74\x61\x69\x6C\x73\x00'
-    SOFTDETAILS = b'\x0C\x00\x00\x00\x53\x6F\x66\x74\x44\x65\x74\x61\x69\x6C\x73\x00'
-    BODYDETAILS = b'\x0C\x00\x00\x00\x42\x6F\x64\x79\x44\x65\x74\x61\x69\x6C\x73\x00'
-    SKINFADECOLOR = b'\x0E\x00\x00\x00\x53\x6B\x69\x6E\x46\x61\x64\x65\x43\x6F\x6C\x6F\x72\x00'
-    SKINROUGHNESS = b'\x0E\x00\x00\x00\x53\x6B\x69\x6E\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
-    SKINMETAL = b'\x0A\x00\x00\x00\x53\x6B\x69\x6E\x4D\x65\x74\x61\x6C\x00'
-    SKINGLOW = b'\x09\x00\x00\x00\x53\x6B\x69\x6E\x47\x6C\x6F\x77\x00'
-    SKINSSSCOLOR = b'\x0D\x00\x00\x00\x53\x6B\x69\x6E\x53\x53\x53\x43\x6F\x6C\x6F\x72\x00'
-    SPECULAR = b'\x09\x00\x00\x00\x53\x70\x65\x63\x75\x6C\x61\x72\x00'
-    SKINFADE = b'\x09\x00\x00\x00\x53\x6B\x69\x6E\x46\x61\x64\x65\x00'
-    ANIMATEDGLOW = b'\x0D\x00\x00\x00\x41\x6E\x69\x6D\x61\x74\x65\x64\x47\x6C\x6F\x77\x00'
-    NIPPLECOLOR = b'\x0C\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x43\x6F\x6C\x6F\x72\x00'
-    NIPPLEROUGHNESS = b'\x10\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
-    NIPPLEMETAL = b'\x0C\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x4D\x65\x74\x61\x6C\x00'
-    NIPPLEGLOW = b'\x0B\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x47\x6C\x6F\x77\x00'
-    NIPPLEACCENTCOLOR = b'\x12\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x41\x63\x63\x65\x6E\x74\x43\x6F\x6C\x6F\x72\x00'
-    NIPPLEACCENTROUGHNESS = b'\x16\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x41\x63\x63\x65\x6E\x74\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
-    NIPPLEACCENTMETAL = b'\x12\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x41\x63\x63\x65\x6E\x74\x4D\x65\x74\x61\x6C\x00'
-    NIPPLEACCENTGLOW = b'\x11\x00\x00\x00\x4E\x69\x70\x70\x6C\x65\x41\x63\x63\x65\x6E\x74\x47\x6C\x6F\x77\x00'
-    VAGINACOLOR = b'\x0C\x00\x00\x00\x56\x61\x67\x69\x6E\x61\x43\x6F\x6C\x6F\x72\x00'
-    VAGINAROUGHNESS = b'\x10\x00\x00\x00\x56\x61\x67\x69\x6E\x61\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
-    VAGINAMETAL = b'\x0C\x00\x00\x00\x56\x61\x67\x69\x6E\x61\x4D\x65\x74\x61\x6C\x00'
-    VAGINAGLOW = b'\x0B\x00\x00\x00\x56\x61\x67\x69\x6E\x61\x47\x6C\x6F\x77\x00'
-    DICKBASECOLOR = b'\x0E\x00\x00\x00\x44\x69\x63\x6B\x42\x61\x73\x65\x43\x6F\x6C\x6F\x72\x00'
-    DICKCOLOR = b'\x0A\x00\x00\x00\x44\x69\x63\x6B\x43\x6F\x6C\x6F\x72\x00'
-    DICKROUGHNESS = b'\x0E\x00\x00\x00\x44\x69\x63\x6B\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
-    DICKMETAL = b'\x0A\x00\x00\x00\x44\x69\x63\x6B\x4D\x65\x74\x61\x6C\x00'
-    DICKGLOW = b'\x09\x00\x00\x00\x44\x69\x63\x6B\x47\x6C\x6F\x77\x00'
-    DICKTIPCOLOR = b'\x0D\x00\x00\x00\x44\x69\x63\x6B\x54\x69\x70\x43\x6F\x6C\x6F\x72\x00'
-    DICKTIPROUGHNESS = b'\x11\x00\x00\x00\x44\x69\x63\x6B\x54\x69\x70\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
-    DICKTIPMETAL = b'\x0D\x00\x00\x00\x44\x69\x63\x6B\x54\x69\x70\x4D\x65\x74\x61\x6C\x00'
-    DICKTIPGLOW = b'\x0C\x00\x00\x00\x44\x69\x63\x6B\x54\x69\x70\x47\x6C\x6F\x77\x00'
-    SCROTUMCOLOR = b'\x0D\x00\x00\x00\x53\x63\x72\x6F\x74\x75\x6D\x43\x6F\x6C\x6F\x72\x00'
-    SCROTUMROUGHNESS = b'\x11\x00\x00\x00\x53\x63\x72\x6F\x74\x75\x6D\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
-    SCROTUMMETAL = b'\x0D\x00\x00\x00\x53\x63\x72\x6F\x74\x75\x6D\x4D\x65\x74\x61\x6C\x00'
-    SCROTUMGLOW = b'\x0C\x00\x00\x00\x53\x63\x72\x6F\x74\x75\x6D\x47\x6C\x6F\x77\x00'
-    BLURSHEATHTINT = b'\x0F\x00\x00\x00\x42\x6C\x75\x72\x53\x68\x65\x61\x74\x68\x54\x69\x6E\x74\x00'
-    ANUSCOLOR = b'\x0A\x00\x00\x00\x41\x6E\x75\x73\x43\x6F\x6C\x6F\x72\x00'
-    ANUSROUGHNESS = b'\x0E\x00\x00\x00\x41\x6E\x75\x73\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
-    ANUSMETAL = b'\x0A\x00\x00\x00\x41\x6E\x75\x73\x4D\x65\x74\x61\x6C\x00'
-    ANUSGLOW = b'\x09\x00\x00\x00\x41\x6E\x75\x73\x47\x6C\x6F\x77\x00'
-    LIPSCOLOR = b'\x0A\x00\x00\x00\x4C\x69\x70\x73\x43\x6F\x6C\x6F\x72\x00'
-    LIPSROUGHNESS = b'\x0E\x00\x00\x00\x4C\x69\x70\x73\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
-    LIPSMETAL = b'\x0A\x00\x00\x00\x4C\x69\x70\x73\x4D\x65\x74\x61\x6C\x00'
-    LIPSGLOW = b'\x09\x00\x00\x00\x4C\x69\x70\x73\x47\x6C\x6F\x77\x00'
-    EYESOCKETCOLOR = b'\x0F\x00\x00\x00\x45\x79\x65\x53\x6F\x63\x6B\x65\x74\x43\x6F\x6C\x6F\x72\x00'
-    EYESOCKETSHADOW = b'\x10\x00\x00\x00\x45\x79\x65\x53\x6F\x63\x6B\x65\x74\x53\x68\x61\x64\x6F\x77\x00'
-    EYERIMCOLOR = b'\x0C\x00\x00\x00\x45\x79\x65\x52\x69\x6D\x43\x6F\x6C\x6F\x72\x00'
-    EYERIMGLOW = b'\x0B\x00\x00\x00\x45\x79\x65\x52\x69\x6D\x47\x6C\x6F\x77\x00'
-    EYERIMMETAL = b'\x0C\x00\x00\x00\x45\x79\x65\x52\x69\x6D\x4D\x65\x74\x61\x6C\x00'
-    EYERIMROUGHNESS = b'\x10\x00\x00\x00\x45\x79\x65\x52\x69\x6D\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
-    EYERCOLOR = b'\x0A\x00\x00\x00\x45\x79\x65\x52\x43\x6F\x6C\x6F\x72\x00'
-    EYERGLOW = b'\x09\x00\x00\x00\x45\x79\x65\x52\x47\x6C\x6F\x77\x00'
-    EYELCOLOR = b'\x0A\x00\x00\x00\x45\x79\x65\x4C\x43\x6F\x6C\x6F\x72\x00'
-    EYELGLOW = b'\x09\x00\x00\x00\x45\x79\x65\x4C\x47\x6C\x6F\x77\x00'
-    EYESCLERACOLOR = b'\x0F\x00\x00\x00\x45\x79\x65\x53\x63\x6C\x65\x72\x61\x43\x6F\x6C\x6F\x72\x00'
-    EYESCLERAGLOW = b'\x0E\x00\x00\x00\x45\x79\x65\x53\x63\x6C\x65\x72\x61\x47\x6C\x6F\x77\x00'
-    EYEROUGHNESS = b'\x0D\x00\x00\x00\x45\x79\x65\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
-    EYEMETAL = b'\x09\x00\x00\x00\x45\x79\x65\x4D\x65\x74\x61\x6C\x00'
-    WHOLEEYEMETAL = b'\x0E\x00\x00\x00\x57\x68\x6F\x6C\x65\x45\x79\x65\x4D\x65\x74\x61\x6C\x00'
-    WHOLEEYEGLOW = b'\x0D\x00\x00\x00\x57\x68\x6F\x6C\x65\x45\x79\x65\x47\x6C\x6F\x77\x00'
-    HAIRCOLOR = b'\x0A\x00\x00\x00\x48\x61\x69\x72\x43\x6F\x6C\x6F\x72\x00'
-    HAIRMETAL = b'\x0A\x00\x00\x00\x48\x61\x69\x72\x4D\x65\x74\x61\x6C\x00'
-    HAIRROUGHNESSMIN = b'\x11\x00\x00\x00\x48\x61\x69\x72\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x4D\x69\x6E\x00'
-    HAIRROUGHNESSMAX = b'\x11\x00\x00\x00\x48\x61\x69\x72\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x4D\x61\x78\x00'
-    HAIRROOTCOLOR = b'\x0E\x00\x00\x00\x48\x61\x69\x72\x52\x6F\x6F\x74\x43\x6F\x6C\x6F\x72\x00'
-    HAIRTIPCOLOR = b'\x0D\x00\x00\x00\x48\x61\x69\x72\x54\x69\x70\x43\x6F\x6C\x6F\x72\x00'
-    HAIRGLOW = b'\x09\x00\x00\x00\x48\x61\x69\x72\x47\x6C\x6F\x77\x00'
-    HAIRROUGHNESS = b'\x0E\x00\x00\x00\x48\x61\x69\x72\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
-    HAIRSCATTER = b'\x0C\x00\x00\x00\x48\x61\x69\x72\x53\x63\x61\x74\x74\x65\x72\x00'
-    HAIRHUEVARIATION = b'\x11\x00\x00\x00\x48\x61\x69\x72\x48\x75\x65\x56\x61\x72\x69\x61\x74\x69\x6F\x6E\x00'
-    HAIRVALUEVARIATION = b'\x13\x00\x00\x00\x48\x61\x69\x72\x56\x61\x6C\x75\x65\x56\x61\x72\x69\x61\x74\x69\x6F\x6E\x00'
-    HAIREDGEMASKCONTRAST = b'\x15\x00\x00\x00\x48\x61\x69\x72\x45\x64\x67\x65\x4D\x61\x73\x6B\x43\x6F\x6E\x74\x72\x61\x73\x74\x00'
-    HAIREDGEMASKMIN = b'\x10\x00\x00\x00\x48\x61\x69\x72\x45\x64\x67\x65\x4D\x61\x73\x6B\x4D\x69\x6E\x00'
-    HAIRDEPTHCONTRAST = b'\x12\x00\x00\x00\x48\x61\x69\x72\x44\x65\x70\x74\x68\x43\x6F\x6E\x74\x72\x61\x73\x74\x00'
-    HAIRDEPTHOFFSET = b'\x10\x00\x00\x00\x48\x61\x69\x72\x44\x65\x70\x74\x68\x4F\x66\x66\x73\x65\x74\x00'
-    FACIALHAIRCOLOR = b'\x10\x00\x00\x00\x46\x61\x63\x69\x61\x6C\x48\x61\x69\x72\x43\x6F\x6C\x6F\x72\x00'
-    EYEBROWCOLOR = b'\x0D\x00\x00\x00\x45\x79\x65\x62\x72\x6F\x77\x43\x6F\x6C\x6F\x72\x00'
-    EYEBROWROUGHNESS = b'\x11\x00\x00\x00\x45\x79\x65\x62\x72\x6F\x77\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
-    EYEBROWMETAL = b'\x0D\x00\x00\x00\x45\x79\x65\x62\x72\x6F\x77\x4D\x65\x74\x61\x6C\x00'
-    EYEBROWGLOW = b'\x0C\x00\x00\x00\x45\x79\x65\x62\x72\x6F\x77\x47\x6C\x6F\x77\x00'
-    FACEDECORCOLOR = b'\x0F\x00\x00\x00\x46\x61\x63\x65\x44\x65\x63\x6F\x72\x43\x6F\x6C\x6F\x72\x00'
-    FACEDECORROUGHNESS = b'\x13\x00\x00\x00\x46\x61\x63\x65\x44\x65\x63\x6F\x72\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
-    FACEDECORMETAL = b'\x0F\x00\x00\x00\x46\x61\x63\x65\x44\x65\x63\x6F\x72\x4D\x65\x74\x61\x6C\x00'
-    FACEDECORGLOW = b'\x0E\x00\x00\x00\x46\x61\x63\x65\x44\x65\x63\x6F\x72\x47\x6C\x6F\x77\x00'
-    BODYDECORCOLOR = b'\x0F\x00\x00\x00\x42\x6F\x64\x79\x44\x65\x63\x6F\x72\x43\x6F\x6C\x6F\x72\x00'
-    BODYDECORROUGHNESS = b'\x13\x00\x00\x00\x42\x6F\x64\x79\x44\x65\x63\x6F\x72\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
-    BODYDECORMETAL = b'\x0F\x00\x00\x00\x42\x6F\x64\x79\x44\x65\x63\x6F\x72\x4D\x65\x74\x61\x6C\x00'
-    BODYDECORGLOW = b'\x0E\x00\x00\x00\x42\x6F\x64\x79\x44\x65\x63\x6F\x72\x47\x6C\x6F\x77\x00'
-    BODYMARKSCOLOR = b'\x0F\x00\x00\x00\x42\x6F\x64\x79\x4D\x61\x72\x6B\x73\x43\x6F\x6C\x6F\x72\x00'
-    BODYMARKSROUGHNESS = b'\x13\x00\x00\x00\x42\x6F\x64\x79\x4D\x61\x72\x6B\x73\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x00'
-    BODYMARKSMETAL = b'\x0F\x00\x00\x00\x42\x6F\x64\x79\x4D\x61\x72\x6B\x73\x4D\x65\x74\x61\x6C\x00'
-    BODYMARKSGLOW = b'\x0E\x00\x00\x00\x42\x6F\x64\x79\x4D\x61\x72\x6B\x73\x47\x6C\x6F\x77\x00'
-    NAILSCOLOR = b'\x0B\x00\x00\x00\x4E\x61\x69\x6C\x73\x43\x6F\x6C\x6F\x72\x00'
-    NAILSGLOW = b'\x0A\x00\x00\x00\x4E\x61\x69\x6C\x73\x47\x6C\x6F\x77\x00'
-    MAWCOLOR = b'\x09\x00\x00\x00\x4D\x61\x77\x43\x6F\x6C\x6F\x72\x00'
-    MAWGLOW = b'\x08\x00\x00\x00\x4D\x61\x77\x47\x6C\x6F\x77\x00'
-    TEETHCOLOR = b'\x0B\x00\x00\x00\x54\x65\x65\x74\x68\x43\x6F\x6C\x6F\x72\x00'
-    FURCOLORA = b'\x0A\x00\x00\x00\x46\x75\x72\x43\x6F\x6C\x6F\x72\x41\x00'
-    FURCOLORB = b'\x0A\x00\x00\x00\x46\x75\x72\x43\x6F\x6C\x6F\x72\x42\x00'
-    FURCOLORC = b'\x0A\x00\x00\x00\x46\x75\x72\x43\x6F\x6C\x6F\x72\x43\x00'
-    FURCOLORD = b'\x0A\x00\x00\x00\x46\x75\x72\x43\x6F\x6C\x6F\x72\x44\x00'
-    FURTIPCOLOR = b'\x0C\x00\x00\x00\x46\x75\x72\x54\x69\x70\x43\x6F\x6C\x6F\x72\x00'
-    PUBICFURCOLOR = b'\x0E\x00\x00\x00\x50\x75\x62\x69\x63\x46\x75\x72\x43\x6F\x6C\x6F\x72\x00'
-    PUBICFURTIPCOLOR = b'\x11\x00\x00\x00\x50\x75\x62\x69\x63\x46\x75\x72\x54\x69\x70\x43\x6F\x6C\x6F\x72\x00'
-    BODYATTACHMENTSCOLOR = b'\x15\x00\x00\x00\x42\x6F\x64\x79\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x73\x43\x6F\x6C\x6F\x72\x00'
-    ADDITIONALMATERIALTILE = b'\x17\x00\x00\x00\x41\x64\x64\x69\x74\x69\x6F\x6E\x61\x6C\x4D\x61\x74\x65\x72\x69\x61\x6C\x54\x69\x6C\x65\x00'
-    ADDITIONALMATERIALCOLOR = b'\x18\x00\x00\x00\x41\x64\x64\x69\x74\x69\x6F\x6E\x61\x6C\x4D\x61\x74\x65\x72\x69\x61\x6C\x43\x6F\x6C\x6F\x72\x00'
-    ADDITIONALMATERIALGLOW = b'\x17\x00\x00\x00\x41\x64\x64\x69\x74\x69\x6F\x6E\x61\x6C\x4D\x61\x74\x65\x72\x69\x61\x6C\x47\x6C\x6F\x77\x00'
-    ADDITIONALMATERIALUSEOFFSET = b'\x1C\x00\x00\x00\x41\x64\x64\x69\x74\x69\x6F\x6E\x61\x6C\x4D\x61\x74\x65\x72\x69\x61\x6C\x55\x73\x65\x4F\x66\x66\x73\x65\x74\x00'
-    ADDITIONALMATERIALOFFSET = b'\x19\x00\x00\x00\x41\x64\x64\x69\x74\x69\x6F\x6E\x61\x6C\x4D\x61\x74\x65\x72\x69\x61\x6C\x4F\x66\x66\x73\x65\x74\x00'
-    GLINT = b'\x06\x00\x00\x00\x47\x6C\x69\x6E\x74\x00'
-    
-    
-    LINEARCOLOR = b'\x0C\x00\x00\x00\x4C\x69\x6E\x65\x61\x72\x43\x6F\x6C\x6F\x72\x00' + ByteMacros.STRUCT_PADDING
-    CHARACTERATTACHMENTCOLOR = b'\x19\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x41\x74\x74\x61\x63\x68\x6D\x65\x6E\x74\x43\x6F\x6C\x6F\x72\x00' + ByteMacros.STRUCT_PADDING
-    
+class Material(GenericParsers):
     def __init__(self, material_data):
         self._parse_material_data(material_data)
     
     def _parse_material_data(self, material_data):
-        _, lightcolor,                          material_data = self._try_parse_struct_property(material_data, self.LIGHTCOLOR, self.LINEARCOLOR)
+        _, lightcolor,                          material_data = self._try_parse_struct_property(material_data, self.LIGHTCOLOR, self.LINEAR_COLOR)
         _, self.lightintensity,                 material_data = self._try_parse_float_property(material_data, self.LIGHTINTENSITY)
-        _, effectcolor,                         material_data = self._try_parse_struct_property(material_data, self.EFFECTCOLOR, self.LINEARCOLOR)
+        _, effectcolor,                         material_data = self._try_parse_struct_property(material_data, self.EFFECTCOLOR, self.LINEAR_COLOR)
         _, self.effectglow,                     material_data = self._try_parse_float_property(material_data, self.EFFECTGLOW)
-        _, skincolor,                           material_data = self._try_parse_struct_property(material_data, self.SKINCOLOR, self.LINEARCOLOR)
+        _, skincolor,                           material_data = self._try_parse_struct_property(material_data, self.SKINCOLOR, self.LINEAR_COLOR)
         _, self.muscledetails,                  material_data = self._try_parse_float_property(material_data, self.MUSCLEDETAILS)
         _, self.softdetails,                    material_data = self._try_parse_float_property(material_data, self.SOFTDETAILS)
         _, self.bodydetails,                    material_data = self._try_parse_float_property(material_data, self.BODYDETAILS)
-        _, skinfadecolor,                       material_data = self._try_parse_struct_property(material_data, self.SKINFADECOLOR, self.LINEARCOLOR)
+        _, skinfadecolor,                       material_data = self._try_parse_struct_property(material_data, self.SKINFADECOLOR, self.LINEAR_COLOR)
         _, self.skinroughness,                  material_data = self._try_parse_float_property(material_data, self.SKINROUGHNESS)
         _, self.skinmetal,                      material_data = self._try_parse_float_property(material_data, self.SKINMETAL)
-        _, skinglow,                            material_data = self._try_parse_struct_property(material_data, self.SKINGLOW, self.LINEARCOLOR)
-        _, skinssscolor,                        material_data = self._try_parse_struct_property(material_data, self.SKINSSSCOLOR, self.LINEARCOLOR)
+        _, skinglow,                            material_data = self._try_parse_struct_property(material_data, self.SKINGLOW, self.LINEAR_COLOR)
+        _, skinssscolor,                        material_data = self._try_parse_struct_property(material_data, self.SKINSSSCOLOR, self.LINEAR_COLOR)
         _, self.specular,                       material_data = self._try_parse_float_property(material_data, self.SPECULAR)
         _, self.skinfade,                       material_data = self._try_parse_float_property(material_data, self.SKINFADE)
         _, self.animatedglow,                   material_data = self._try_parse_float_property(material_data, self.ANIMATEDGLOW)
-        _, nipplecolor,                         material_data = self._try_parse_struct_property(material_data, self.NIPPLECOLOR, self.LINEARCOLOR)
+        _, nipplecolor,                         material_data = self._try_parse_struct_property(material_data, self.NIPPLECOLOR, self.LINEAR_COLOR)
         _, self.nippleroughness,                material_data = self._try_parse_float_property(material_data, self.NIPPLEROUGHNESS)
         _, self.nipplemetal,                    material_data = self._try_parse_float_property(material_data, self.NIPPLEMETAL)
-        _, nippleglow,                          material_data = self._try_parse_struct_property(material_data, self.NIPPLEGLOW, self.LINEARCOLOR)
-        _, nippleaccentcolor,                   material_data = self._try_parse_struct_property(material_data, self.NIPPLEACCENTCOLOR, self.LINEARCOLOR)
+        _, nippleglow,                          material_data = self._try_parse_struct_property(material_data, self.NIPPLEGLOW, self.LINEAR_COLOR)
+        _, nippleaccentcolor,                   material_data = self._try_parse_struct_property(material_data, self.NIPPLEACCENTCOLOR, self.LINEAR_COLOR)
         _, self.nippleaccentroughness,          material_data = self._try_parse_float_property(material_data, self.NIPPLEACCENTROUGHNESS)
         _, self.nippleaccentmetal,              material_data = self._try_parse_float_property(material_data, self.NIPPLEACCENTMETAL)
-        _, nippleaccentglow,                    material_data = self._try_parse_struct_property(material_data, self.NIPPLEACCENTGLOW, self.LINEARCOLOR)
-        _, vaginacolor,                         material_data = self._try_parse_struct_property(material_data, self.VAGINACOLOR, self.LINEARCOLOR)
+        _, nippleaccentglow,                    material_data = self._try_parse_struct_property(material_data, self.NIPPLEACCENTGLOW, self.LINEAR_COLOR)
+        _, vaginacolor,                         material_data = self._try_parse_struct_property(material_data, self.VAGINACOLOR, self.LINEAR_COLOR)
         _, self.vaginaroughness,                material_data = self._try_parse_float_property(material_data, self.VAGINAROUGHNESS)
         _, self.vaginametal,                    material_data = self._try_parse_float_property(material_data, self.VAGINAMETAL)
-        _, vaginaglow,                          material_data = self._try_parse_struct_property(material_data, self.VAGINAGLOW, self.LINEARCOLOR)
-        _, dickbasecolor,                       material_data = self._try_parse_struct_property(material_data, self.DICKBASECOLOR, self.LINEARCOLOR)
-        _, dickcolor,                           material_data = self._try_parse_struct_property(material_data, self.DICKCOLOR, self.LINEARCOLOR)
+        _, vaginaglow,                          material_data = self._try_parse_struct_property(material_data, self.VAGINAGLOW, self.LINEAR_COLOR)
+        _, dickbasecolor,                       material_data = self._try_parse_struct_property(material_data, self.DICKBASECOLOR, self.LINEAR_COLOR)
+        _, dickcolor,                           material_data = self._try_parse_struct_property(material_data, self.DICKCOLOR, self.LINEAR_COLOR)
         _, self.dickroughness,                  material_data = self._try_parse_float_property(material_data, self.DICKROUGHNESS)
         _, self.dickmetal,                      material_data = self._try_parse_float_property(material_data, self.DICKMETAL)
-        _, dickglow,                            material_data = self._try_parse_struct_property(material_data, self.DICKGLOW, self.LINEARCOLOR)
-        _, dicktipcolor,                        material_data = self._try_parse_struct_property(material_data, self.DICKTIPCOLOR, self.LINEARCOLOR)
+        _, dickglow,                            material_data = self._try_parse_struct_property(material_data, self.DICKGLOW, self.LINEAR_COLOR)
+        _, dicktipcolor,                        material_data = self._try_parse_struct_property(material_data, self.DICKTIPCOLOR, self.LINEAR_COLOR)
         _, self.dicktiproughness,               material_data = self._try_parse_float_property(material_data, self.DICKTIPROUGHNESS)
         _, self.dicktipmetal,                   material_data = self._try_parse_float_property(material_data, self.DICKTIPMETAL)
-        _, dicktipglow,                         material_data = self._try_parse_struct_property(material_data, self.DICKTIPGLOW, self.LINEARCOLOR)
-        _, scrotumcolor,                        material_data = self._try_parse_struct_property(material_data, self.SCROTUMCOLOR, self.LINEARCOLOR)
+        _, dicktipglow,                         material_data = self._try_parse_struct_property(material_data, self.DICKTIPGLOW, self.LINEAR_COLOR)
+        _, scrotumcolor,                        material_data = self._try_parse_struct_property(material_data, self.SCROTUMCOLOR, self.LINEAR_COLOR)
         _, self.scrotumroughness,               material_data = self._try_parse_float_property(material_data, self.SCROTUMROUGHNESS)
         _, self.scrotummetal,                   material_data = self._try_parse_float_property(material_data, self.SCROTUMMETAL)
-        _, scrotumglow,                         material_data = self._try_parse_struct_property(material_data, self.SCROTUMGLOW, self.LINEARCOLOR)
-        _, blursheathtint,                      material_data = self._try_parse_struct_property(material_data, self.BLURSHEATHTINT, self.LINEARCOLOR)
-        _, anuscolor,                           material_data = self._try_parse_struct_property(material_data, self.ANUSCOLOR, self.LINEARCOLOR)
+        _, scrotumglow,                         material_data = self._try_parse_struct_property(material_data, self.SCROTUMGLOW, self.LINEAR_COLOR)
+        _, blursheathtint,                      material_data = self._try_parse_struct_property(material_data, self.BLURSHEATHTINT, self.LINEAR_COLOR)
+        _, anuscolor,                           material_data = self._try_parse_struct_property(material_data, self.ANUSCOLOR, self.LINEAR_COLOR)
         _, self.anusroughness,                  material_data = self._try_parse_float_property(material_data, self.ANUSROUGHNESS)
         _, self.anusmetal,                      material_data = self._try_parse_float_property(material_data, self.ANUSMETAL)
-        _, anusglow,                            material_data = self._try_parse_struct_property(material_data, self.ANUSGLOW, self.LINEARCOLOR)
-        _, lipscolor,                           material_data = self._try_parse_struct_property(material_data, self.LIPSCOLOR, self.LINEARCOLOR)
+        _, anusglow,                            material_data = self._try_parse_struct_property(material_data, self.ANUSGLOW, self.LINEAR_COLOR)
+        _, lipscolor,                           material_data = self._try_parse_struct_property(material_data, self.LIPSCOLOR, self.LINEAR_COLOR)
         _, self.lipsroughness,                  material_data = self._try_parse_float_property(material_data, self.LIPSROUGHNESS)
         _, self.lipsmetal,                      material_data = self._try_parse_float_property(material_data, self.LIPSMETAL)
-        _, lipsglow,                            material_data = self._try_parse_struct_property(material_data, self.LIPSGLOW, self.LINEARCOLOR)
-        _, eyesocketcolor,                      material_data = self._try_parse_struct_property(material_data, self.EYESOCKETCOLOR, self.LINEARCOLOR)
+        _, lipsglow,                            material_data = self._try_parse_struct_property(material_data, self.LIPSGLOW, self.LINEAR_COLOR)
+        _, eyesocketcolor,                      material_data = self._try_parse_struct_property(material_data, self.EYESOCKETCOLOR, self.LINEAR_COLOR)
         _, self.eyesocketshadow,                material_data = self._try_parse_float_property(material_data, self.EYESOCKETSHADOW)
-        _, eyerimcolor,                         material_data = self._try_parse_struct_property(material_data, self.EYERIMCOLOR, self.LINEARCOLOR)
-        _, eyerimglow,                          material_data = self._try_parse_struct_property(material_data, self.EYERIMGLOW, self.LINEARCOLOR)
+        _, eyerimcolor,                         material_data = self._try_parse_struct_property(material_data, self.EYERIMCOLOR, self.LINEAR_COLOR)
+        _, eyerimglow,                          material_data = self._try_parse_struct_property(material_data, self.EYERIMGLOW, self.LINEAR_COLOR)
         _, self.eyerimmetal,                    material_data = self._try_parse_float_property(material_data, self.EYERIMMETAL)
         _, self.eyerimroughness,                material_data = self._try_parse_float_property(material_data, self.EYERIMROUGHNESS)
-        _, eyercolor,                           material_data = self._try_parse_struct_property(material_data, self.EYERCOLOR, self.LINEARCOLOR)
-        _, eyerglow,                            material_data = self._try_parse_struct_property(material_data, self.EYERGLOW, self.LINEARCOLOR)
-        _, eyelcolor,                           material_data = self._try_parse_struct_property(material_data, self.EYELCOLOR, self.LINEARCOLOR)
-        _, eyelglow,                            material_data = self._try_parse_struct_property(material_data, self.EYELGLOW, self.LINEARCOLOR)
-        _, eyescleracolor,                      material_data = self._try_parse_struct_property(material_data, self.EYESCLERACOLOR, self.LINEARCOLOR)
-        _, eyescleraglow,                       material_data = self._try_parse_struct_property(material_data, self.EYESCLERAGLOW, self.LINEARCOLOR)
+        _, eyercolor,                           material_data = self._try_parse_struct_property(material_data, self.EYERCOLOR, self.LINEAR_COLOR)
+        _, eyerglow,                            material_data = self._try_parse_struct_property(material_data, self.EYERGLOW, self.LINEAR_COLOR)
+        _, eyelcolor,                           material_data = self._try_parse_struct_property(material_data, self.EYELCOLOR, self.LINEAR_COLOR)
+        _, eyelglow,                            material_data = self._try_parse_struct_property(material_data, self.EYELGLOW, self.LINEAR_COLOR)
+        _, eyescleracolor,                      material_data = self._try_parse_struct_property(material_data, self.EYESCLERACOLOR, self.LINEAR_COLOR)
+        _, eyescleraglow,                       material_data = self._try_parse_struct_property(material_data, self.EYESCLERAGLOW, self.LINEAR_COLOR)
         _, self.eyeroughness,                   material_data = self._try_parse_float_property(material_data, self.EYEROUGHNESS)
         _, self.eyemetal,                       material_data = self._try_parse_float_property(material_data, self.EYEMETAL)
         _, self.wholeeyemetal,                  material_data = self._try_parse_float_property(material_data, self.WHOLEEYEMETAL)
         _, self.wholeeyeglow,                   material_data = self._try_parse_float_property(material_data, self.WHOLEEYEGLOW)
-        _, haircolor,                           material_data = self._try_parse_struct_property(material_data, self.HAIRCOLOR, self.LINEARCOLOR)
+        _, haircolor,                           material_data = self._try_parse_struct_property(material_data, self.HAIRCOLOR, self.LINEAR_COLOR)
         _, self.hairmetal,                      material_data = self._try_parse_float_property(material_data, self.HAIRMETAL)
         _, self.hairroughnessmin,               material_data = self._try_parse_float_property(material_data, self.HAIRROUGHNESSMIN)
         _, self.hairroughnessmax,               material_data = self._try_parse_float_property(material_data, self.HAIRROUGHNESSMAX)
-        _, hairrootcolor,                       material_data = self._try_parse_struct_property(material_data, self.HAIRROOTCOLOR, self.LINEARCOLOR)
-        _, hairtipcolor,                        material_data = self._try_parse_struct_property(material_data, self.HAIRTIPCOLOR, self.LINEARCOLOR)
-        _, hairglow,                            material_data = self._try_parse_struct_property(material_data, self.HAIRGLOW, self.LINEARCOLOR)
+        _, hairrootcolor,                       material_data = self._try_parse_struct_property(material_data, self.HAIRROOTCOLOR, self.LINEAR_COLOR)
+        _, hairtipcolor,                        material_data = self._try_parse_struct_property(material_data, self.HAIRTIPCOLOR, self.LINEAR_COLOR)
+        _, hairglow,                            material_data = self._try_parse_struct_property(material_data, self.HAIRGLOW, self.LINEAR_COLOR)
         _, self.hairroughness,                  material_data = self._try_parse_float_property(material_data, self.HAIRROUGHNESS)
         _, self.hairscatter,                    material_data = self._try_parse_float_property(material_data, self.HAIRSCATTER)
         _, self.hairhuevariation,               material_data = self._try_parse_float_property(material_data, self.HAIRHUEVARIATION)
@@ -2283,39 +2384,39 @@ class Material(Appearance):
         _, self.hairedgemaskmin,                material_data = self._try_parse_float_property(material_data, self.HAIREDGEMASKMIN)
         _, self.hairdepthcontrast,              material_data = self._try_parse_float_property(material_data, self.HAIRDEPTHCONTRAST)
         _, self.hairdepthoffset,                material_data = self._try_parse_float_property(material_data, self.HAIRDEPTHOFFSET)
-        _, facialhaircolor,                     material_data = self._try_parse_struct_property(material_data, self.FACIALHAIRCOLOR, self.LINEARCOLOR)
-        _, eyebrowcolor,                        material_data = self._try_parse_struct_property(material_data, self.EYEBROWCOLOR, self.LINEARCOLOR)
+        _, facialhaircolor,                     material_data = self._try_parse_struct_property(material_data, self.FACIALHAIRCOLOR, self.LINEAR_COLOR)
+        _, eyebrowcolor,                        material_data = self._try_parse_struct_property(material_data, self.EYEBROWCOLOR, self.LINEAR_COLOR)
         _, self.eyebrowroughness,               material_data = self._try_parse_float_property(material_data, self.EYEBROWROUGHNESS)
         _, self.eyebrowmetal,                   material_data = self._try_parse_float_property(material_data, self.EYEBROWMETAL)
-        _, eyebrowglow,                         material_data = self._try_parse_struct_property(material_data, self.EYEBROWGLOW, self.LINEARCOLOR)
-        _, facedecorcolor,                      material_data = self._try_parse_struct_property(material_data, self.FACEDECORCOLOR, self.LINEARCOLOR)
+        _, eyebrowglow,                         material_data = self._try_parse_struct_property(material_data, self.EYEBROWGLOW, self.LINEAR_COLOR)
+        _, facedecorcolor,                      material_data = self._try_parse_struct_property(material_data, self.FACEDECORCOLOR, self.LINEAR_COLOR)
         _, self.facedecorroughness,             material_data = self._try_parse_float_property(material_data, self.FACEDECORROUGHNESS)
         _, self.facedecormetal,                 material_data = self._try_parse_float_property(material_data, self.FACEDECORMETAL)
-        _, facedecorglow,                       material_data = self._try_parse_struct_property(material_data, self.FACEDECORGLOW, self.LINEARCOLOR)
-        _, bodydecorcolor,                      material_data = self._try_parse_struct_property(material_data, self.BODYDECORCOLOR, self.LINEARCOLOR)
+        _, facedecorglow,                       material_data = self._try_parse_struct_property(material_data, self.FACEDECORGLOW, self.LINEAR_COLOR)
+        _, bodydecorcolor,                      material_data = self._try_parse_struct_property(material_data, self.BODYDECORCOLOR, self.LINEAR_COLOR)
         _, self.bodydecorroughness,             material_data = self._try_parse_float_property(material_data, self.BODYDECORROUGHNESS)
         _, self.bodydecormetal,                 material_data = self._try_parse_float_property(material_data, self.BODYDECORMETAL)
-        _, bodydecorglow,                       material_data = self._try_parse_struct_property(material_data, self.BODYDECORGLOW, self.LINEARCOLOR)
-        _, bodymarkscolor,                      material_data = self._try_parse_struct_property(material_data, self.BODYMARKSCOLOR, self.LINEARCOLOR)
+        _, bodydecorglow,                       material_data = self._try_parse_struct_property(material_data, self.BODYDECORGLOW, self.LINEAR_COLOR)
+        _, bodymarkscolor,                      material_data = self._try_parse_struct_property(material_data, self.BODYMARKSCOLOR, self.LINEAR_COLOR)
         _, self.bodymarksroughness,             material_data = self._try_parse_float_property(material_data, self.BODYMARKSROUGHNESS)
         _, self.bodymarksmetal,                 material_data = self._try_parse_float_property(material_data, self.BODYMARKSMETAL)
-        _, bodymarksglow,                       material_data = self._try_parse_struct_property(material_data, self.BODYMARKSGLOW, self.LINEARCOLOR)
-        _, nailscolor,                          material_data = self._try_parse_struct_property(material_data, self.NAILSCOLOR, self.LINEARCOLOR)
-        _, nailsglow,                           material_data = self._try_parse_struct_property(material_data, self.NAILSGLOW, self.LINEARCOLOR)
-        _, mawcolor,                            material_data = self._try_parse_struct_property(material_data, self.MAWCOLOR, self.LINEARCOLOR)
-        _, mawglow,                             material_data = self._try_parse_struct_property(material_data, self.MAWGLOW, self.LINEARCOLOR)
-        _, teethcolor,                          material_data = self._try_parse_struct_property(material_data, self.TEETHCOLOR, self.LINEARCOLOR)
-        _, furcolora,                           material_data = self._try_parse_struct_property(material_data, self.FURCOLORA, self.LINEARCOLOR)
-        _, furcolorb,                           material_data = self._try_parse_struct_property(material_data, self.FURCOLORB, self.LINEARCOLOR)
-        _, furcolorc,                           material_data = self._try_parse_struct_property(material_data, self.FURCOLORC, self.LINEARCOLOR)
-        _, furcolord,                           material_data = self._try_parse_struct_property(material_data, self.FURCOLORD, self.LINEARCOLOR)
-        _, furtipcolor,                         material_data = self._try_parse_struct_property(material_data, self.FURTIPCOLOR, self.LINEARCOLOR)
-        _, pubicfurcolor,                       material_data = self._try_parse_struct_property(material_data, self.PUBICFURCOLOR, self.LINEARCOLOR)
-        _, pubicfurtipcolor,                    material_data = self._try_parse_struct_property(material_data, self.PUBICFURTIPCOLOR, self.LINEARCOLOR)
-        _, bodyattachmentscolor,                material_data = self._try_parse_struct_property(material_data, self.BODYATTACHMENTSCOLOR, self.CHARACTERATTACHMENTCOLOR)
-        _, additionalmaterialtile,              material_data = self._try_parse_struct_property(material_data, self.ADDITIONALMATERIALTILE, self.LINEARCOLOR)
-        _, additionalmaterialcolor,             material_data = self._try_parse_struct_property(material_data, self.ADDITIONALMATERIALCOLOR, self.LINEARCOLOR)
-        _, additionalmaterialglow,              material_data = self._try_parse_struct_property(material_data, self.ADDITIONALMATERIALGLOW, self.LINEARCOLOR)
+        _, bodymarksglow,                       material_data = self._try_parse_struct_property(material_data, self.BODYMARKSGLOW, self.LINEAR_COLOR)
+        _, nailscolor,                          material_data = self._try_parse_struct_property(material_data, self.NAILSCOLOR, self.LINEAR_COLOR)
+        _, nailsglow,                           material_data = self._try_parse_struct_property(material_data, self.NAILSGLOW, self.LINEAR_COLOR)
+        _, mawcolor,                            material_data = self._try_parse_struct_property(material_data, self.MAWCOLOR, self.LINEAR_COLOR)
+        _, mawglow,                             material_data = self._try_parse_struct_property(material_data, self.MAWGLOW, self.LINEAR_COLOR)
+        _, teethcolor,                          material_data = self._try_parse_struct_property(material_data, self.TEETHCOLOR, self.LINEAR_COLOR)
+        _, furcolora,                           material_data = self._try_parse_struct_property(material_data, self.FURCOLORA, self.LINEAR_COLOR)
+        _, furcolorb,                           material_data = self._try_parse_struct_property(material_data, self.FURCOLORB, self.LINEAR_COLOR)
+        _, furcolorc,                           material_data = self._try_parse_struct_property(material_data, self.FURCOLORC, self.LINEAR_COLOR)
+        _, furcolord,                           material_data = self._try_parse_struct_property(material_data, self.FURCOLORD, self.LINEAR_COLOR)
+        _, furtipcolor,                         material_data = self._try_parse_struct_property(material_data, self.FURTIPCOLOR, self.LINEAR_COLOR)
+        _, pubicfurcolor,                       material_data = self._try_parse_struct_property(material_data, self.PUBICFURCOLOR, self.LINEAR_COLOR)
+        _, pubicfurtipcolor,                    material_data = self._try_parse_struct_property(material_data, self.PUBICFURTIPCOLOR, self.LINEAR_COLOR)
+        _, bodyattachmentscolor,                material_data = self._try_parse_struct_property(material_data, self.BODYATTACHMENTSCOLOR, self.CHARACTER_ATTACHMENT_COLOR)
+        _, additionalmaterialtile,              material_data = self._try_parse_struct_property(material_data, self.ADDITIONALMATERIALTILE, self.LINEAR_COLOR)
+        _, additionalmaterialcolor,             material_data = self._try_parse_struct_property(material_data, self.ADDITIONALMATERIALCOLOR, self.LINEAR_COLOR)
+        _, additionalmaterialglow,              material_data = self._try_parse_struct_property(material_data, self.ADDITIONALMATERIALGLOW, self.LINEAR_COLOR)
         _, self.additionalmaterialuseoffset,    material_data = self._try_parse_float_property(material_data, self.ADDITIONALMATERIALUSEOFFSET)
         _, self.additionalmaterialoffset,       material_data = self._try_parse_float_property(material_data, self.ADDITIONALMATERIALOFFSET)
         _, self.glint,                          material_data = self._try_parse_float_property(material_data, self.GLINT)
@@ -2386,79 +2487,79 @@ class Material(Appearance):
     
     def get_data(self):
         data_out = []
-        data_out.append(self._try_get_struct_property_bytes(self.lightcolor.get_data(),self.LIGHTCOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.lightcolor.get_data(),self.LIGHTCOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.lightintensity, self.LIGHTINTENSITY))
-        data_out.append(self._try_get_struct_property_bytes(self.effectcolor.get_data(), self.EFFECTCOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.effectcolor.get_data(), self.EFFECTCOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.effectglow, self.EFFECTGLOW))
-        data_out.append(self._try_get_struct_property_bytes(self.skincolor.get_data(), self.SKINCOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.skincolor.get_data(), self.SKINCOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.muscledetails, self.MUSCLEDETAILS))
         data_out.append(self._try_get_float_property_bytes(self.softdetails, self.SOFTDETAILS))
         data_out.append(self._try_get_float_property_bytes(self.bodydetails, self.BODYDETAILS))
-        data_out.append(self._try_get_struct_property_bytes(self.skinfadecolor.get_data(), self.SKINFADECOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.skinfadecolor.get_data(), self.SKINFADECOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.skinroughness, self.SKINROUGHNESS))
         data_out.append(self._try_get_float_property_bytes(self.skinmetal, self.SKINMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.skinglow.get_data(), self.SKINGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.skinssscolor.get_data(), self.SKINSSSCOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.skinglow.get_data(), self.SKINGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.skinssscolor.get_data(), self.SKINSSSCOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.specular, self.SPECULAR))
         data_out.append(self._try_get_float_property_bytes(self.skinfade, self.SKINFADE))
         data_out.append(self._try_get_float_property_bytes(self.animatedglow, self.ANIMATEDGLOW))
-        data_out.append(self._try_get_struct_property_bytes(self.nipplecolor.get_data(), self.NIPPLECOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.nipplecolor.get_data(), self.NIPPLECOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.nippleroughness, self.NIPPLEROUGHNESS))
         data_out.append(self._try_get_float_property_bytes(self.nipplemetal, self.NIPPLEMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.nippleglow.get_data(), self.NIPPLEGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.nippleaccentcolor.get_data(), self.NIPPLEACCENTCOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.nippleglow.get_data(), self.NIPPLEGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.nippleaccentcolor.get_data(), self.NIPPLEACCENTCOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.nippleaccentroughness, self.NIPPLEACCENTROUGHNESS))
         data_out.append(self._try_get_float_property_bytes(self.nippleaccentmetal, self.NIPPLEACCENTMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.nippleaccentglow.get_data(), self.NIPPLEACCENTGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.vaginacolor.get_data(), self.VAGINACOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.nippleaccentglow.get_data(), self.NIPPLEACCENTGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.vaginacolor.get_data(), self.VAGINACOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.vaginaroughness, self.VAGINAROUGHNESS))
         data_out.append(self._try_get_float_property_bytes(self.vaginametal, self.VAGINAMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.vaginaglow.get_data(), self.VAGINAGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.dickbasecolor.get_data(), self.DICKBASECOLOR, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.dickcolor.get_data(), self.DICKCOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.vaginaglow.get_data(), self.VAGINAGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.dickbasecolor.get_data(), self.DICKBASECOLOR, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.dickcolor.get_data(), self.DICKCOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.dickroughness, self.DICKROUGHNESS))
         data_out.append(self._try_get_float_property_bytes(self.dickmetal, self.DICKMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.dickglow.get_data(), self.DICKGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.dicktipcolor.get_data(), self.DICKTIPCOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.dickglow.get_data(), self.DICKGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.dicktipcolor.get_data(), self.DICKTIPCOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.dicktiproughness, self.DICKTIPROUGHNESS))
         data_out.append(self._try_get_float_property_bytes(self.dicktipmetal, self.DICKTIPMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.dicktipglow.get_data(), self.DICKTIPGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.scrotumcolor.get_data(), self.SCROTUMCOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.dicktipglow.get_data(), self.DICKTIPGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.scrotumcolor.get_data(), self.SCROTUMCOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.scrotumroughness, self.SCROTUMROUGHNESS))
         data_out.append(self._try_get_float_property_bytes(self.scrotummetal, self.SCROTUMMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.scrotumglow.get_data(), self.SCROTUMGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.blursheathtint.get_data(), self.BLURSHEATHTINT, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.anuscolor.get_data(), self.ANUSCOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.scrotumglow.get_data(), self.SCROTUMGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.blursheathtint.get_data(), self.BLURSHEATHTINT, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.anuscolor.get_data(), self.ANUSCOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.anusroughness, self.ANUSROUGHNESS))
         data_out.append(self._try_get_float_property_bytes(self.anusmetal, self.ANUSMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.anusglow.get_data(), self.ANUSGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.lipscolor.get_data(), self.LIPSCOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.anusglow.get_data(), self.ANUSGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.lipscolor.get_data(), self.LIPSCOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.lipsroughness, self.LIPSROUGHNESS))
         data_out.append(self._try_get_float_property_bytes(self.lipsmetal, self.LIPSMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.lipsglow.get_data(), self.LIPSGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.eyesocketcolor.get_data(), self.EYESOCKETCOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.lipsglow.get_data(), self.LIPSGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.eyesocketcolor.get_data(), self.EYESOCKETCOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.eyesocketshadow, self.EYESOCKETSHADOW))
-        data_out.append(self._try_get_struct_property_bytes(self.eyerimcolor.get_data(), self.EYERIMCOLOR, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.eyerimglow.get_data(), self.EYERIMGLOW, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.eyerimcolor.get_data(), self.EYERIMCOLOR, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.eyerimglow.get_data(), self.EYERIMGLOW, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.eyerimmetal, self.EYERIMMETAL))
         data_out.append(self._try_get_float_property_bytes(self.eyerimroughness, self.EYERIMROUGHNESS))
-        data_out.append(self._try_get_struct_property_bytes(self.eyercolor.get_data(), self.EYERCOLOR, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.eyerglow.get_data(), self.EYERGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.eyelcolor.get_data(), self.EYELCOLOR, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.eyelglow.get_data(), self.EYELGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.eyescleracolor.get_data(), self.EYESCLERACOLOR, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.eyescleraglow.get_data(), self.EYESCLERAGLOW, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.eyercolor.get_data(), self.EYERCOLOR, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.eyerglow.get_data(), self.EYERGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.eyelcolor.get_data(), self.EYELCOLOR, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.eyelglow.get_data(), self.EYELGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.eyescleracolor.get_data(), self.EYESCLERACOLOR, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.eyescleraglow.get_data(), self.EYESCLERAGLOW, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.eyeroughness, self.EYEROUGHNESS))
         data_out.append(self._try_get_float_property_bytes(self.eyemetal, self.EYEMETAL))
         data_out.append(self._try_get_float_property_bytes(self.wholeeyemetal, self.WHOLEEYEMETAL))
         data_out.append(self._try_get_float_property_bytes(self.wholeeyeglow, self.WHOLEEYEGLOW))
-        data_out.append(self._try_get_struct_property_bytes(self.haircolor.get_data(), self.HAIRCOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.haircolor.get_data(), self.HAIRCOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.hairmetal, self.HAIRMETAL))
         data_out.append(self._try_get_float_property_bytes(self.hairroughnessmin, self.HAIRROUGHNESSMIN))
         data_out.append(self._try_get_float_property_bytes(self.hairroughnessmax, self.HAIRROUGHNESSMAX))
-        data_out.append(self._try_get_struct_property_bytes(self.hairrootcolor.get_data(), self.HAIRROOTCOLOR, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.hairtipcolor.get_data(), self.HAIRTIPCOLOR, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.hairglow.get_data(), self.HAIRGLOW, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.hairrootcolor.get_data(), self.HAIRROOTCOLOR, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.hairtipcolor.get_data(), self.HAIRTIPCOLOR, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.hairglow.get_data(), self.HAIRGLOW, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.hairroughness, self.HAIRROUGHNESS))
         data_out.append(self._try_get_float_property_bytes(self.hairscatter, self.HAIRSCATTER))
         data_out.append(self._try_get_float_property_bytes(self.hairhuevariation, self.HAIRHUEVARIATION))
@@ -2467,74 +2568,58 @@ class Material(Appearance):
         data_out.append(self._try_get_float_property_bytes(self.hairedgemaskmin, self.HAIREDGEMASKMIN))
         data_out.append(self._try_get_float_property_bytes(self.hairdepthcontrast, self.HAIRDEPTHCONTRAST))
         data_out.append(self._try_get_float_property_bytes(self.hairdepthoffset, self.HAIRDEPTHOFFSET))
-        data_out.append(self._try_get_struct_property_bytes(self.facialhaircolor.get_data(), self.FACIALHAIRCOLOR, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.eyebrowcolor.get_data(), self.EYEBROWCOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.facialhaircolor.get_data(), self.FACIALHAIRCOLOR, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.eyebrowcolor.get_data(), self.EYEBROWCOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.eyebrowroughness, self.EYEBROWROUGHNESS))
         data_out.append(self._try_get_float_property_bytes(self.eyebrowmetal, self.EYEBROWMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.eyebrowglow.get_data(), self.EYEBROWGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.facedecorcolor.get_data(), self.FACEDECORCOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.eyebrowglow.get_data(), self.EYEBROWGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.facedecorcolor.get_data(), self.FACEDECORCOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.facedecorroughness, self.FACEDECORROUGHNESS))
         data_out.append(self._try_get_float_property_bytes(self.facedecormetal, self.FACEDECORMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.facedecorglow.get_data(), self.FACEDECORGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.bodydecorcolor.get_data(), self.BODYDECORCOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.facedecorglow.get_data(), self.FACEDECORGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.bodydecorcolor.get_data(), self.BODYDECORCOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.bodydecorroughness, self.BODYDECORROUGHNESS))
         data_out.append(self._try_get_float_property_bytes(self.bodydecormetal, self.BODYDECORMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.bodydecorglow.get_data(), self.BODYDECORGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.bodymarkscolor.get_data(), self.BODYMARKSCOLOR, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.bodydecorglow.get_data(), self.BODYDECORGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.bodymarkscolor.get_data(), self.BODYMARKSCOLOR, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.bodymarksroughness, self.BODYMARKSROUGHNESS))
         data_out.append(self._try_get_float_property_bytes(self.bodymarksmetal, self.BODYMARKSMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.bodymarksglow.get_data(), self.BODYMARKSGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.nailscolor.get_data(), self.NAILSCOLOR, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.nailsglow.get_data(), self.NAILSGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.mawcolor.get_data(), self.MAWCOLOR, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.mawglow.get_data(), self.MAWGLOW, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.teethcolor.get_data(), self.TEETHCOLOR, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.furcolora.get_data(), self.FURCOLORA, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.furcolorb.get_data(), self.FURCOLORB, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.furcolorc.get_data(), self.FURCOLORC, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.furcolord.get_data(), self.FURCOLORD, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.furtipcolor.get_data(), self.FURTIPCOLOR, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.pubicfurcolor.get_data(), self.PUBICFURCOLOR, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.pubicfurtipcolor.get_data(), self.PUBICFURTIPCOLOR, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.bodyattachmentscolor.get_data(), self.BODYATTACHMENTSCOLOR, self.CHARACTERATTACHMENTCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.additionalmaterialtile.get_data(), self.ADDITIONALMATERIALTILE, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.additionalmaterialcolor.get_data(), self.ADDITIONALMATERIALCOLOR, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.additionalmaterialglow.get_data(), self.ADDITIONALMATERIALGLOW, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.bodymarksglow.get_data(), self.BODYMARKSGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.nailscolor.get_data(), self.NAILSCOLOR, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.nailsglow.get_data(), self.NAILSGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.mawcolor.get_data(), self.MAWCOLOR, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.mawglow.get_data(), self.MAWGLOW, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.teethcolor.get_data(), self.TEETHCOLOR, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.furcolora.get_data(), self.FURCOLORA, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.furcolorb.get_data(), self.FURCOLORB, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.furcolorc.get_data(), self.FURCOLORC, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.furcolord.get_data(), self.FURCOLORD, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.furtipcolor.get_data(), self.FURTIPCOLOR, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.pubicfurcolor.get_data(), self.PUBICFURCOLOR, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.pubicfurtipcolor.get_data(), self.PUBICFURTIPCOLOR, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.bodyattachmentscolor.get_data(), self.BODYATTACHMENTSCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.additionalmaterialtile.get_data(), self.ADDITIONALMATERIALTILE, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.additionalmaterialcolor.get_data(), self.ADDITIONALMATERIALCOLOR, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.additionalmaterialglow.get_data(), self.ADDITIONALMATERIALGLOW, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.additionalmaterialuseoffset, self.ADDITIONALMATERIALUSEOFFSET))
         data_out.append(self._try_get_float_property_bytes(self.additionalmaterialoffset, self.ADDITIONALMATERIALOFFSET))
         data_out.append(self._try_get_float_property_bytes(self.glint, self.GLINT))
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
-class CharacterAttachmentColor(Material):
-    COLORA = b'\x07\x00\x00\x00\x43\x6F\x6C\x6F\x72\x41\x00'
-    COLORB = b'\x07\x00\x00\x00\x43\x6F\x6C\x6F\x72\x42\x00'
-    COLORC = b'\x07\x00\x00\x00\x43\x6F\x6C\x6F\x72\x43\x00'
-    COLORD = b'\x07\x00\x00\x00\x43\x6F\x6C\x6F\x72\x44\x00'
-    GLOWA = b'\x06\x00\x00\x00\x47\x6C\x6F\x77\x41\x00'
-    GLOWB = b'\x06\x00\x00\x00\x47\x6C\x6F\x77\x42\x00'
-    GLOWC = b'\x06\x00\x00\x00\x47\x6C\x6F\x77\x43\x00'
-    GLOWD = b'\x06\x00\x00\x00\x47\x6C\x6F\x77\x44\x00'
-    METALA = b'\x07\x00\x00\x00\x4D\x65\x74\x61\x6C\x41\x00'
-    METALB = b'\x07\x00\x00\x00\x4D\x65\x74\x61\x6C\x42\x00'
-    METALC = b'\x07\x00\x00\x00\x4D\x65\x74\x61\x6C\x43\x00'
-    METALD = b'\x07\x00\x00\x00\x4D\x65\x74\x61\x6C\x44\x00'
-    ROUGHNESSMIN = b'\x0D\x00\x00\x00\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x4D\x69\x6E\x00'
-    ROUGHNESSMAX = b'\x0D\x00\x00\x00\x52\x6F\x75\x67\x68\x6E\x65\x73\x73\x4D\x61\x78\x00'
-    UNDERFURADJUST = b'\x0F\x00\x00\x00\x55\x6E\x64\x65\x72\x46\x75\x72\x41\x64\x6A\x75\x73\x74\x00'
-
+class CharacterAttachmentColor(GenericParsers):
     def __init__(self, color_data):
         self._parse_color_data(color_data)
         
     def _parse_color_data(self, color_data):
-        _, colora,              color_data = self._try_parse_struct_property(color_data, self.COLORA, self.LINEARCOLOR)
-        _, colorb,              color_data = self._try_parse_struct_property(color_data, self.COLORB, self.LINEARCOLOR)
-        _, colorc,              color_data = self._try_parse_struct_property(color_data, self.COLORC, self.LINEARCOLOR)
-        _, colord,              color_data = self._try_parse_struct_property(color_data, self.COLORD, self.LINEARCOLOR)
-        _, glowa,               color_data = self._try_parse_struct_property(color_data, self.GLOWA, self.LINEARCOLOR)
-        _, glowb,               color_data = self._try_parse_struct_property(color_data, self.GLOWB, self.LINEARCOLOR)
-        _, glowc,               color_data = self._try_parse_struct_property(color_data, self.GLOWC, self.LINEARCOLOR)
-        _, glowd,               color_data = self._try_parse_struct_property(color_data, self.GLOWD, self.LINEARCOLOR)
+        _, colora,              color_data = self._try_parse_struct_property(color_data, self.COLORA, self.LINEAR_COLOR)
+        _, colorb,              color_data = self._try_parse_struct_property(color_data, self.COLORB, self.LINEAR_COLOR)
+        _, colorc,              color_data = self._try_parse_struct_property(color_data, self.COLORC, self.LINEAR_COLOR)
+        _, colord,              color_data = self._try_parse_struct_property(color_data, self.COLORD, self.LINEAR_COLOR)
+        _, glowa,               color_data = self._try_parse_struct_property(color_data, self.GLOWA, self.LINEAR_COLOR)
+        _, glowb,               color_data = self._try_parse_struct_property(color_data, self.GLOWB, self.LINEAR_COLOR)
+        _, glowc,               color_data = self._try_parse_struct_property(color_data, self.GLOWC, self.LINEAR_COLOR)
+        _, glowd,               color_data = self._try_parse_struct_property(color_data, self.GLOWD, self.LINEAR_COLOR)
         _, self.metala,         color_data = self._try_parse_float_property(color_data, self.METALA)
         _, self.metalb,         color_data = self._try_parse_float_property(color_data, self.METALB)
         _, self.metalc,         color_data = self._try_parse_float_property(color_data, self.METALC)
@@ -2555,14 +2640,14 @@ class CharacterAttachmentColor(Material):
     
     def get_data(self):
         data_out = []
-        data_out.append(self._try_get_struct_property_bytes(self.colora.get_data(), self.COLORA, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.colorb.get_data(), self.COLORB, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.colorc.get_data(), self.COLORC, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.colord.get_data(), self.COLORD, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.glowa.get_data(), self.GLOWA, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.glowb.get_data(), self.GLOWB, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.glowc.get_data(), self.GLOWC, self.LINEARCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.glowd.get_data(), self.GLOWD, self.LINEARCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.colora.get_data(), self.COLORA, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.colorb.get_data(), self.COLORB, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.colorc.get_data(), self.COLORC, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.colord.get_data(), self.COLORD, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.glowa.get_data(), self.GLOWA, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.glowb.get_data(), self.GLOWB, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.glowc.get_data(), self.GLOWC, self.LINEAR_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.glowd.get_data(), self.GLOWD, self.LINEAR_COLOR))
         data_out.append(self._try_get_float_property_bytes(self.metala, self.METALA))
         data_out.append(self._try_get_float_property_bytes(self.metalb, self.METALB))
         data_out.append(self._try_get_float_property_bytes(self.metalc, self.METALC))
@@ -2573,7 +2658,7 @@ class CharacterAttachmentColor(Material):
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
-class LinearColor(Material):
+class LinearColor(GenericParsers):
     def __init__(self, linearcolor_data):
         self._parse_linearcolor_data(linearcolor_data)
         
@@ -2595,22 +2680,16 @@ class LinearColor(Material):
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
-class AttachmentMaterial(Material):
-    ACCESSORYCOLOR = b'\x0F\x00\x00\x00\x41\x63\x63\x65\x73\x73\x6F\x72\x79\x43\x6F\x6C\x6F\x72\x00'
-    UPPERCLOTHINGCOLOR = b'\x13\x00\x00\x00\x55\x70\x70\x65\x72\x43\x6C\x6F\x74\x68\x69\x6E\x67\x43\x6F\x6C\x6F\x72\x00'
-    LOWERCLOTHINGCOLOR = b'\x13\x00\x00\x00\x4C\x6F\x77\x65\x72\x43\x6C\x6F\x74\x68\x69\x6E\x67\x43\x6F\x6C\x6F\x72\x00'
-    UNDERWEARCOLOR = b'\x0F\x00\x00\x00\x55\x6E\x64\x65\x72\x77\x65\x61\x72\x43\x6F\x6C\x6F\x72\x00'
-    BOOTSCOLOR = b'\x0B\x00\x00\x00\x42\x6F\x6F\x74\x73\x43\x6F\x6C\x6F\x72\x00'
-
+class AttachmentMaterial(GenericParsers):
     def __init__(self, material_data):
         self._parse_material_data(material_data)
     
     def _parse_material_data(self, material_data):
-        _, bodyattachmentscolor,      material_data = self._try_parse_struct_property(material_data, self.ACCESSORYCOLOR, self.CHARACTERATTACHMENTCOLOR)
-        _, upperclothingcolor,        material_data = self._try_parse_struct_property(material_data, self.UPPERCLOTHINGCOLOR, self.CHARACTERATTACHMENTCOLOR)
-        _, lowerclothingcolor,        material_data = self._try_parse_struct_property(material_data, self.LOWERCLOTHINGCOLOR, self.CHARACTERATTACHMENTCOLOR)
-        _, underwearcolor,            material_data = self._try_parse_struct_property(material_data, self.UNDERWEARCOLOR, self.CHARACTERATTACHMENTCOLOR)
-        _, bootscolor,                material_data = self._try_parse_struct_property(material_data, self.BOOTSCOLOR, self.CHARACTERATTACHMENTCOLOR)
+        _, bodyattachmentscolor,      material_data = self._try_parse_struct_property(material_data, self.ACCESSORYCOLOR, self.CHARACTER_ATTACHMENT_COLOR)
+        _, upperclothingcolor,        material_data = self._try_parse_struct_property(material_data, self.UPPERCLOTHINGCOLOR, self.CHARACTER_ATTACHMENT_COLOR)
+        _, lowerclothingcolor,        material_data = self._try_parse_struct_property(material_data, self.LOWERCLOTHINGCOLOR, self.CHARACTER_ATTACHMENT_COLOR)
+        _, underwearcolor,            material_data = self._try_parse_struct_property(material_data, self.UNDERWEARCOLOR, self.CHARACTER_ATTACHMENT_COLOR)
+        _, bootscolor,                material_data = self._try_parse_struct_property(material_data, self.BOOTSCOLOR, self.CHARACTER_ATTACHMENT_COLOR)
         self.remain = material_data
         
         self.bodyattachmentscolor = CharacterAttachmentColor(bodyattachmentscolor)
@@ -2621,11 +2700,11 @@ class AttachmentMaterial(Material):
         
     def get_data(self):
         data_out = []
-        data_out.append(self._try_get_struct_property_bytes(self.bodyattachmentscolor.get_data(), self.ACCESSORYCOLOR, self.CHARACTERATTACHMENTCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.upperclothingcolor.get_data(), self.UPPERCLOTHINGCOLOR, self.CHARACTERATTACHMENTCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.lowerclothingcolor.get_data(), self.LOWERCLOTHINGCOLOR, self.CHARACTERATTACHMENTCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.underwearcolor.get_data(), self.UNDERWEARCOLOR, self.CHARACTERATTACHMENTCOLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.bootscolor.get_data(), self.BOOTSCOLOR, self.CHARACTERATTACHMENTCOLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.bodyattachmentscolor.get_data(), self.ACCESSORYCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.upperclothingcolor.get_data(), self.UPPERCLOTHINGCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.lowerclothingcolor.get_data(), self.LOWERCLOTHINGCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.underwearcolor.get_data(), self.UNDERWEARCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
+        data_out.append(self._try_get_struct_property_bytes(self.bootscolor.get_data(), self.BOOTSCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
@@ -2655,9 +2734,7 @@ class GameplayTag(GenericParsers):
 
 
 '''World Level Classes'''
-class MonsterLevels(Appearance):
-    LEVEL = b'\x06\x00\x00\x00\x4C\x65\x76\x65\x6C\x00'
-    PROGRESS = b'\x09\x00\x00\x00\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
+class MonsterLevels(GenericParsers):
     def __init__(self, monsterlevels_data):
         self._parse_monsterlevels_data(monsterlevels_data)
     
@@ -2683,7 +2760,7 @@ class MonsterLevels(Appearance):
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
-class MonsterLevel(MonsterLevels):
+class MonsterLevel(GenericParsers):
     def __init__(self, tagname, level, progress, remain):
         self.tagname = tagname
         self.level = level
@@ -2701,7 +2778,7 @@ class MonsterLevel(MonsterLevels):
 
 
 '''Sex Posistion Classes'''
-class PlayerSexPositions(MonsterLevels):
+class PlayerSexPositions(GenericParsers):
     def __init__(self, playersexpositions_data):
         self._parse_sexpositions(playersexpositions_data)
     
@@ -2715,7 +2792,7 @@ class PlayerSexPositions(MonsterLevels):
     def get_data(self):
         return self.playersexposition_list
 
-class SexPosition(PlayerSexPositions):
+class SexPosition(GenericParsers):
     def __init__(self, sexpositions_data, remain):
         self.sexposition = sexpositions_data
         self.remain = remain
@@ -2728,13 +2805,7 @@ class SexPosition(PlayerSexPositions):
 
 
 '''Breeder Stat Progress Class'''
-class BreederStatProgress(Appearance):
-    STRENGTHPROGRESS =  b'\x11\x00\x00\x00\x53\x74\x72\x65\x6E\x67\x74\x68\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
-    DEXTERITYPROGRESS = b'\x12\x00\x00\x00\x44\x65\x78\x74\x65\x72\x69\x74\x79\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
-    WILLPOWERPROGRESS = b'\x12\x00\x00\x00\x57\x69\x6C\x6C\x70\x6F\x77\x65\x72\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
-    ALLUREPROGRESS =    b'\x0F\x00\x00\x00\x41\x6C\x6C\x75\x72\x65\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
-    FERTILITYPROGRESS = b'\x12\x00\x00\x00\x46\x65\x72\x74\x69\x6C\x69\x74\x79\x50\x72\x6F\x67\x72\x65\x73\x73\x00'
-    
+class BreederStatProgress(GenericParsers):
     def __init__(self, breederstatprogress_data):
         self._parse_breederstatprogress_data(breederstatprogress_data)
     
@@ -2758,23 +2829,7 @@ class BreederStatProgress(Appearance):
 
 
 '''World State Classes'''
-class WorldState(Appearance):
-    SECONDS = b'\x08\x00\x00\x00\x53\x65\x63\x6F\x6E\x64\x73\x00'
-    MINUTE = b'\x07\x00\x00\x00\x4D\x69\x6E\x75\x74\x65\x00'
-    HOUR = b'\x05\x00\x00\x00\x48\x6F\x75\x72\x00'
-    DAY = b'\x04\x00\x00\x00\x44\x61\x79\x00'
-    MONTH = b'\x06\x00\x00\x00\x4D\x6F\x6E\x74\x68\x00'
-    ACTIVETRAVELSHRINES = b'\x14\x00\x00\x00\x41\x63\x74\x69\x76\x65\x54\x72\x61\x76\x65\x6C\x53\x68\x72\x69\x6E\x65\x73\x00'
-    ACQUIREDRANCHUPGRADES = b'\x16\x00\x00\x00\x41\x63\x71\x75\x69\x72\x65\x64\x52\x61\x6E\x63\x68\x55\x70\x67\x72\x61\x64\x65\x73\x00'
-    DIALOGUESTATES = b'\x0F\x00\x00\x00\x44\x69\x61\x6C\x6F\x67\x75\x65\x53\x74\x61\x74\x65\x73\x00'
-    DIALOGUESTATE = b'\x0E\x00\x00\x00\x44\x69\x61\x6C\x6F\x67\x75\x65\x53\x74\x61\x74\x65\x00' + ByteMacros.STRUCT_PADDING
-    MONSTERLEVELS = b'\x0E\x00\x00\x00\x4D\x6F\x6E\x73\x74\x65\x72\x4C\x65\x76\x65\x6C\x73\x00'
-    FERNFED = b'\x08\x00\x00\x00\x46\x65\x72\x6E\x46\x65\x64\x00'
-    BREEDINGTASKS = b'\x0E\x00\x00\x00\x42\x72\x65\x65\x64\x69\x6E\x67\x54\x61\x73\x6B\x73\x00'
-    BREEDINGTASK = b'\x0D\x00\x00\x00\x42\x72\x65\x65\x64\x69\x6E\x67\x54\x61\x73\x6B\x00' + ByteMacros.STRUCT_PADDING
-    SPECIALBREEDINGTASKS = b'\x15\x00\x00\x00\x53\x70\x65\x63\x69\x61\x6C\x42\x72\x65\x65\x64\x69\x6E\x67\x54\x61\x73\x6B\x73\x00'
-    DAYSSINCEBREEDINGTASKREFRESH = b'\x1D\x00\x00\x00\x44\x61\x79\x73\x53\x69\x6E\x63\x65\x42\x72\x65\x65\x64\x69\x6E\x67\x54\x61\x73\x6B\x52\x65\x66\x72\x65\x73\x68\x00'
-    
+class WorldState(GenericParsers):
     def __init__(self, worldstate_data):
         self._parse_worldstate_data(worldstate_data)
     
@@ -2786,11 +2841,11 @@ class WorldState(Appearance):
         _, self.month,                        worldstate_data = self._try_parse_int_property(worldstate_data,    self.MONTH)
         _, activetravelshrines,               worldstate_data = self._try_parse_struct_property(worldstate_data, self.ACTIVETRAVELSHRINES, self.GAMEPLAY_TAG_CONTAINER)
         _, acquiredranchupgrades,             worldstate_data = self._try_parse_struct_property(worldstate_data, self.ACQUIREDRANCHUPGRADES, self.GAMEPLAY_TAG_CONTAINER)
-        _, dialoguestates,                    worldstate_data = self._try_parse_array_struct_property(worldstate_data,  self.DIALOGUESTATES,  self.DIALOGUESTATES,  self.DIALOGUESTATE)
+        _, dialoguestates,                    worldstate_data = self._try_parse_array_struct_property(worldstate_data,  self.DIALOGUESTATES,  self.DIALOGUESTATES,  self.DIALOGUE_STATE)
         _, monsterlevels,                     worldstate_data = self._try_parse_map_property(worldstate_data, self.MONSTERLEVELS, self.STRUCT_PROPERTY)
         _, self.fernfed,                      worldstate_data = self._try_parse_int_property(worldstate_data,    self.FERNFED)
-        _, breedingtasks,                     worldstate_data = self._try_parse_array_struct_property(worldstate_data, self.BREEDINGTASKS, self.BREEDINGTASKS, self.BREEDINGTASK)
-        _, specialbreedingtasks,              worldstate_data = self._try_parse_array_struct_property(worldstate_data, self.SPECIALBREEDINGTASKS, self.SPECIALBREEDINGTASKS, self.BREEDINGTASK)
+        _, breedingtasks,                     worldstate_data = self._try_parse_array_struct_property(worldstate_data, self.BREEDINGTASKS, self.BREEDINGTASKS, self.BREEDING_TASK)
+        _, specialbreedingtasks,              worldstate_data = self._try_parse_array_struct_property(worldstate_data, self.SPECIALBREEDINGTASKS, self.SPECIALBREEDINGTASKS, self.BREEDING_TASK)
         _, self.dayssincebreedingtaskrefresh, worldstate_data = self._try_parse_int_property(worldstate_data,    self.DAYSSINCEBREEDINGTASKREFRESH)
         
         self.remain =                worldstate_data
@@ -2810,17 +2865,16 @@ class WorldState(Appearance):
         data_out.append(self._try_get_int_property_bytes(self.month, self.MONTH))
         data_out.append(self._try_get_struct_property_bytes(self.activetravelshrines.get_data(), self.ACTIVETRAVELSHRINES, self.GAMEPLAY_TAG_CONTAINER))
         data_out.append(self._try_get_struct_property_bytes(self.acquiredranchupgrades.get_data(), self.ACQUIREDRANCHUPGRADES, self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._try_get_array_struct_property_bytes(self.dialoguestates.get_data(), self.DIALOGUESTATES, self.DIALOGUESTATES, self.DIALOGUESTATE))
+        data_out.append(self._try_get_array_struct_property_bytes(self.dialoguestates.get_data(), self.DIALOGUESTATES, self.DIALOGUESTATES, self.DIALOGUE_STATE))
         data_out.append(self._try_get_map_property_bytes(self.monsterlevels.get_data(), self.MONSTERLEVELS, self.STRUCT_PROPERTY))
         data_out.append(self._try_get_int_property_bytes(self.fernfed, self.FERNFED))
-        data_out.append(self._try_get_array_struct_property_bytes(self.breedingtasks.get_data(), self.BREEDINGTASKS, self.BREEDINGTASKS, self.BREEDINGTASK))
-        data_out.append(self._try_get_array_struct_property_bytes(self.specialbreedingtasks.get_data(), self.SPECIALBREEDINGTASKS, self.SPECIALBREEDINGTASKS, self.BREEDINGTASK))
+        data_out.append(self._try_get_array_struct_property_bytes(self.breedingtasks.get_data(), self.BREEDINGTASKS, self.BREEDINGTASKS, self.BREEDING_TASK))
+        data_out.append(self._try_get_array_struct_property_bytes(self.specialbreedingtasks.get_data(), self.SPECIALBREEDINGTASKS, self.SPECIALBREEDINGTASKS, self.BREEDING_TASK))
         data_out.append(self._try_get_int_property_bytes(self.dayssincebreedingtaskrefresh, self.DAYSSINCEBREEDINGTASKREFRESH))
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
-class DialogueStates(Appearance):
-    NPC = b'\x04\x00\x00\x00\x4E\x50\x43\x00'
+class DialogueStates(GenericParsers):
     def __init__(self, dialoguestates_data):
         self._parse_dialoguestates_data(dialoguestates_data)
     
@@ -2835,18 +2889,11 @@ class DialogueStates(Appearance):
     def get_data(self):
         return self.dialoguestates_list
 
-class DialogueState(DialogueStates):
+class DialogueState(GenericParsers):
     def __init__(self, npc, tags, remain):
-        self.npc = self._parse_npc(npc)
+        self.npc = Variant(npc)
         self.tags = self._parse_tags(tags)
         self.remain = remain
-    
-    def _parse_npc(self, npc_data):
-        variant_values, npc_data = self.split_byte_list(npc_data)
-        if len(variant_values) != 2:
-            raise
-        
-        return Variants(variant_values)
     
     def _parse_tags(self, tag_data):
         tag_list, tag_data = self.split_byte_list(tag_data)
@@ -2863,22 +2910,7 @@ class DialogueState(DialogueStates):
         bytes_out.append(self.remain)
         return self.list_to_bytes(bytes_out)
 
-class BreedingTasks(Appearance):
-    DISPLAYNAME = b'\x0C\x00\x00\x00\x44\x69\x73\x70\x6C\x61\x79\x4E\x61\x6D\x65\x00'
-    DISCRIPTION = b'\x0C\x00\x00\x00\x44\x65\x73\x63\x72\x69\x70\x74\x69\x6F\x6E\x00'
-    REQUIREDVARIANT = b'\x10\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x56\x61\x72\x69\x61\x6E\x74\x00'
-    REQUIREDSTAT = b'\x0D\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x53\x74\x61\x74\x00'
-    REQUIREDFLUID = b'\x0E\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x46\x6C\x75\x69\x64\x00'
-    REQUIREDSTATVALUE = b'\x12\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x53\x74\x61\x74\x56\x61\x6C\x75\x65\x00'
-    REQUIREDFLUIDML = b'\x11\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x46\x6C\x75\x69\x64\x5F\x6D\x6C\x00'
-    LEVELREQUIREMENT = b'\x11\x00\x00\x00\x4C\x65\x76\x65\x6C\x52\x65\x71\x75\x69\x72\x65\x6D\x65\x6E\x74\x00'
-    REQUIREDTRAITS = b'\x0F\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x64\x54\x72\x61\x69\x74\x73\x00'
-    REQUIREMENTS = b'\x0D\x00\x00\x00\x52\x65\x71\x75\x69\x72\x65\x6D\x65\x6E\x74\x73\x00'
-    DIFFICULTY = b'\x0B\x00\x00\x00\x44\x69\x66\x66\x69\x63\x75\x6C\x74\x79\x00'
-    REWARD = b'\x07\x00\x00\x00\x52\x65\x77\x61\x72\x64\x00'
-    DAYS = b'\x05\x00\x00\x00\x44\x61\x79\x73\x00'
-    COMPLETIONTAGS = b'\x0F\x00\x00\x00\x43\x6F\x6D\x70\x6C\x65\x74\x69\x6F\x6E\x54\x61\x67\x73\x00'
-    REWARDMESSAGE = b'\x0E\x00\x00\x00\x52\x65\x77\x61\x72\x64\x4D\x65\x73\x73\x61\x67\x65\x00'
+class BreedingTasks(GenericParsers):
     def __init__(self, breedingtasks_data):
         self._parse_breedingtasks_data(breedingtasks_data)
     
@@ -2908,7 +2940,7 @@ class BreedingTasks(Appearance):
     def get_data(self):
         return self.breedingtask_list
 
-class BreedingTask(BreedingTasks):
+class BreedingTask(GenericParsers):
     def __init__(self, displayname, discription, requiredvariant, requiredstat, requiredfluid, requiredstatvalue, requiredfluidml, levelrequirement, requiredtraits, requirements, difficulty, reward, days, completiontags, rewardmessage, remain):
         self.displayname = displayname
         self.discription = discription
@@ -2958,7 +2990,7 @@ class PlayerObtainedVariants(GenericParsers):
             variant_values, playerobtainedvariants_data = self.split_byte_list(playerobtainedvariants_data)
             if len(variant_values) != 2:
                 raise
-            self.playerobtainedvariant_list.append(Variants(variant_values))
+            self.playerobtainedvariant_list.append(Variant(variant_values))
     
     def get_data(self):
         return self.playerobtainedvariant_list
@@ -2975,14 +3007,31 @@ class TagContainer(GenericParsers):
         bytes_out.append(self.list_to_bytes(self.tag_list))
         return self.list_to_bytes(bytes_out)
 
-class Variants(GenericParsers):
-    def __init__(self, variant_values):
-        self.variant_values = variant_values
-        
+class Variant(GenericParsers):
+    def __init__(self, variant_data):
+        if variant_data == b'': #Defualt Variant type
+            self.race = self.RACES['vulpuss']
+            self.sex = self.SEXES['female']
+        elif isinstance(variant_data, list):
+            self.race = variant_data[0][4:]
+            self.sex  = variant_data[1][4:]
+        else:
+            self._parse_variant_data(variant_data)
+    
+    def _parse_variant_data(self, variant_data):
+        variant_data_list, remain = self.split_byte_list(variant_data)
+        if len(variant_data_list) != 2:
+            raise Exception(f'Invalid Variant block. expected 2 values, got {len(variant_data_list)}')
+        if remain:
+            raise Exception(f'Invalid Variant block. Unexpected traiting data:\n{remain}')
+        self.race = variant_data_list[0][4:]
+        self.sex  = variant_data_list[1][4:]
+    
     def get_data(self):
         bytes_out = []
-        bytes_out.append(len(self.variant_values).to_bytes(4, 'little'))
-        bytes_out.append(self.list_to_bytes(self.variant_values))
+        bytes_out.append(int(2).to_bytes(4, 'little') )
+        bytes_out.append(self.append_length(self.race))
+        bytes_out.append(self.append_length(self.sex) )
         return self.list_to_bytes(bytes_out)
 
 
@@ -3002,8 +3051,8 @@ class NephelymSaveEditor(Appearance):
         _, playerobtainedvariants,            save_data = self._try_parse_array_struct_property(save_data, self.PLAYEROBTAINEDVARIANTS, self.PLAYEROBTAINEDVARIANTS, self.GAMEPLAY_TAG_CONTAINER)
         _, playerseenvariants,                save_data = self._try_parse_array_struct_property(save_data, self.PLAYERSEENVARIANTS,     self.PLAYERSEENVARIANTS,     self.GAMEPLAY_TAG_CONTAINER)
         _, gameflags,                         save_data = self._try_parse_struct_property(save_data, self.GAMEFLAGS,           self.GAMEPLAY_TAG_CONTAINER)
-        _, worldstate,                        save_data = self._try_parse_struct_property(save_data, self.WORLDSTATE,          self.SEXYWOLDSTATE)
-        _, breederstatprogress,               save_data = self._try_parse_struct_property(save_data, self.BREEDERSTATPROGRESS, self.BREEDERSTATRANKPROGRESS)
+        _, worldstate,                        save_data = self._try_parse_struct_property(save_data, self.WORLDSTATE,          self.SEXY_WOLD_STATE)
+        _, breederstatprogress,               save_data = self._try_parse_struct_property(save_data, self.BREEDERSTATPROGRESS, self.BREEDER_STAT_RANK_PROGRESS)
         self.remain = save_data
         
         self.header                 = Header(data_header)
@@ -3186,8 +3235,8 @@ class NephelymSaveEditor(Appearance):
         data_out.append(self._try_get_array_struct_property_bytes(self.playerobtainedvariants.get_data(), self.PLAYEROBTAINEDVARIANTS, self.PLAYEROBTAINEDVARIANTS, self.GAMEPLAY_TAG_CONTAINER))
         data_out.append(self._try_get_array_struct_property_bytes(self.playerseenvariants.get_data(),     self.PLAYERSEENVARIANTS,     self.PLAYERSEENVARIANTS,     self.GAMEPLAY_TAG_CONTAINER))
         data_out.append(self._try_get_struct_property_bytes(self.gameflags.get_data(),           self.GAMEFLAGS,           self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._try_get_struct_property_bytes(self.worldstate.get_data(),          self.WORLDSTATE,          self.SEXYWOLDSTATE))
-        data_out.append(self._try_get_struct_property_bytes(self.breederstatprogress.get_data(), self.BREEDERSTATPROGRESS, self.BREEDERSTATRANKPROGRESS))
+        data_out.append(self._try_get_struct_property_bytes(self.worldstate.get_data(),          self.WORLDSTATE,          self.SEXY_WOLD_STATE))
+        data_out.append(self._try_get_struct_property_bytes(self.breederstatprogress.get_data(), self.BREEDERSTATPROGRESS, self.BREEDER_STAT_RANK_PROGRESS))
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
@@ -3203,6 +3252,7 @@ if __name__ == "__main__":
         NephelymSaveEditor(save_in).save(save_out)
         exit()
     
+    
     #Example: of transfering colors from one part to another
     if False:
         x = NephelymSaveEditor(save_in)
@@ -3217,6 +3267,7 @@ if __name__ == "__main__":
         material.dicktipglow = lowerclothingglowb
         x.save(save_out)
         exit()
+    
     
     #Example: Converting Old saves to Newer version of game. Nephelyms should be safe, but progress may be broken
     if False:
@@ -3237,11 +3288,32 @@ if __name__ == "__main__":
         exit()
     
     
+    #Example: Comparing Appearnace settings of saves
+    if False:
+        tit_max = NephelymSaveEditor(r'6.sav').nephelyms[0]
+        tit_min = NephelymSaveEditor(r'7.sav').nephelyms[0]
+        print(hex_to_float(tit_max.appearance.baseshape.morph.breast.breastsize))
+        print(hex_to_float(tit_min.appearance.baseshape.morph.breast.breastsize))
+        morphs = tit_min.appearance.baseshape.morph
+        morphs_dict = vars(morphs)
+        for element in morphs_dict:
+            try:
+                print(f"{element}: {hex_to_float(morphs_dict[element])}")
+            except:
+                print(element)
+        print(hex_to_float(tit_max.appearance.baseshape.morph.buttsize))
+        print(hex_to_float(tit_min.appearance.baseshape.morph.buttsize))
+        exit()
+    
+    
     # Instance of Editor
     nephelym_save_editor = NephelymSaveEditor(save_in)
     
     # Breeder/Player is always the first Nephelym unless changed in the save header
     breeder = nephelym_save_editor.nephelyms[0]
+    
+    print(breeder.mother)
+    print(breeder.father)
     
     # Change the Spirit form to be breeder. Any NephelymBase derived object will work
     nephelym_save_editor.playerspiritform.change_form(breeder)
