@@ -418,6 +418,7 @@ class ByteMacros:
     BOOL_PROPERTY = b'\x0D\x00\x00\x00\x42\x6F\x6F\x6C\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
     MAP_PROPERTY = b'\x0C\x00\x00\x00\x4D\x61\x70\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
     TEXT_PROPERTY = b'\x0D\x00\x00\x00\x54\x65\x78\x74\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
+    STR_PROPERTY = b'\x0C\x00\x00\x00\x53\x74\x72\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
     
     MAP_PADDING = b'\x00\x00\x00\x00'
     STRUCT_PADDING = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
@@ -453,47 +454,47 @@ class ByteMacros:
     PLAYER_MONSTER_NAME = b'\x05\x00\x00\x00\x4E\x61\x6D\x65\x00\x0C\x00\x00\x00\x53\x74\x72\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
     UNIQUEID = b'\x09\x00\x00\x00\x55\x6E\x69\x71\x75\x65\x49\x44\x00'
     
+    
     VARIANT = b'\x08\x00\x00\x00\x56\x61\x72\x69\x61\x6E\x74\x00'
     GAMEPLAY_TAG_CONTAINER = b'\x15\x00\x00\x00\x47\x61\x6D\x65\x70\x6C\x61\x79\x54\x61\x67\x43\x6F\x6E\x74\x61\x69\x6E\x65\x72\x00' + STRUCT_PADDING
     
     
     APPEARANCE = b'\x0B\x00\x00\x00\x41\x70\x70\x65\x61\x72\x61\x6E\x63\x65\x00'
+    SPLATTER = b'\x09\x00\x00\x00\x53\x70\x6C\x61\x74\x74\x65\x72\x00'
+    CITARGETVALUE = b'\x0E\x00\x00\x00\x43\x49\x54\x61\x72\x67\x65\x74\x56\x61\x6C\x75\x65\x00'
+    CIBUFFER = b'\x09\x00\x00\x00\x43\x49\x42\x75\x66\x66\x65\x72\x00'
+    
     CHARACTER_APPEARANCE = b'\x14\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x41\x70\x70\x65\x61\x72\x61\x6E\x63\x65\x00' + STRUCT_PADDING
-    
-    SPLATTER_STRUCT_PROP = b'\x09\x00\x00\x00\x53\x70\x6C\x61\x74\x74\x65\x72\x00' + STRUCT_PROPERTY
     FLUID_SPLATTER = b'\x0E\x00\x00\x00\x46\x6C\x75\x69\x64\x53\x70\x6C\x61\x74\x74\x65\x72\x00' + STRUCT_PADDING
-    
-    CITARGETVALUE_STRUCT_PROP = b'\x0E\x00\x00\x00\x43\x49\x54\x61\x72\x67\x65\x74\x56\x61\x6C\x75\x65\x00' + STRUCT_PROPERTY
-    CIBUFFER_STRUCT_PROP = b'\x09\x00\x00\x00\x43\x49\x42\x75\x66\x66\x65\x72\x00' + STRUCT_PROPERTY
     CHARACTER_MORPH = b'\x0F\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x4D\x6F\x72\x70\x68\x00' + STRUCT_PADDING
     
+    
     #FloatProp
-    CIRATE  = b'\x07\x00\x00\x00\x43\x49\x52\x61\x74\x65\x00' + FLOAT_PROPERTY
-    CIALPHA = b'\x08\x00\x00\x00\x43\x49\x41\x6C\x70\x68\x61\x00' + FLOAT_PROPERTY
+    CIRATE  = b'\x07\x00\x00\x00\x43\x49\x52\x61\x74\x65\x00'
+    CIALPHA = b'\x08\x00\x00\x00\x43\x49\x41\x6C\x70\x68\x61\x00'
     
     #StructProp
-    APPLIEDSCHEME_STRUCT_PROP = b'\x0E\x00\x00\x00\x41\x70\x70\x6C\x69\x65\x64\x53\x63\x68\x65\x6D\x65\x00' + STRUCT_PROPERTY
+    APPLIEDSCHEME = b'\x0E\x00\x00\x00\x41\x70\x70\x6C\x69\x65\x64\x53\x63\x68\x65\x6D\x65\x00'
+    STAT = b'\x06\x00\x00\x00\x53\x74\x61\x74\x73\x00'
+    
     CHARACTER_APPLIED_SCHEME = b'\x17\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x41\x70\x70\x6C\x69\x65\x64\x53\x63\x68\x65\x6D\x65\x00' + STRUCT_PADDING
-    STAT_STRUCT_PROP = b'\x06\x00\x00\x00\x53\x74\x61\x74\x73\x00' + STRUCT_PROPERTY
     CHARACTER_STATS = b'\x0F\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x53\x74\x61\x74\x73\x00' + STRUCT_PADDING
     
+    
     #Parents
-    MOTHER_STRUCT_PROP = b'\x07\x00\x00\x00\x4D\x6F\x74\x68\x65\x72\x00' + STRUCT_PROPERTY
-    FATHER_STRUCT_PROP = b'\x07\x00\x00\x00\x46\x61\x74\x68\x65\x72\x00' + STRUCT_PROPERTY
+    MOTHER = b'\x07\x00\x00\x00\x4D\x6F\x74\x68\x65\x72\x00'
+    FATHER = b'\x07\x00\x00\x00\x46\x61\x74\x68\x65\x72\x00'
+    NAME = b'\x05\x00\x00\x00\x4E\x61\x6D\x65\x00'
+    
     CHARACTER_PARENT_DATA = b'\x14\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x50\x61\x72\x65\x6E\x74\x44\x61\x74\x61\x00' + STRUCT_PADDING
     
     #Traits
-    TRAITS_STRUCT_PROP = b'\x07\x00\x00\x00\x54\x72\x61\x69\x74\x73\x00' + STRUCT_PROPERTY
-    PLAYERTAGS_STRUCT_PROP = b'\x0B\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x54\x61\x67\x73\x00' + STRUCT_PROPERTY
-    STATES_STRUCT_PROP = b'\x07\x00\x00\x00\x53\x74\x61\x74\x65\x73\x00' + STRUCT_PROPERTY
+    TRAITS = b'\x07\x00\x00\x00\x54\x72\x61\x69\x74\x73\x00'
+    PLAYERTAGS = b'\x0B\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x54\x61\x67\x73\x00'
+    STATES = b'\x07\x00\x00\x00\x53\x74\x61\x74\x65\x73\x00'
     OFFSPRINGID = b'\x0C\x00\x00\x00\x4F\x66\x66\x73\x70\x72\x69\x6E\x67\x49\x44\x00'
     LASTMATEID = b'\x0B\x00\x00\x00\x4C\x61\x73\x74\x4D\x61\x74\x65\x49\x44\x00'
     LASTMATESEXCOUNT = b'\x11\x00\x00\x00\x4C\x61\x73\x74\x4D\x61\x74\x65\x53\x65\x78\x43\x6F\x75\x6E\x74\x00'
-    
-    
-    
-    
-    
     
     ### Offspring Macros
     OFFSPRINGBUFFER = b'\x10\x00\x00\x00\x4F\x66\x66\x73\x70\x72\x69\x6E\x67\x42\x75\x66\x66\x65\x72\x00'
@@ -1087,6 +1088,20 @@ class GenericParsers(DictMacros, ByteMacros, IO):
         data_end = data_start + 2
         return bool_bytes[:cursor], bool_bytes[data_start:data_end], bool_bytes[data_end:]
     
+    def _parse_str_property(self, str_bytes, str_macro):
+        '''Return name value in byte format'''
+        cursor = str_bytes.find(str_macro)
+        if cursor == -1:
+            raise Exception(f'Invalid Save: {str_macro}')
+        length_start = cursor + len(str_macro)
+        length_end = length_start + 8
+        length_bytes = str_bytes[length_start:length_end]
+        length = int.from_bytes(length_bytes, 'little')
+        
+        data_start = length_end + 1
+        data_end = data_start + length
+        return str_bytes[:cursor], str_bytes[data_start+4:data_end], str_bytes[data_end:]
+    
     
     def _get_float_property_bytes(self, float_bytes, float_macro):
         float_length = len(float_bytes)
@@ -1182,6 +1197,16 @@ class GenericParsers(DictMacros, ByteMacros, IO):
             + bool_bytes
         return bytes_out
     
+    def _get_str_property_bytes(self, str_bytes, str_macro):
+        str_length = len(str_bytes)
+        str_full_length = str_length + 4
+        bytes_out = str_macro \
+            + str_full_length.to_bytes(8, 'little') \
+            + b'\x00' \
+            + str_length.to_bytes(4, 'little') \
+            + str_bytes
+        return bytes_out
+    
     
     def _try_parse_int_property(self, data_in, int_macro):
         int_macro += self.INT_PROPERTY
@@ -1273,6 +1298,15 @@ class GenericParsers(DictMacros, ByteMacros, IO):
             bool_prop = b''
         return pre_data, bool_prop, data_in
     
+    def _try_parse_str_property(self, data_in, str_macro):
+        str_macro += self.STR_PROPERTY
+        try:
+            pre_data, str_prop, data_in = self._parse_str_property(data_in, str_macro)
+        except:
+            pre_data = b''
+            str_prop = b''
+        return pre_data, str_prop, data_in
+    
     
     def _try_get_int_property_bytes(self, data_in, int_macro):
         if data_in == b'':
@@ -1354,6 +1388,14 @@ class GenericParsers(DictMacros, ByteMacros, IO):
             data_out = self._get_bool_property_bytes(data_in, bool_macro)
         return data_out
     
+    def _try_get_str_property_bytes(self, data_in, str_macro):
+        if data_in == b'':
+            data = b''
+        else:
+            str_macro += self.STR_PROPERTY
+            data = self._get_str_property_bytes(data_in, str_macro)
+        return data
+    
     
     def list_to_bytes(self, byte_list):
         '''
@@ -1382,7 +1424,7 @@ class GenericParsers(DictMacros, ByteMacros, IO):
     def append_length(self, bytes_in):
         length = len(bytes_in)
         return length.to_bytes(4, 'little') + bytes_in
-    
+
 
 '''Header Classes'''
 class Header(GenericParsers):
@@ -1459,22 +1501,22 @@ class NephelymBase(GenericParsers):
         self._parse_nephelym_data(nephelym_data)
     
     def _parse_nephelym_data(self, nephelym_data):
-        _, self.name,             nephelym_data = self._parse_name(nephelym_data)
-        _, self.guid,             nephelym_data = self._try_parse_struct_property(nephelym_data, self.UNIQUEID, self.GUID_PROP)
-        _, variant,               nephelym_data = self._try_parse_struct_property(nephelym_data, self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER)
+        _, self.name,             nephelym_data = self._try_parse_str_property(nephelym_data, self.NAME)
+        _, self.guid,             nephelym_data = self._try_parse_struct_property(nephelym_data, self.UNIQUEID,      self.GUID_PROP)
+        _, variant,               nephelym_data = self._try_parse_struct_property(nephelym_data, self.VARIANT,       self.GAMEPLAY_TAG_CONTAINER)
         _, appearance,            nephelym_data = self._try_parse_struct_property(nephelym_data, self.APPEARANCE,    self.CHARACTER_APPEARANCE)
-        _, self.splatter,         nephelym_data = self._parse_struct_property(nephelym_data, self.SPLATTER_STRUCT_PROP,      self.FLUID_SPLATTER)
-        _, self.citargetvalue,    nephelym_data = self._parse_struct_property(nephelym_data, self.CITARGETVALUE_STRUCT_PROP, self.CHARACTER_MORPH)
-        _, self.cibuffer,         nephelym_data = self._parse_struct_property(nephelym_data, self.CIBUFFER_STRUCT_PROP,      self.CHARACTER_MORPH)
-        _, self.cirate,           nephelym_data = self._parse_float_property(nephelym_data,  self.CIRATE)
-        _, self.cialpha,          nephelym_data = self._parse_float_property(nephelym_data,  self.CIALPHA)
-        _, self.appliedscheme,    nephelym_data = self._parse_struct_property(nephelym_data, self.APPLIEDSCHEME_STRUCT_PROP, self.CHARACTER_APPLIED_SCHEME)
-        _, self.stats,            nephelym_data = self._parse_struct_property(nephelym_data, self.STAT_STRUCT_PROP,          self.CHARACTER_STATS)
-        _, self.mother,           nephelym_data = self._parse_struct_property(nephelym_data, self.MOTHER_STRUCT_PROP,        self.CHARACTER_PARENT_DATA)
-        _, self.father,           nephelym_data = self._parse_struct_property(nephelym_data, self.FATHER_STRUCT_PROP,        self.CHARACTER_PARENT_DATA)
-        _, self.traits,           nephelym_data = self._parse_traits(nephelym_data)
-        _, self.playertags,       nephelym_data = self._parse_struct_property(nephelym_data, self.PLAYERTAGS_STRUCT_PROP,    self.GAMEPLAY_TAG_CONTAINER)
-        _, self.states,           nephelym_data = self._parse_struct_property(nephelym_data, self.STATES_STRUCT_PROP,        self.GAMEPLAY_TAG_CONTAINER)
+        _, splatter,              nephelym_data = self._try_parse_struct_property(nephelym_data, self.SPLATTER,      self.FLUID_SPLATTER)
+        _, citargetvalue,         nephelym_data = self._try_parse_struct_property(nephelym_data, self.CITARGETVALUE, self.CHARACTER_MORPH)
+        _, cibuffer,              nephelym_data = self._try_parse_struct_property(nephelym_data, self.CIBUFFER,      self.CHARACTER_MORPH)
+        _, self.cirate,           nephelym_data = self._try_parse_float_property(nephelym_data,  self.CIRATE)
+        _, self.cialpha,          nephelym_data = self._try_parse_float_property(nephelym_data,  self.CIALPHA)
+        _, appliedscheme,         nephelym_data = self._try_parse_struct_property(nephelym_data, self.APPLIEDSCHEME, self.CHARACTER_APPLIED_SCHEME)
+        _, stats,                 nephelym_data = self._try_parse_struct_property(nephelym_data, self.STAT,          self.CHARACTER_STATS)
+        _, mother,                nephelym_data = self._try_parse_struct_property(nephelym_data, self.MOTHER,        self.CHARACTER_PARENT_DATA)
+        _, father,                nephelym_data = self._try_parse_struct_property(nephelym_data, self.FATHER,        self.CHARACTER_PARENT_DATA)
+        _, traits,                nephelym_data = self._try_parse_struct_property(nephelym_data, self.TRAITS,        self.GAMEPLAY_TAG_CONTAINER)
+        _, playertags,            nephelym_data = self._try_parse_struct_property(nephelym_data, self.PLAYERTAGS,    self.GAMEPLAY_TAG_CONTAINER)
+        _, states,                nephelym_data = self._try_parse_struct_property(nephelym_data, self.STATES,        self.GAMEPLAY_TAG_CONTAINER)
         _, self.offspringid,      nephelym_data = self._try_parse_struct_property(nephelym_data, self.OFFSPRINGID,   self.GUID_PROP)
         _, self.lastmateid,       nephelym_data = self._try_parse_struct_property(nephelym_data, self.LASTMATEID,    self.GUID_PROP)
         _, self.lastmatesexcount, nephelym_data = self._try_parse_byte_property(nephelym_data, self.LASTMATESEXCOUNT)
@@ -1482,66 +1524,17 @@ class NephelymBase(GenericParsers):
         
         self.variant = Variant(variant)
         self.appearance = Appearance(appearance)
-    
-    def _parse_traits(self, nephelym_data):
-        cursor = nephelym_data.find(self.TRAITS_STRUCT_PROP)
-        if cursor == -1:
-            raise Exception('Invalid Nephelym: TRAITS_STRUCT_PROP')
-        traits_index = cursor + len(self.TRAITS_STRUCT_PROP) + 8
-        _, traits, post_block = self._parse_gameplaytags(nephelym_data[traits_index:])
-        return nephelym_data[:cursor], traits, post_block
-    
-    def _parse_gameplaytags(self, nephelym_data):
-        '''Parse Gameplay tag Containers'''
-        cursor = nephelym_data.find(self.GAMEPLAY_TAG_CONTAINER)
-        if cursor == -1:
-            raise Exception('Invalid Nephelym: GAMEPLAY_TAG_CONTAINER')
-        container_start = cursor + len(self.GAMEPLAY_TAG_CONTAINER)
-        container_elements = int.from_bytes(nephelym_data[container_start:container_start + 4], 'little')
-        data_index = container_start + 4
-        tags = []
-        for x in range(container_elements):
-            tag_length = int.from_bytes(nephelym_data[data_index:data_index + 4], 'little')
-            data_index += tag_length + 4
-            tags.append(nephelym_data[data_index-tag_length:data_index])
-        return nephelym_data[:cursor], tags, nephelym_data[data_index:]
-    
-    def _parse_name(self, nephelym_data):
-        '''Parses name from datablock'''
-        cursor = nephelym_data.find(self.PLAYER_MONSTER_NAME)
-        if cursor == -1:
-            raise Exception('Invalid Nephelym: Name Missing')
-        name_length_start = cursor + len(self.PLAYER_MONSTER_NAME) + 9
-        name_length_end = name_length_start + 4
-        name_length_bytes = nephelym_data[name_length_start:name_length_end]
-        name_length = int.from_bytes(name_length_bytes, 'little')
-        return nephelym_data[:cursor], nephelym_data[name_length_end:name_length_end + name_length], nephelym_data[name_length_end + name_length:]
-    
-    def _get_traits_bytes(self, traits):
-        gameplay_tags_bytes = self._get_gameplaytags(traits)
-        tags_length = len(gameplay_tags_bytes) - len(self.GAMEPLAY_TAG_CONTAINER)
-        bytes_out = self.TRAITS_STRUCT_PROP \
-            + tags_length.to_bytes(8, 'little') \
-            + gameplay_tags_bytes
-        return bytes_out
-    
-    def _get_gameplaytags(self, tags):
-        '''Returns bytes for game_play_tags with input tags'''
-        bytes_out = self.GAMEPLAY_TAG_CONTAINER + len(tags).to_bytes(4, 'little')
-        for tag in tags:
-            bytes_out += len(tag).to_bytes(4, 'little') + tag
-        return bytes_out
-    
-    def _get_name_bytes(self, name):
-        '''Rebuild name string'''
-        name_length = len(name)
-        name_bytes = self.PLAYER_MONSTER_NAME \
-            + (name_length+4).to_bytes(8, 'little') \
-            + b'\x00' \
-            + name_length.to_bytes(4, 'little') \
-            + name
-        return name_bytes
-    
+        self.splatter = splatter
+        self.citargetvalue = citargetvalue
+        self.cibuffer = cibuffer
+        self.appliedscheme = appliedscheme
+        self.stats = stats
+        self.mother = Parent(mother)
+        self.father = Parent(father)
+        self.traits     = TagContainer(traits)
+        self.playertags = TagContainer(playertags)
+        self.states     = TagContainer(states)
+     
     def _format_trait(self, trait, level):
         if trait in self.NEPHELYM_TRAITS:
             new_trait = self.NEPHELYM_TRAITS[trait]
@@ -1599,22 +1592,22 @@ class NephelymBase(GenericParsers):
         Order doesn't seem to matter, but comparison is easier.
         '''
         data_out = []
-        data_out.append(self._get_name_bytes(self.name))
+        data_out.append(self._try_get_str_property_bytes(self.name, self.NAME))
         data_out.append(self._try_get_struct_property_bytes(self.guid, self.UNIQUEID, self.GUID_PROP))
         data_out.append(self._try_get_struct_property_bytes(self.variant.get_data(), self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER))
         data_out.append(self._try_get_struct_property_bytes(self.appearance.get_data(), self.APPEARANCE, self.CHARACTER_APPEARANCE))
-        data_out.append(self._get_struct_property_bytes(self.splatter, self.SPLATTER_STRUCT_PROP, self.FLUID_SPLATTER))
-        data_out.append(self._get_struct_property_bytes(self.citargetvalue, self.CITARGETVALUE_STRUCT_PROP, self.CHARACTER_MORPH))
-        data_out.append(self._get_struct_property_bytes(self.cibuffer, self.CIBUFFER_STRUCT_PROP, self.CHARACTER_MORPH))
-        data_out.append(self._get_float_property_bytes(self.cirate, self.CIRATE))
-        data_out.append(self._get_float_property_bytes(self.cialpha, self.CIALPHA))
-        data_out.append(self._get_struct_property_bytes(self.appliedscheme, self.APPLIEDSCHEME_STRUCT_PROP, self.CHARACTER_APPLIED_SCHEME))
-        data_out.append(self._get_struct_property_bytes(self.stats, self.STAT_STRUCT_PROP, self.CHARACTER_STATS))
-        data_out.append(self._get_struct_property_bytes(self.mother, self.MOTHER_STRUCT_PROP, self.CHARACTER_PARENT_DATA))
-        data_out.append(self._get_struct_property_bytes(self.father, self.FATHER_STRUCT_PROP, self.CHARACTER_PARENT_DATA))
-        data_out.append(self._get_traits_bytes(self.traits))
-        data_out.append(self._get_struct_property_bytes(self.playertags, self.PLAYERTAGS_STRUCT_PROP, self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._get_struct_property_bytes(self.states, self.STATES_STRUCT_PROP, self.GAMEPLAY_TAG_CONTAINER))
+        data_out.append(self._try_get_struct_property_bytes(self.splatter, self.SPLATTER, self.FLUID_SPLATTER))
+        data_out.append(self._try_get_struct_property_bytes(self.citargetvalue, self.CITARGETVALUE, self.CHARACTER_MORPH))
+        data_out.append(self._try_get_struct_property_bytes(self.cibuffer, self.CIBUFFER, self.CHARACTER_MORPH))
+        data_out.append(self._try_get_float_property_bytes(self.cirate, self.CIRATE))
+        data_out.append(self._try_get_float_property_bytes(self.cialpha, self.CIALPHA))
+        data_out.append(self._try_get_struct_property_bytes(self.appliedscheme, self.APPLIEDSCHEME, self.CHARACTER_APPLIED_SCHEME))
+        data_out.append(self._try_get_struct_property_bytes(self.stats, self.STAT, self.CHARACTER_STATS))
+        data_out.append(self._try_get_struct_property_bytes(self.mother.get_data(), self.MOTHER, self.CHARACTER_PARENT_DATA))
+        data_out.append(self._try_get_struct_property_bytes(self.father.get_data(), self.FATHER, self.CHARACTER_PARENT_DATA))
+        data_out.append(self._try_get_struct_property_bytes(self.traits.get_data(), self.TRAITS, self.GAMEPLAY_TAG_CONTAINER))
+        data_out.append(self._try_get_struct_property_bytes(self.playertags.get_data(), self.PLAYERTAGS, self.GAMEPLAY_TAG_CONTAINER))
+        data_out.append(self._try_get_struct_property_bytes(self.states.get_data(), self.STATES, self.GAMEPLAY_TAG_CONTAINER))
         data_out.append(self._try_get_struct_property_bytes(self.offspringid, self.OFFSPRINGID, self.GUID_PROP))
         data_out.append(self._try_get_struct_property_bytes(self.lastmateid, self.LASTMATEID, self.GUID_PROP))
         data_out.append(self._try_get_byte_property_bytes(self.lastmatesexcount, self.LASTMATESEXCOUNT))
@@ -1647,13 +1640,13 @@ class Nephelym(NephelymBase):
         return parent_block[:guid_start] + guid + parent_block[guid_start + 16:]
     
     def replace_mother_guid(self, guid=None):
-        self.mother = self.replace_parent_guid(self.mother, guid)
+        self.mother.new_guid(guid)
     
     def replace_father_guid(self, guid=None):
-        self.father = self.replace_parent_guid(self.father, guid)
+        self.father.new_guid(guid)
     
     def add_trait(self, trait, level='3'):
-        self.traits.append(self._format_trait(trait, level))
+        self.traits.tags.append(self._format_trait(trait, level))
     
     def all_positive_traits(self):
         for trait in self.NEPHELYM_TRAITS:
@@ -1662,20 +1655,20 @@ class Nephelym(NephelymBase):
             if trait in self.TRAIT_SIZE:
                 continue
             new_trait = self._format_trait(trait, '3')
-            self.traits.append(new_trait)
+            self.traits.tags.append(new_trait)
     
     def all_traits(self):
         for trait in self.NEPHELYM_TRAITS:
             new_trait = self._format_trait(trait, '3')
-            self.traits.append(new_trait)
+            self.traits.tags.append(new_trait)
     
     def remove_all_traits(self):
-        self.traits = []
+        self.traits.tags = []
     
     def remove_trait(self, trait, level='3'):
         remove_trait = self._format_trait(trait, level)
-        if remove_trait in self.traits:
-            self.traits.remove(remove_trait)
+        if remove_trait in self.traits.tags:
+            self.traits.tags.remove(remove_trait)
     
     def change_name(self, name):
         if type(name) is str:
@@ -1721,7 +1714,7 @@ class Nephelym(NephelymBase):
         clone = self.copy()
         clone.new_guid()
         clone.replace_mother_guid()
-        clone.replace_father_guid()
+        clone.replace_mother_guid()
         return clone
 
 class PlayerSpiritForm(NephelymBase):
@@ -1729,16 +1722,18 @@ class PlayerSpiritForm(NephelymBase):
         self._parse_spiritform_data(spiritform_data)
     
     def _parse_spiritform_data(self, spiritform_data):
-        _, self.guid,           spiritform_data = self._try_parse_struct_property(spiritform_data, self.UNIQUEID, self.GUID_PROP)
-        _, variant,             spiritform_data = self._try_parse_struct_property(spiritform_data, self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER)
-        _, appearance,          spiritform_data = self._try_parse_struct_property(spiritform_data, self.APPEARANCE,    self.CHARACTER_APPEARANCE)
-        _, self.appliedscheme,  spiritform_data = self._parse_struct_property(spiritform_data, self.APPLIEDSCHEME_STRUCT_PROP, self.CHARACTER_APPLIED_SCHEME)
-        _, self.mother,         spiritform_data = self._parse_struct_property(spiritform_data, self.MOTHER_STRUCT_PROP,        self.CHARACTER_PARENT_DATA)
-        _, self.father,         spiritform_data = self._parse_struct_property(spiritform_data, self.FATHER_STRUCT_PROP,        self.CHARACTER_PARENT_DATA)
+        _, self.guid,          spiritform_data = self._try_parse_struct_property(spiritform_data, self.UNIQUEID, self.GUID_PROP)
+        _, variant,            spiritform_data = self._try_parse_struct_property(spiritform_data, self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER)
+        _, appearance,         spiritform_data = self._try_parse_struct_property(spiritform_data, self.APPEARANCE,    self.CHARACTER_APPEARANCE)
+        _, self.appliedscheme, spiritform_data = self._try_parse_struct_property(spiritform_data, self.APPLIEDSCHEME, self.CHARACTER_APPLIED_SCHEME)
+        _, mother,             spiritform_data = self._try_parse_struct_property(spiritform_data, self.MOTHER,        self.CHARACTER_PARENT_DATA)
+        _, father,             spiritform_data = self._try_parse_struct_property(spiritform_data, self.FATHER,        self.CHARACTER_PARENT_DATA)
         self.remain = spiritform_data
         
         self.variant = Variant(variant)
         self.appearance = Appearance(appearance)
+        self.mother = Parent(mother)
+        self.father = Parent(father)
     
     def change_form(self, nephelym):
         '''Update spirit form to be incoming nephelym'''
@@ -1751,9 +1746,9 @@ class PlayerSpiritForm(NephelymBase):
         data_out.append(self._try_get_struct_property_bytes(self.guid, self.UNIQUEID, self.GUID_PROP))
         data_out.append(self._try_get_struct_property_bytes(self.variant.get_data(), self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER))
         data_out.append(self._try_get_struct_property_bytes(self.appearance.get_data(), self.APPEARANCE, self.CHARACTER_APPEARANCE))
-        data_out.append(self._get_struct_property_bytes(self.appliedscheme, self.APPLIEDSCHEME_STRUCT_PROP, self.CHARACTER_APPLIED_SCHEME))
-        data_out.append(self._get_struct_property_bytes(self.mother, self.MOTHER_STRUCT_PROP, self.CHARACTER_PARENT_DATA))
-        data_out.append(self._get_struct_property_bytes(self.father, self.FATHER_STRUCT_PROP, self.CHARACTER_PARENT_DATA))
+        data_out.append(self._try_get_struct_property_bytes(self.appliedscheme, self.APPLIEDSCHEME, self.CHARACTER_APPLIED_SCHEME))
+        data_out.append(self._try_get_struct_property_bytes(self.mother.get_data(), self.MOTHER, self.CHARACTER_PARENT_DATA))
+        data_out.append(self._try_get_struct_property_bytes(self.father.get_data(), self.FATHER, self.CHARACTER_PARENT_DATA))
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
 
@@ -1762,17 +1757,27 @@ class Parent(GenericParsers):
     def __init__(self, parent_data):
         self._parse_parent_data(parent_data)
     
-    def _parse_parent_data(parent_data):
-        _, variant, parent_data = self._try_parse_struct_property(parent_data, self.VARIANT, self.GAMEPLAY_TAG_CONTAINER)
-        print(variant)
-        print(parent_data)
-        exit()
+    def _parse_parent_data(self, parent_data):
+        _, variant,   parent_data = self._try_parse_struct_property(parent_data, self.VARIANT, self.GAMEPLAY_TAG_CONTAINER)
+        _, self.name, parent_data = self._try_parse_str_property(parent_data, self.NAME)
+        _, self.guid, parent_data = self._try_parse_struct_property(parent_data, self.UNIQUEID, self.GUID_PROP)
+        self.remain = parent_data
         
+        self.variant = Variant(variant)
+    
+    def new_guid(self, guid=None):
+        if guid == None:
+            guid = bytes.fromhex(uuid.uuid4().hex)
+        self.guid = guid
+    
     def get_data(self):
         bytes_out = []
-        bytes_out.append(len(self.tag_list).to_bytes(4, 'little'))
-        bytes_out.append(self.list_to_bytes(self.tag_list))
+        bytes_out.append(self._try_get_struct_property_bytes(self.variant.get_data(), self.VARIANT, self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_str_property_bytes(self.name, self.NAME))
+        bytes_out.append(self._try_get_struct_property_bytes(self.guid, self.UNIQUEID, self.GUID_PROP))
+        bytes_out.append(self.remain)
         return self.list_to_bytes(bytes_out)
+
 
 '''Nephelym Presets Class'''
 class NephelymPreset(NephelymBase):
@@ -1785,17 +1790,18 @@ class NephelymPreset(NephelymBase):
         self._parse_preset(preset_data)
     
     def _parse_preset(self, preset_data):
-        self.gvas,              preset_data = self._parse_gvas(preset_data)
-        _, self.name,           preset_data = self._try_parse_name_property(preset_data, self.PRESETNAME)
-        _, self.race, self.sex, preset_data = self._parse_variant(preset_data)
-        _, appearance,          preset_data = self._try_parse_struct_property(preset_data, self.SCHEME, self.CHARACTER_APPEARANCE)
-        _, self.common,         preset_data = self._try_parse_bool_property(preset_data, self.COMMON)
-        _, self.uncommon,       preset_data = self._try_parse_bool_property(preset_data, self.UNCOMMON)
-        _, self.rare,           preset_data = self._try_parse_bool_property(preset_data, self.RARE)
-        _, self.unique,         preset_data = self._try_parse_bool_property(preset_data, self.UNIQUE)
-        _, self.legendary,      preset_data = self._try_parse_bool_property(preset_data, self.LEGENDARY)
+        self.gvas,         preset_data = self._parse_gvas(preset_data)
+        _, self.name,      preset_data = self._try_parse_name_property(preset_data, self.PRESETNAME)
+        _, variant,        preset_data = self._try_parse_struct_property(preset_data, self.VARIANT, self.GAMEPLAY_TAG_CONTAINER)
+        _, appearance,     preset_data = self._try_parse_struct_property(preset_data, self.SCHEME, self.CHARACTER_APPEARANCE)
+        _, self.common,    preset_data = self._try_parse_bool_property(preset_data, self.COMMON)
+        _, self.uncommon,  preset_data = self._try_parse_bool_property(preset_data, self.UNCOMMON)
+        _, self.rare,      preset_data = self._try_parse_bool_property(preset_data, self.RARE)
+        _, self.unique,    preset_data = self._try_parse_bool_property(preset_data, self.UNIQUE)
+        _, self.legendary, preset_data = self._try_parse_bool_property(preset_data, self.LEGENDARY)
         self.remain = preset_data
         
+        self.variant = Variant(variant)
         self.appearance = Appearance(appearance)
     
     def _parse_gvas(self, preset_data):
@@ -1808,7 +1814,7 @@ class NephelymPreset(NephelymBase):
         data_out = []
         data_out.append(self.gvas)
         data_out.append(self._try_get_name_property_bytes(self.name, self.PRESETNAME))
-        data_out.append(self._get_variant_bytes([self.race, self.sex]))
+        data_out.append(self._try_get_struct_property_bytes(self.variant.get_data(), self.VARIANT, self.GAMEPLAY_TAG_CONTAINER))
         data_out.append(self._try_get_struct_property_bytes(self.appearance.get_data(), self.SCHEME, self.CHARACTER_APPEARANCE))
         data_out.append(self._try_get_bool_property_bytes(self.common,    self.COMMON))
         data_out.append(self._try_get_bool_property_bytes(self.uncommon,  self.UNCOMMON))
@@ -2997,21 +3003,32 @@ class PlayerObtainedVariants(GenericParsers):
 
 class TagContainer(GenericParsers):
     def __init__(self, tag_bytes):
-        self.tag_list, remain = self.split_byte_list(tag_bytes)
+        self.tags = []
+        tags, remain = self.split_byte_list(tag_bytes)
         if remain:
             raise
-        
+        for tag in tags:
+            self.tags.append(tag[4:])
+    
+    def _fixed_tags(self):
+        tags_out = []
+        for tag in self.tags:
+            tags_out.append(self.append_length(tag))
+        return tags_out
+    
     def get_data(self):
         bytes_out = []
-        bytes_out.append(len(self.tag_list).to_bytes(4, 'little'))
-        bytes_out.append(self.list_to_bytes(self.tag_list))
+        bytes_out.append(len(self.tags).to_bytes(4, 'little'))
+        bytes_out.append(self.list_to_bytes(self._fixed_tags()))
         return self.list_to_bytes(bytes_out)
 
 class Variant(GenericParsers):
     def __init__(self, variant_data):
-        if variant_data == b'': #Defualt Variant type
-            self.race = self.RACES['vulpuss']
-            self.sex = self.SEXES['female']
+        self._has_data = True
+        if variant_data == b'': # No variant, Spirit form
+            self._has_data = False
+            self.race = b''
+            self.sex = b''
         elif isinstance(variant_data, list):
             self.race = variant_data[0][4:]
             self.sex  = variant_data[1][4:]
@@ -3020,18 +3037,38 @@ class Variant(GenericParsers):
     
     def _parse_variant_data(self, variant_data):
         variant_data_list, remain = self.split_byte_list(variant_data)
-        if len(variant_data_list) != 2:
+        if len(variant_data_list) == 0:
+            self.race = b''
+            self.sex = b''
+        elif len(variant_data_list) != 2:
             raise Exception(f'Invalid Variant block. expected 2 values, got {len(variant_data_list)}')
-        if remain:
+        elif remain:
             raise Exception(f'Invalid Variant block. Unexpected traiting data:\n{remain}')
-        self.race = variant_data_list[0][4:]
-        self.sex  = variant_data_list[1][4:]
+        else:
+            self.race = variant_data_list[0][4:]
+            self.sex  = variant_data_list[1][4:]
+    
+    def _calc_output(self):
+        length = 0
+        race = b''
+        sex = b''
+        if self.race != b'':
+            race = self.append_length(self.race)
+            length += 1
+        if self.sex != b'':
+            sex = self.append_length(self.sex)
+            length += 1
+        if length > 0:
+            self._has_data = True
+        return length, race, sex
     
     def get_data(self):
+        length, race, sex = self._calc_output()
         bytes_out = []
-        bytes_out.append(int(2).to_bytes(4, 'little') )
-        bytes_out.append(self.append_length(self.race))
-        bytes_out.append(self.append_length(self.sex) )
+        if self._has_data:
+            bytes_out.append(length.to_bytes(4, 'little') )
+            bytes_out.append(race)
+            bytes_out.append(sex)
         return self.list_to_bytes(bytes_out)
 
 
@@ -3154,7 +3191,7 @@ class NephelymSaveEditor(Appearance):
                 ignore_breeder = False
                 new_nephelyms.append(nephelym)
                 continue
-            for trait in nephelym.traits:
+            for trait in nephelym.traits.tags:
                 if trait in self.TRAIT_SIZE.values():
                     nephelym.remove_trait(trait)
             for size in self.TRAIT_SIZE.values():
@@ -3166,8 +3203,8 @@ class NephelymSaveEditor(Appearance):
     def export_nephelym(self, nephelym):
         '''Export datablock to file for nephelym, useful for debugging'''
         name = nephelym.name.strip(b'\x00').decode('utf-8')
-        race = nephelym.race.strip(b'\x00').decode('utf-8')
-        sex  = nephelym.sex.strip(b'\x00').decode('utf-8')
+        race = nephelym.variant.race.strip(b'\x00').decode('utf-8')
+        sex  = nephelym.variant.sex.strip(b'\x00').decode('utf-8')
         file_name = f"{name}_{race}_{sex}.bin"
         with open(file_name, 'wb') as f:
             f.write(nephelym.get_data())
@@ -3201,24 +3238,24 @@ class NephelymSaveEditor(Appearance):
         new_nephelym = template_nephelym.clone()
         new_nephelym.change_appearance(preset)
         new_nephelym.change_name(preset.name)
-        new_nephelym.change_race(preset.race)
-        new_nephelym.change_sex(preset.sex)
+        new_nephelym.change_race(preset.variant.race)
+        new_nephelym.change_sex(preset.variant.sex)
         return new_nephelym
 
     def nephelym_to_preset(self, preset_in_path, nephelym, preset_out_path=None):
         preset_template = NephelymPreset(preset_in_path)
-        preset_template.race = nephelym.race
-        if nephelym.sex == self.SEXES['futa']:
-            preset_template.sex = self.SEXES['female']
+        preset_template.variant.race = nephelym.variant.race
+        if nephelym.variant.sex == self.SEXES['futa']:
+            preset_template.variant.sex = self.SEXES['female']
         else:
-            preset_template.sex = nephelym.sex
+            preset_template.variant.sex = nephelym.variant.sex
         preset_template.name = nephelym.name
         preset_template.appearance = nephelym.appearance
         
         if preset_out_path == None:
-            race_out = preset_template.race[:-1].decode('utf-8').split('Race.')[-1].replace('.','_')
-            sex_out = preset_template.sex[:-1].decode('utf-8').split('Sex.')[-1].replace('.','_')
-            name_out = preset_template.name[:-1].decode('utf-8')
+            race_out = preset_template.variant.race[:-1].decode('utf-8').split('Race.')[-1].replace('.','_')
+            sex_out = preset_template.variant.sex[:-1].decode('utf-8').split('Sex.')[-1].replace('.','_')
+            name_out = preset_template.variant.name[:-1].decode('utf-8')
             preset_out_path = os.path.join(os.path.split(preset_in_path)[0], f'CP_{race_out}_{sex_out}_{name_out}.sav')
         
         self.write_save(preset_out_path, preset_template.get_data())
@@ -3247,7 +3284,7 @@ if __name__ == "__main__":
     preset_folder = r'..\CharacterPresets'
     
     # DEBUGGING: test if parsing and save of save works.
-    # Files should be identical, with execption of maybe spiritform variant and some additional gameplaytags container
+    # Files should be identical, with execption of maybe some additional gameplaytags container
     if True:
         NephelymSaveEditor(save_in).save(save_out)
         exit()
@@ -3311,9 +3348,6 @@ if __name__ == "__main__":
     
     # Breeder/Player is always the first Nephelym unless changed in the save header
     breeder = nephelym_save_editor.nephelyms[0]
-    
-    print(breeder.mother)
-    print(breeder.father)
     
     # Change the Spirit form to be breeder. Any NephelymBase derived object will work
     nephelym_save_editor.playerspiritform.change_form(breeder)
