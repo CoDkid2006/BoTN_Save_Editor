@@ -459,26 +459,87 @@ class ByteMacros:
     GAMEPLAY_TAG_CONTAINER = b'\x15\x00\x00\x00\x47\x61\x6D\x65\x70\x6C\x61\x79\x54\x61\x67\x43\x6F\x6E\x74\x61\x69\x6E\x65\x72\x00' + STRUCT_PADDING
     
     
+    #Appearance
     APPEARANCE = b'\x0B\x00\x00\x00\x41\x70\x70\x65\x61\x72\x61\x6E\x63\x65\x00'
-    SPLATTER = b'\x09\x00\x00\x00\x53\x70\x6C\x61\x74\x74\x65\x72\x00'
-    CITARGETVALUE = b'\x0E\x00\x00\x00\x43\x49\x54\x61\x72\x67\x65\x74\x56\x61\x6C\x75\x65\x00'
-    CIBUFFER = b'\x09\x00\x00\x00\x43\x49\x42\x75\x66\x66\x65\x72\x00'
     
     CHARACTER_APPEARANCE = b'\x14\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x41\x70\x70\x65\x61\x72\x61\x6E\x63\x65\x00' + STRUCT_PADDING
+    
+    
+    #Body Splatter
+    SPLATTER = b'\x09\x00\x00\x00\x53\x70\x6C\x61\x74\x74\x65\x72\x00'
+    VAGINASPLATTER = b'\x0F\x00\x00\x00\x56\x61\x67\x69\x6E\x61\x53\x70\x6C\x61\x74\x74\x65\x72\x00'
+    DICKSPLATTER = b'\x0D\x00\x00\x00\x44\x69\x63\x6B\x53\x70\x6C\x61\x74\x74\x65\x72\x00'
+    BODYSPLATTER = b'\x0D\x00\x00\x00\x42\x6F\x64\x79\x53\x70\x6C\x61\x74\x74\x65\x72\x00'
+    MOUTHSPLATTER = b'\x0E\x00\x00\x00\x4D\x6F\x75\x74\x68\x53\x70\x6C\x61\x74\x74\x65\x72\x00'
+    COLOR = b'\x06\x00\x00\x00\x43\x6F\x6C\x6F\x72\x00'
+    GLOW = b'\x05\x00\x00\x00\x47\x6C\x6F\x77\x00'
+    METAL = b'\x06\x00\x00\x00\x4D\x65\x74\x61\x6C\x00'
+    
+    
     FLUID_SPLATTER = b'\x0E\x00\x00\x00\x46\x6C\x75\x69\x64\x53\x70\x6C\x61\x74\x74\x65\x72\x00' + STRUCT_PADDING
-    CHARACTER_MORPH = b'\x0F\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x4D\x6F\x72\x70\x68\x00' + STRUCT_PADDING
+    BODY_FLUID_MATERIAL = b'\x12\x00\x00\x00\x42\x6F\x64\x79\x46\x6C\x75\x69\x64\x4D\x61\x74\x65\x72\x69\x61\x6C\x00' + STRUCT_PADDING
     
     
-    #FloatProp
+    #BODY CI
+    CITARGETVALUE = b'\x0E\x00\x00\x00\x43\x49\x54\x61\x72\x67\x65\x74\x56\x61\x6C\x75\x65\x00'
+    CIBUFFER = b'\x09\x00\x00\x00\x43\x49\x42\x75\x66\x66\x65\x72\x00'
     CIRATE  = b'\x07\x00\x00\x00\x43\x49\x52\x61\x74\x65\x00'
     CIALPHA = b'\x08\x00\x00\x00\x43\x49\x41\x6C\x70\x68\x61\x00'
+    
+    CHARACTER_MORPH = b'\x0F\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x4D\x6F\x72\x70\x68\x00' + STRUCT_PADDING
+    
     
     #StructProp
     APPLIEDSCHEME = b'\x0E\x00\x00\x00\x41\x70\x70\x6C\x69\x65\x64\x53\x63\x68\x65\x6D\x65\x00'
     STAT = b'\x06\x00\x00\x00\x53\x74\x61\x74\x73\x00'
+    XP = b'\x03\x00\x00\x00\x58\x50\x00'
+    XPTARGET = b'\x09\x00\x00\x00\x58\x50\x54\x61\x72\x67\x65\x74\x00'
+    EXCITEMENT = b'\x0B\x00\x00\x00\x45\x78\x63\x69\x74\x65\x6D\x65\x6E\x74\x00'
+    LUST = b'\x05\x00\x00\x00\x4C\x75\x73\x74\x00'
+    LUSTMAX = b'\x08\x00\x00\x00\x4C\x75\x73\x74\x4D\x61\x78\x00'
+    FERTILITY = b'\x0A\x00\x00\x00\x46\x65\x72\x74\x69\x6C\x69\x74\x79\x00'
+    BREEDINGFERTILITY = b'\x12\x00\x00\x00\x42\x72\x65\x65\x64\x69\x6E\x67\x46\x65\x72\x74\x69\x6C\x69\x74\x79\x00'
+    FERTILITYRANK = b'\x0E\x00\x00\x00\x46\x65\x72\x74\x69\x6C\x69\x74\x79\x52\x61\x6E\x6B\x00'
+    STRENGTH = b'\x09\x00\x00\x00\x53\x74\x72\x65\x6E\x67\x74\x68\x00'
+    BREEDINGSTRENGTH = b'\x11\x00\x00\x00\x42\x72\x65\x65\x64\x69\x6E\x67\x53\x74\x72\x65\x6E\x67\x74\x68\x00'
+    STRENGTHRANK = b'\x0D\x00\x00\x00\x53\x74\x72\x65\x6E\x67\x74\x68\x52\x61\x6E\x6B\x00'
+    ALLURE = b'\x07\x00\x00\x00\x41\x6C\x6C\x75\x72\x65\x00'
+    BREEDINGALLURE = b'\x0F\x00\x00\x00\x42\x72\x65\x65\x64\x69\x6E\x67\x41\x6C\x6C\x75\x72\x65\x00'
+    ALLURERANK = b'\x0B\x00\x00\x00\x41\x6C\x6C\x75\x72\x65\x52\x61\x6E\x6B\x00'
+    WILLPOWER = b'\x0A\x00\x00\x00\x57\x69\x6C\x6C\x70\x6F\x77\x65\x72\x00'
+    BREEDINGWILLPOWER = b'\x12\x00\x00\x00\x42\x72\x65\x65\x64\x69\x6E\x67\x57\x69\x6C\x6C\x70\x6F\x77\x65\x72\x00'
+    WILLPOWERRANK = b'\x0E\x00\x00\x00\x57\x69\x6C\x6C\x70\x6F\x77\x65\x72\x52\x61\x6E\x6B\x00'
+    DEXTERITY = b'\x0A\x00\x00\x00\x44\x65\x78\x74\x65\x72\x69\x74\x79\x00'
+    BREEDINGDEXTERITY = b'\x12\x00\x00\x00\x42\x72\x65\x65\x64\x69\x6E\x67\x44\x65\x78\x74\x65\x72\x69\x74\x79\x00'
+    DEXTERITYRANK = b'\x0E\x00\x00\x00\x44\x65\x78\x74\x65\x72\x69\x74\x79\x52\x61\x6E\x6B\x00'
+    DAILYSEXCOUNTER = b'\x10\x00\x00\x00\x44\x61\x69\x6C\x79\x53\x65\x78\x43\x6F\x75\x6E\x74\x65\x72\x00'
+    DAILYFEDCOUNTER = b'\x10\x00\x00\x00\x44\x61\x69\x6C\x79\x46\x65\x64\x43\x6F\x75\x6E\x74\x65\x72\x00'
+    DAYSPREGNANT = b'\x0D\x00\x00\x00\x44\x61\x79\x73\x50\x72\x65\x67\x6E\x61\x6E\x74\x00'
+    VALUE = b'\x06\x00\x00\x00\x56\x61\x6C\x75\x65\x00'
+    RARITY = b'\x07\x00\x00\x00\x52\x61\x72\x69\x74\x79\x00'
     
     CHARACTER_APPLIED_SCHEME = b'\x17\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x41\x70\x70\x6C\x69\x65\x64\x53\x63\x68\x65\x6D\x65\x00' + STRUCT_PADDING
     CHARACTER_STATS = b'\x0F\x00\x00\x00\x43\x68\x61\x72\x61\x63\x74\x65\x72\x53\x74\x61\x74\x73\x00' + STRUCT_PADDING
+    
+    #Prefrences
+    PREFERENCES = b'\x0C\x00\x00\x00\x50\x72\x65\x66\x65\x72\x65\x6E\x63\x65\x73\x00'
+    VARIANTRANK = b'\x0C\x00\x00\x00\x56\x61\x72\x69\x61\x6E\x74\x52\x61\x6E\x6B\x00'
+    VARIANTVALUE = b'\x0D\x00\x00\x00\x56\x61\x72\x69\x61\x6E\x74\x56\x61\x6C\x75\x65\x00'
+    BODYTYPE = b'\x09\x00\x00\x00\x42\x6F\x64\x79\x54\x79\x70\x65\x00'
+    BODYTYPERANK = b'\x0D\x00\x00\x00\x42\x6F\x64\x79\x54\x79\x70\x65\x52\x61\x6E\x6B\x00'
+    BODYTYPEVALUE = b'\x0E\x00\x00\x00\x42\x6F\x64\x79\x54\x79\x70\x65\x56\x61\x6C\x75\x65\x00'
+    SIZE = b'\x05\x00\x00\x00\x53\x69\x7A\x65\x00'
+    SIZERANK = b'\x09\x00\x00\x00\x53\x69\x7A\x65\x52\x61\x6E\x6B\x00'
+    SIZEVALUE = b'\x0A\x00\x00\x00\x53\x69\x7A\x65\x56\x61\x6C\x75\x65\x00'
+    POSITION = b'\x09\x00\x00\x00\x50\x6F\x73\x69\x74\x69\x6F\x6E\x00'
+    POSITIONRANK = b'\x0D\x00\x00\x00\x50\x6F\x73\x69\x74\x69\x6F\x6E\x52\x61\x6E\x6B\x00'
+    POSITIONVALUE = b'\x0E\x00\x00\x00\x50\x6F\x73\x69\x74\x69\x6F\x6E\x56\x61\x6C\x75\x65\x00'
+        
+    MONSTER = b'\x08\x00\x00\x00\x4D\x6F\x6E\x73\x74\x65\x72\x00'
+    MONSTERRANK = b'\x0C\x00\x00\x00\x4D\x6F\x6E\x73\x74\x65\x72\x52\x61\x6E\x6B\x00'
+    MONSTERVALUE = b'\x0D\x00\x00\x00\x4D\x6F\x6E\x73\x74\x65\x72\x56\x61\x6C\x75\x65\x00'
+    
+    BREEDING_PREFERENCES = b'\x14\x00\x00\x00\x42\x72\x65\x65\x64\x69\x6E\x67\x50\x72\x65\x66\x65\x72\x65\x6E\x63\x65\x73\x00' + STRUCT_PADDING
     
     
     #Parents
@@ -1522,18 +1583,18 @@ class NephelymBase(GenericParsers):
         _, self.lastmatesexcount, nephelym_data = self._try_parse_byte_property(nephelym_data, self.LASTMATESEXCOUNT)
         self.remain = nephelym_data
         
-        self.variant = Variant(variant)
-        self.appearance = Appearance(appearance)
-        self.splatter = splatter
-        self.citargetvalue = citargetvalue
-        self.cibuffer = cibuffer
-        self.appliedscheme = appliedscheme
-        self.stats = stats
-        self.mother = Parent(mother)
-        self.father = Parent(father)
-        self.traits     = TagContainer(traits)
-        self.playertags = TagContainer(playertags)
-        self.states     = TagContainer(states)
+        self.variant        = Variant(variant)
+        self.appearance     = Appearance(appearance)
+        self.splatter       = Splatter(splatter)
+        self.citargetvalue  = Morph(citargetvalue)
+        self.cibuffer       = Morph(cibuffer)
+        self.appliedscheme  = Appliedscheme(appliedscheme)
+        self.stats          = Stats(stats)
+        self.mother         = Parent(mother)
+        self.father         = Parent(father)
+        self.traits         = TagContainer(traits)
+        self.playertags     = TagContainer(playertags)
+        self.states         = TagContainer(states)
      
     def _format_trait(self, trait, level):
         if trait in self.NEPHELYM_TRAITS:
@@ -1596,13 +1657,13 @@ class NephelymBase(GenericParsers):
         data_out.append(self._try_get_struct_property_bytes(self.guid, self.UNIQUEID, self.GUID_PROP))
         data_out.append(self._try_get_struct_property_bytes(self.variant.get_data(), self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER))
         data_out.append(self._try_get_struct_property_bytes(self.appearance.get_data(), self.APPEARANCE, self.CHARACTER_APPEARANCE))
-        data_out.append(self._try_get_struct_property_bytes(self.splatter, self.SPLATTER, self.FLUID_SPLATTER))
-        data_out.append(self._try_get_struct_property_bytes(self.citargetvalue, self.CITARGETVALUE, self.CHARACTER_MORPH))
-        data_out.append(self._try_get_struct_property_bytes(self.cibuffer, self.CIBUFFER, self.CHARACTER_MORPH))
+        data_out.append(self._try_get_struct_property_bytes(self.splatter.get_data(), self.SPLATTER, self.FLUID_SPLATTER))
+        data_out.append(self._try_get_struct_property_bytes(self.citargetvalue.get_data(), self.CITARGETVALUE, self.CHARACTER_MORPH))
+        data_out.append(self._try_get_struct_property_bytes(self.cibuffer.get_data(), self.CIBUFFER, self.CHARACTER_MORPH))
         data_out.append(self._try_get_float_property_bytes(self.cirate, self.CIRATE))
         data_out.append(self._try_get_float_property_bytes(self.cialpha, self.CIALPHA))
-        data_out.append(self._try_get_struct_property_bytes(self.appliedscheme, self.APPLIEDSCHEME, self.CHARACTER_APPLIED_SCHEME))
-        data_out.append(self._try_get_struct_property_bytes(self.stats, self.STAT, self.CHARACTER_STATS))
+        data_out.append(self._try_get_struct_property_bytes(self.appliedscheme.get_data(), self.APPLIEDSCHEME, self.CHARACTER_APPLIED_SCHEME))
+        data_out.append(self._try_get_struct_property_bytes(self.stats.get_data(), self.STAT, self.CHARACTER_STATS))
         data_out.append(self._try_get_struct_property_bytes(self.mother.get_data(), self.MOTHER, self.CHARACTER_PARENT_DATA))
         data_out.append(self._try_get_struct_property_bytes(self.father.get_data(), self.FATHER, self.CHARACTER_PARENT_DATA))
         data_out.append(self._try_get_struct_property_bytes(self.traits.get_data(), self.TRAITS, self.GAMEPLAY_TAG_CONTAINER))
@@ -1714,7 +1775,7 @@ class Nephelym(NephelymBase):
         clone = self.copy()
         clone.new_guid()
         clone.replace_mother_guid()
-        clone.replace_mother_guid()
+        clone.replace_father_guid()
         return clone
 
 class PlayerSpiritForm(NephelymBase):
@@ -1722,16 +1783,17 @@ class PlayerSpiritForm(NephelymBase):
         self._parse_spiritform_data(spiritform_data)
     
     def _parse_spiritform_data(self, spiritform_data):
-        _, self.guid,          spiritform_data = self._try_parse_struct_property(spiritform_data, self.UNIQUEID, self.GUID_PROP)
-        _, variant,            spiritform_data = self._try_parse_struct_property(spiritform_data, self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER)
-        _, appearance,         spiritform_data = self._try_parse_struct_property(spiritform_data, self.APPEARANCE,    self.CHARACTER_APPEARANCE)
-        _, self.appliedscheme, spiritform_data = self._try_parse_struct_property(spiritform_data, self.APPLIEDSCHEME, self.CHARACTER_APPLIED_SCHEME)
-        _, mother,             spiritform_data = self._try_parse_struct_property(spiritform_data, self.MOTHER,        self.CHARACTER_PARENT_DATA)
-        _, father,             spiritform_data = self._try_parse_struct_property(spiritform_data, self.FATHER,        self.CHARACTER_PARENT_DATA)
+        _, self.guid,     spiritform_data = self._try_parse_struct_property(spiritform_data, self.UNIQUEID, self.GUID_PROP)
+        _, variant,       spiritform_data = self._try_parse_struct_property(spiritform_data, self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER)
+        _, appearance,    spiritform_data = self._try_parse_struct_property(spiritform_data, self.APPEARANCE,    self.CHARACTER_APPEARANCE)
+        _, appliedscheme, spiritform_data = self._try_parse_struct_property(spiritform_data, self.APPLIEDSCHEME, self.CHARACTER_APPLIED_SCHEME)
+        _, mother,        spiritform_data = self._try_parse_struct_property(spiritform_data, self.MOTHER,        self.CHARACTER_PARENT_DATA)
+        _, father,        spiritform_data = self._try_parse_struct_property(spiritform_data, self.FATHER,        self.CHARACTER_PARENT_DATA)
         self.remain = spiritform_data
         
         self.variant = Variant(variant)
         self.appearance = Appearance(appearance)
+        self.appliedscheme = Appliedscheme(appliedscheme)
         self.mother = Parent(mother)
         self.father = Parent(father)
     
@@ -1746,12 +1808,11 @@ class PlayerSpiritForm(NephelymBase):
         data_out.append(self._try_get_struct_property_bytes(self.guid, self.UNIQUEID, self.GUID_PROP))
         data_out.append(self._try_get_struct_property_bytes(self.variant.get_data(), self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER))
         data_out.append(self._try_get_struct_property_bytes(self.appearance.get_data(), self.APPEARANCE, self.CHARACTER_APPEARANCE))
-        data_out.append(self._try_get_struct_property_bytes(self.appliedscheme, self.APPLIEDSCHEME, self.CHARACTER_APPLIED_SCHEME))
+        data_out.append(self._try_get_struct_property_bytes(self.appliedscheme.get_data(), self.APPLIEDSCHEME, self.CHARACTER_APPLIED_SCHEME))
         data_out.append(self._try_get_struct_property_bytes(self.mother.get_data(), self.MOTHER, self.CHARACTER_PARENT_DATA))
         data_out.append(self._try_get_struct_property_bytes(self.father.get_data(), self.FATHER, self.CHARACTER_PARENT_DATA))
         data_out.append(self.remain)
         return self.list_to_bytes(data_out)
-
 
 class Parent(GenericParsers):
     def __init__(self, parent_data):
@@ -1775,6 +1836,159 @@ class Parent(GenericParsers):
         bytes_out.append(self._try_get_struct_property_bytes(self.variant.get_data(), self.VARIANT, self.GAMEPLAY_TAG_CONTAINER))
         bytes_out.append(self._try_get_str_property_bytes(self.name, self.NAME))
         bytes_out.append(self._try_get_struct_property_bytes(self.guid, self.UNIQUEID, self.GUID_PROP))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
+
+
+'''Nephelym Stat Classes'''
+class Stats(GenericParsers):
+    def __init__(self, stats_bytes):
+        self._parse_stats_bytes(stats_bytes)
+    
+    def _parse_stats_bytes(self, stats_bytes):
+        _, self.xp,                 stats_bytes = self._try_parse_int_property(stats_bytes,    self.XP)
+        _, self.xptarget,           stats_bytes = self._try_parse_int_property(stats_bytes,    self.XPTARGET)
+        _, self.level,              stats_bytes = self._try_parse_int_property(stats_bytes,    self.LEVEL)
+        _, self.excitement,         stats_bytes = self._try_parse_int_property(stats_bytes,    self.EXCITEMENT)
+        _, self.lust,               stats_bytes = self._try_parse_int_property(stats_bytes,    self.LUST)
+        _, self.lustmax,            stats_bytes = self._try_parse_int_property(stats_bytes,    self.LUSTMAX)
+        _, self.fertility,          stats_bytes = self._try_parse_int_property(stats_bytes,    self.FERTILITY)
+        _, self.breedingfertility,  stats_bytes = self._try_parse_int_property(stats_bytes,    self.BREEDINGFERTILITY)
+        _, self.fertilityrank,      stats_bytes = self._try_parse_byte_property(stats_bytes,   self.FERTILITYRANK)
+        _, self.strength,           stats_bytes = self._try_parse_int_property(stats_bytes,    self.STRENGTH)
+        _, self.breedingstrength,   stats_bytes = self._try_parse_int_property(stats_bytes,    self.BREEDINGSTRENGTH)
+        _, self.strengthrank,       stats_bytes = self._try_parse_byte_property(stats_bytes,   self.STRENGTHRANK)
+        _, self.allure,             stats_bytes = self._try_parse_int_property(stats_bytes,    self.ALLURE)
+        _, self.breedingallure,     stats_bytes = self._try_parse_int_property(stats_bytes,    self.BREEDINGALLURE)
+        _, self.allurerank,         stats_bytes = self._try_parse_byte_property(stats_bytes,   self.ALLURERANK)
+        _, self.willpower,          stats_bytes = self._try_parse_int_property(stats_bytes,    self.WILLPOWER)
+        _, self.breedingwillpower,  stats_bytes = self._try_parse_int_property(stats_bytes,    self.BREEDINGWILLPOWER)
+        _, self.willpowerrank,      stats_bytes = self._try_parse_byte_property(stats_bytes,   self.WILLPOWERRANK)
+        _, self.dexterity,          stats_bytes = self._try_parse_int_property(stats_bytes,    self.DEXTERITY)
+        _, self.breedingdexterity,  stats_bytes = self._try_parse_int_property(stats_bytes,    self.BREEDINGDEXTERITY)
+        _, self.dexterityrank,      stats_bytes = self._try_parse_byte_property(stats_bytes,   self.DEXTERITYRANK)
+        _, self.dailysexcounter,    stats_bytes = self._try_parse_byte_property(stats_bytes,   self.DAILYSEXCOUNTER)
+        _, self.dailyfedcounter,    stats_bytes = self._try_parse_byte_property(stats_bytes,   self.DAILYFEDCOUNTER)
+        _, self.dayspregnant,       stats_bytes = self._try_parse_byte_property(stats_bytes,   self.DAYSPREGNANT)
+        _, self.value,              stats_bytes = self._try_parse_int_property(stats_bytes,    self.VALUE)
+        _, self.rarity,             stats_bytes = self._try_parse_byte_property(stats_bytes,   self.RARITY)
+        _, preferences,             stats_bytes = self._try_parse_struct_property(stats_bytes, self.PREFERENCES, self.BREEDING_PREFERENCES)
+        self.remain = stats_bytes
+        
+        self.prefrences = Prefrences(preferences)
+    
+    def get_data(self):
+        bytes_out = []
+        bytes_out.append(self._try_get_int_property_bytes(self.xp,                self.XP))
+        bytes_out.append(self._try_get_int_property_bytes(self.xptarget,          self.XPTARGET))
+        bytes_out.append(self._try_get_int_property_bytes(self.level,             self.LEVEL))
+        bytes_out.append(self._try_get_int_property_bytes(self.excitement,        self.EXCITEMENT))
+        bytes_out.append(self._try_get_int_property_bytes(self.lust,              self.LUST))
+        bytes_out.append(self._try_get_int_property_bytes(self.lustmax,           self.LUSTMAX))
+        bytes_out.append(self._try_get_int_property_bytes(self.fertility,         self.FERTILITY))
+        bytes_out.append(self._try_get_int_property_bytes(self.breedingfertility, self.BREEDINGFERTILITY))
+        bytes_out.append(self._try_get_byte_property_bytes(self.fertilityrank,     self.FERTILITYRANK))
+        bytes_out.append(self._try_get_int_property_bytes(self.strength,          self.STRENGTH))
+        bytes_out.append(self._try_get_int_property_bytes(self.breedingstrength,  self.BREEDINGSTRENGTH))
+        bytes_out.append(self._try_get_byte_property_bytes(self.strengthrank,     self.STRENGTHRANK))
+        bytes_out.append(self._try_get_int_property_bytes(self.allure,            self.ALLURE))
+        bytes_out.append(self._try_get_int_property_bytes(self.breedingallure,    self.BREEDINGALLURE))
+        bytes_out.append(self._try_get_byte_property_bytes(self.allurerank,       self.ALLURERANK))
+        bytes_out.append(self._try_get_int_property_bytes(self.willpower,         self.WILLPOWER))
+        bytes_out.append(self._try_get_int_property_bytes(self.breedingwillpower, self.BREEDINGWILLPOWER))
+        bytes_out.append(self._try_get_byte_property_bytes(self.willpowerrank,    self.WILLPOWERRANK))
+        bytes_out.append(self._try_get_int_property_bytes(self.dexterity,         self.DEXTERITY))
+        bytes_out.append(self._try_get_int_property_bytes(self.breedingdexterity, self.BREEDINGDEXTERITY))
+        bytes_out.append(self._try_get_byte_property_bytes(self.dexterityrank,    self.DEXTERITYRANK))
+        bytes_out.append(self._try_get_byte_property_bytes(self.dailysexcounter,  self.DAILYSEXCOUNTER))
+        bytes_out.append(self._try_get_byte_property_bytes(self.dailyfedcounter,  self.DAILYFEDCOUNTER))
+        bytes_out.append(self._try_get_byte_property_bytes(self.dayspregnant,     self.DAYSPREGNANT))
+        bytes_out.append(self._try_get_int_property_bytes(self.value,             self.VALUE))
+        bytes_out.append(self._try_get_byte_property_bytes(self.rarity,           self.RARITY))
+        bytes_out.append(self._try_get_struct_property_bytes(self.prefrences.get_data(), self.PREFERENCES, self.BREEDING_PREFERENCES))
+        
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
+
+class Color(GenericParsers):
+    def __init__(self, color_bytes):
+        self._parse_color_bytes(color_bytes)
+    
+    def _parse_color_bytes(self, color_bytes):
+        _, color,             color_bytes = self._try_parse_struct_property(color_bytes, self.COLOR, self.LINEAR_COLOR)
+        _, glow,              color_bytes = self._try_parse_struct_property(color_bytes, self.GLOW,  self.LINEAR_COLOR)
+        _, self.metal,        color_bytes = self._try_parse_float_property(color_bytes, self.METAL)
+        _, self.roughnessmin, color_bytes = self._try_parse_float_property(color_bytes, self.ROUGHNESSMIN)
+        _, self.roughnessmax, color_bytes = self._try_parse_float_property(color_bytes, self.ROUGHNESSMAX)
+        self.remain = color_bytes
+        
+        self.color = LinearColor(color)
+        self.glow = LinearColor(glow)
+    
+    def get_data(self):
+        bytes_out = []
+        bytes_out.append(self._try_get_struct_property_bytes(self.color.get_data(), self.COLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.glow.get_data(), self.GLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.metal, self.METAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.roughnessmin, self.ROUGHNESSMIN))
+        bytes_out.append(self._try_get_float_property_bytes(self.roughnessmax, self.ROUGHNESSMAX))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
+
+class Prefrences(GenericParsers):
+    def __init__(self, prefrences_bytes):
+        self._parse_prefrences_byte(prefrences_bytes)
+    
+    def _parse_prefrences_byte(self, prefrences_bytes):
+        _, variant,             prefrences_bytes = self._try_parse_struct_property(prefrences_bytes, self.VARIANT, self.GAMEPLAY_TAG_CONTAINER)
+        _, self.variantrank,    prefrences_bytes = self._try_parse_byte_property(prefrences_bytes, self.VARIANTRANK)
+        _, self.variantvalue,   prefrences_bytes = self._try_parse_byte_property(prefrences_bytes, self.VARIANTVALUE)
+        _, bodytype,            prefrences_bytes = self._try_parse_struct_property(prefrences_bytes, self.BODYTYPE, self.GAMEPLAY_TAG)
+        _, self.bodytyperank,   prefrences_bytes = self._try_parse_byte_property(prefrences_bytes, self.BODYTYPERANK)
+        _, self.bodytypevalue,  prefrences_bytes = self._try_parse_byte_property(prefrences_bytes, self.BODYTYPEVALUE)
+        _, size,                prefrences_bytes = self._try_parse_struct_property(prefrences_bytes, self.SIZE, self.GAMEPLAY_TAG)
+        _, self.sizerank,       prefrences_bytes = self._try_parse_byte_property(prefrences_bytes, self.SIZERANK)
+        _, self.sizevalue,      prefrences_bytes = self._try_parse_byte_property(prefrences_bytes, self.SIZEVALUE)
+        _, position,            prefrences_bytes = self._try_parse_struct_property(prefrences_bytes, self.POSITION, self.GAMEPLAY_TAG)
+        _, self.positionrank,   prefrences_bytes = self._try_parse_byte_property(prefrences_bytes, self.POSITIONRANK)
+        _, self.positionvalue,  prefrences_bytes = self._try_parse_byte_property(prefrences_bytes, self.POSITIONVALUE)
+        _, self.monster,        prefrences_bytes = self._try_parse_struct_property(prefrences_bytes, self.MONSTER, self.GUID_PROP)
+        _, self.monsterrank,    prefrences_bytes = self._try_parse_byte_property(prefrences_bytes, self.MONSTERRANK)
+        _, self.monstervalue,   prefrences_bytes = self._try_parse_byte_property(prefrences_bytes, self.MONSTERVALUE)
+        self.remain = prefrences_bytes
+        
+        self.variant  = Variant(variant)
+        self.bodytype = Name(bodytype)
+        self.size     = Name(size)
+        self.position = Name(position)
+    
+    def get_data(self):
+        bytes_out = []
+        bytes_out.append(self._try_get_struct_property_bytes(self.variant.get_data(),  self.VARIANT, self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(  self._try_get_byte_property_bytes(self.variantrank,         self.VARIANTRANK))
+        bytes_out.append(  self._try_get_byte_property_bytes(self.variantvalue,        self.VARIANTVALUE))
+        bytes_out.append(self._try_get_struct_property_bytes(self.bodytype.get_data(), self.BODYTYPE, self.GAMEPLAY_TAG))
+        bytes_out.append(  self._try_get_byte_property_bytes(self.bodytyperank,        self.BODYTYPERANK))
+        bytes_out.append(  self._try_get_byte_property_bytes(self.bodytypevalue,       self.BODYTYPEVALUE))
+        bytes_out.append(self._try_get_struct_property_bytes(self.size.get_data(),     self.SIZE,         self.GAMEPLAY_TAG))
+        bytes_out.append(  self._try_get_byte_property_bytes(self.sizerank,            self.SIZERANK))
+        bytes_out.append(  self._try_get_byte_property_bytes(self.sizevalue,           self.SIZEVALUE))
+        bytes_out.append(self._try_get_struct_property_bytes(self.position.get_data(), self.POSITION, self.GAMEPLAY_TAG))
+        bytes_out.append(  self._try_get_byte_property_bytes(self.positionrank,        self.POSITIONRANK))
+        bytes_out.append(  self._try_get_byte_property_bytes(self.positionvalue,       self.POSITIONVALUE))
+        bytes_out.append(self._try_get_struct_property_bytes(self.monster,             self.MONSTER, self.GUID_PROP))
+        bytes_out.append(  self._try_get_byte_property_bytes(self.monsterrank,         self.MONSTERRANK))
+        bytes_out.append(  self._try_get_byte_property_bytes(self.monstervalue,        self.MONSTERVALUE))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
+
+class Name(GenericParsers):
+    def __init__(self, name_data):
+        _, self.name, self.remain = self._try_parse_name_property(name_data, self.TAGNAME)
+    
+    def get_data(self):
+        bytes_out = []
+        bytes_out.append(self._try_get_name_property_bytes(self.name, self.TAGNAME))
         bytes_out.append(self.remain)
         return self.list_to_bytes(bytes_out)
 
@@ -2738,6 +2952,49 @@ class GameplayTag(GenericParsers):
         bytes_out.append(self.remain)
         return self.list_to_bytes(bytes_out)
 
+class Splatter(GenericParsers):
+    def __init__(self, splatter_bytes):
+        self._parse_splatter_bytes(splatter_bytes)
+    
+    def _parse_splatter_bytes(self, splatter_bytes):
+        _, color,               splatter_bytes = self._try_parse_struct_property(splatter_bytes, self.MATERIAL, self.BODY_FLUID_MATERIAL)
+        _, self.vaginasplatter, splatter_bytes = self._try_parse_float_property(splatter_bytes, self.VAGINASPLATTER)
+        _, self.dicksplatter,   splatter_bytes = self._try_parse_float_property(splatter_bytes, self.DICKSPLATTER)
+        _, self.bodysplatter,   splatter_bytes = self._try_parse_float_property(splatter_bytes, self.BODYSPLATTER)
+        _, self.mouthsplatter,  splatter_bytes = self._try_parse_float_property(splatter_bytes, self.MOUTHSPLATTER)
+        self.remain = splatter_bytes
+        
+        self.color = Color(color)
+    
+    def get_data(self):
+        bytes_out = []
+        bytes_out.append(self._try_get_struct_property_bytes(self.color.get_data(), self.MATERIAL, self.BODY_FLUID_MATERIAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.vaginasplatter, self.VAGINASPLATTER))
+        bytes_out.append(self._try_get_float_property_bytes(self.dicksplatter, self.DICKSPLATTER))
+        bytes_out.append(self._try_get_float_property_bytes(self.bodysplatter, self.BODYSPLATTER))
+        bytes_out.append(self._try_get_float_property_bytes(self.mouthsplatter, self.MOUTHSPLATTER))
+        
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
+
+class Appliedscheme(GenericParsers):
+    def __init__(self, appliedscheme_bytes):
+        self._parse_appliedscheme_bytes(appliedscheme_bytes)
+    
+    def _parse_appliedscheme_bytes(self, appliedscheme_bytes):
+        _, tags, appliedscheme_bytes = self._try_parse_struct_property(appliedscheme_bytes, self.TAGS, self.GAMEPLAY_TAG_CONTAINER)
+        _, self.name, appliedscheme_bytes = self._try_parse_str_property(appliedscheme_bytes, self.NAME)
+        self.remain = appliedscheme_bytes
+        
+        self.tags = TagContainer(tags)
+    
+    def get_data(self):
+        bytes_out = []
+        bytes_out.append(self._try_get_struct_property_bytes(self.tags.get_data(), self.TAGS, self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_str_property_bytes(self.name, self.NAME))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
+
 
 '''World Level Classes'''
 class MonsterLevels(GenericParsers):
@@ -3284,7 +3541,10 @@ if __name__ == "__main__":
     preset_folder = r'..\CharacterPresets'
     
     # DEBUGGING: test if parsing and save of save works.
-    # Files should be identical, with execption of maybe some additional gameplaytags container
+    # Files should be identical, with a maybe a few execptions becuase of parsing/serialization differences
+    # - some additional gameplaytags container
+    # - name str_property in breeder appliedscheme being removed. (original value is blank)
+    # These should have no affect on the actual save
     if True:
         NephelymSaveEditor(save_in).save(save_out)
         exit()
