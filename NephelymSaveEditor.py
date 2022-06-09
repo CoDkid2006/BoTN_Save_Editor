@@ -228,10 +228,12 @@ class DictMacros:
         'female': b'Sex.Female\x00',
         'futa': b'Sex.Futa\x00',
         'male': b'Sex.Male\x00',
+        'defualt_spirit_sex': b'',
     }
     RACES = {}
     
     RACES_FEMININE = {
+        'defualt_spirit_race': b'',
         'ayrshire' : b'Race.Bovaur.Ayrshire\x00',
         'minotaur' : b'Race.Bovaur.Minotaur\x00',
         'cambion' : b'Race.Demon.Cambion\x00',
@@ -1588,7 +1590,7 @@ class NephelymBase(GenericParsers):
         self.splatter       = Splatter(splatter)
         self.citargetvalue  = Morph(citargetvalue)
         self.cibuffer       = Morph(cibuffer)
-        self.appliedscheme  = Appliedscheme(appliedscheme)
+        self.appliedscheme  = AppliedScheme(appliedscheme)
         self.stats          = Stats(stats)
         self.mother         = Parent(mother)
         self.father         = Parent(father)
@@ -1615,13 +1617,25 @@ class NephelymBase(GenericParsers):
     
     def _check_sex(self):
         '''Check if the new sex is a possibility for the race'''
-        if self.variant.race in self.SEX_RACE[self.variant.sex].values():
+        #logic need for when defaults are used
+        if self.variant.race == b'':
+            race = self.RACES['vulpuss']
+        else:
+            race = self.variant.race
+        
+        if self.variant.sex == b'':
+            sex = self.SEXES['female']
+        else:
+            sex = self.variant.sex
+        
+        if race in self.SEX_RACE[sex].values():
             return
         else:
-            for sex in self.SEXES:
-                self.variant.sex = self.SEXES[sex]
-                if self.variant.race in self.SEX_RACE[self.variant.sex].values():
+            for _sex in self.SEXES:
+                self.variant.sex = self.SEXES[_sex]
+                if race in self.SEX_RACE[self.variant.sex].values():
                     return
+        
         raise Exception(f'Unable to find a suitable sex-race pairing for {self.variant.race}')
     
     def change_appearance(self, nephelym):
@@ -1690,16 +1704,6 @@ class Nephelym(NephelymBase):
             guid = bytes.fromhex(uuid.uuid4().hex)
         self.guid = guid
     
-    def replace_parent_guid(self, parent_block, guid=None):
-        '''Returns the input parent block with a new guid'''
-        if guid is None:
-            guid = bytes.fromhex(uuid.uuid4().hex)
-        cursor = parent_block.find(self.NEPHELYM_GUID)
-        if cursor == -1:
-            raise Exception('Invalid Nephelym: GUID')
-        guid_start = cursor + len(self.NEPHELYM_GUID)
-        return parent_block[:guid_start] + guid + parent_block[guid_start + 16:]
-    
     def replace_mother_guid(self, guid=None):
         self.mother.new_guid(guid)
     
@@ -1759,14 +1763,19 @@ class Nephelym(NephelymBase):
         if level not in self.STAT_RANK_LEVEL:
             raise Exception(f'Invalid stat level{level}')
         
-        stat_property = self.STAT_RANKS[stat] + self.BYTE_PROPERTY
-        cursor = self.stats.find(stat_property)
-        if cursor == -1:
-            raise Exception('Invalid Nephelym: GUID')
-        stat_rank_start = cursor + len(stat_property)
+        if stat == 'fertility':
+            self.stats.fertilityrank = self.STAT_RANK_LEVEL[level]
+        elif stat == 'strength':
+            self.stats.strengthrank = self.STAT_RANK_LEVEL[level]
+        elif stat == 'allure':
+            self.stats.allurerank = self.STAT_RANK_LEVEL[level]
+        elif stat == 'willpower':
+            self.stats.willpowerrank = self.STAT_RANK_LEVEL[level]
+        elif stat == 'dexterity':
+            self.stats.dexterityrank = self.STAT_RANK_LEVEL[level]
+        elif stat == 'rarity':
+            self.stats.rarity = self.STAT_RANK_LEVEL[level]
         
-        self.stats = self.stats[:stat_rank_start] + self.STAT_RANK_LEVEL[level] + self.stats[stat_rank_start+1:]
-    
     def replace_all_stat_levels(self, level):
         for stat in self.STAT_RANKS:
             self.change_stat_level(stat, level)
@@ -1793,15 +1802,15 @@ class PlayerSpiritForm(NephelymBase):
         
         self.variant = Variant(variant)
         self.appearance = Appearance(appearance)
-        self.appliedscheme = Appliedscheme(appliedscheme)
+        self.appliedscheme = AppliedScheme(appliedscheme)
         self.mother = Parent(mother)
         self.father = Parent(father)
     
     def change_form(self, nephelym):
         '''Update spirit form to be incoming nephelym'''
         self.change_appearance(nephelym)
-        self.change_sex(nephelym.variant.sex)
         self.change_race(nephelym.variant.race)
+        self.change_sex(nephelym.variant.sex)
     
     def get_data(self):
         data_out = []
@@ -1907,31 +1916,6 @@ class Stats(GenericParsers):
         bytes_out.append(self._try_get_byte_property_bytes(self.rarity,           self.RARITY))
         bytes_out.append(self._try_get_struct_property_bytes(self.prefrences.get_data(), self.PREFERENCES, self.BREEDING_PREFERENCES))
         
-        bytes_out.append(self.remain)
-        return self.list_to_bytes(bytes_out)
-
-class Color(GenericParsers):
-    def __init__(self, color_bytes):
-        self._parse_color_bytes(color_bytes)
-    
-    def _parse_color_bytes(self, color_bytes):
-        _, color,             color_bytes = self._try_parse_struct_property(color_bytes, self.COLOR, self.LINEAR_COLOR)
-        _, glow,              color_bytes = self._try_parse_struct_property(color_bytes, self.GLOW,  self.LINEAR_COLOR)
-        _, self.metal,        color_bytes = self._try_parse_float_property(color_bytes, self.METAL)
-        _, self.roughnessmin, color_bytes = self._try_parse_float_property(color_bytes, self.ROUGHNESSMIN)
-        _, self.roughnessmax, color_bytes = self._try_parse_float_property(color_bytes, self.ROUGHNESSMAX)
-        self.remain = color_bytes
-        
-        self.color = LinearColor(color)
-        self.glow = LinearColor(glow)
-    
-    def get_data(self):
-        bytes_out = []
-        bytes_out.append(self._try_get_struct_property_bytes(self.color.get_data(), self.COLOR, self.LINEAR_COLOR))
-        bytes_out.append(self._try_get_struct_property_bytes(self.glow.get_data(), self.GLOW, self.LINEAR_COLOR))
-        bytes_out.append(self._try_get_float_property_bytes(self.metal, self.METAL))
-        bytes_out.append(self._try_get_float_property_bytes(self.roughnessmin, self.ROUGHNESSMIN))
-        bytes_out.append(self._try_get_float_property_bytes(self.roughnessmax, self.ROUGHNESSMAX))
         bytes_out.append(self.remain)
         return self.list_to_bytes(bytes_out)
 
@@ -2977,7 +2961,32 @@ class Splatter(GenericParsers):
         bytes_out.append(self.remain)
         return self.list_to_bytes(bytes_out)
 
-class Appliedscheme(GenericParsers):
+class Color(GenericParsers):
+    def __init__(self, color_bytes):
+        self._parse_color_bytes(color_bytes)
+    
+    def _parse_color_bytes(self, color_bytes):
+        _, color,             color_bytes = self._try_parse_struct_property(color_bytes, self.COLOR, self.LINEAR_COLOR)
+        _, glow,              color_bytes = self._try_parse_struct_property(color_bytes, self.GLOW,  self.LINEAR_COLOR)
+        _, self.metal,        color_bytes = self._try_parse_float_property(color_bytes, self.METAL)
+        _, self.roughnessmin, color_bytes = self._try_parse_float_property(color_bytes, self.ROUGHNESSMIN)
+        _, self.roughnessmax, color_bytes = self._try_parse_float_property(color_bytes, self.ROUGHNESSMAX)
+        self.remain = color_bytes
+        
+        self.color = LinearColor(color)
+        self.glow = LinearColor(glow)
+    
+    def get_data(self):
+        bytes_out = []
+        bytes_out.append(self._try_get_struct_property_bytes(self.color.get_data(), self.COLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.glow.get_data(), self.GLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.metal, self.METAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.roughnessmin, self.ROUGHNESSMIN))
+        bytes_out.append(self._try_get_float_property_bytes(self.roughnessmax, self.ROUGHNESSMAX))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
+
+class AppliedScheme(GenericParsers):
     def __init__(self, appliedscheme_bytes):
         self._parse_appliedscheme_bytes(appliedscheme_bytes)
     
