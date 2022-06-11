@@ -26,6 +26,19 @@ def hex_to_float(bytes):
 def float_to_hex(value):
     return bytes(bytearray(struct.pack("f", value)))
 
+def guid_to_string(bytes_in):
+    if len(bytes_in) != 16:
+        print(bytes_in)
+        raise Exception("Guid isn't 16 bytes long")
+    p1 = bytes_in[:3].hex()
+    p2 = bytes_in[4:5].hex()
+    p3 = bytes_in[5:6].hex()
+    p4 = bytes_in[6:7].hex()
+    p5 = bytes_in[8:].hex()
+    return f'{p1}-{p2}-{p3}-{p4}-{p5}'
+
+
+
 
 ''' Batch Editor for Save Files
 # New size ONLY shows inside of breeding session and during sex
@@ -435,6 +448,7 @@ class ByteMacros:
     PLAYERWEALTH = b'\x0D\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x57\x65\x61\x6C\x74\x68\x00'
     PLAYERBODYFLUIDS = b'\x11\x00\x00\x00\x50\x6C\x61\x79\x65\x72\x42\x6F\x64\x79\x46\x6C\x75\x69\x64\x73\x00'
     TAGNAME = b'\x08\x00\x00\x00\x54\x61\x67\x4E\x61\x6D\x65\x00'
+    VERSION = b'\x08\x00\x00\x00\x56\x65\x72\x73\x69\x6F\x6E\x00'
     
     BODYFLUIDS = b'\x0B\x00\x00\x00\x42\x6F\x64\x79\x46\x6C\x75\x69\x64\x73\x00' + STRUCT_PADDING
     
@@ -1053,10 +1067,10 @@ class GenericParsers(DictMacros, ByteMacros, IO):
         data_end = data_start + length
         
         if child_data_size:
-            data_out = [array_bytes[i:i+child_data_size] for i in range(data_start + 4, data_end, child_data_size)]
+            bytes_out = [array_bytes[i:i+child_data_size] for i in range(data_start + 4, data_end, child_data_size)]
         else:
-            data_out = array_bytes[data_start:data_start+length]
-        return array_bytes[:cursor], data_out, array_bytes[data_start+length:]
+            bytes_out = array_bytes[data_start:data_start+length]
+        return array_bytes[:cursor], bytes_out, array_bytes[data_start+length:]
     
     def _parse_int_property(self, int_bytes, int_macro):
         '''Return Int value in byte format'''
@@ -1108,8 +1122,7 @@ class GenericParsers(DictMacros, ByteMacros, IO):
         data_start = length_end + len(child_macro)
         data_end = data_start + length
         
-        data_out = map_bytes[data_start:data_start+length]
-        return map_bytes[:cursor], data_out, map_bytes[data_start+length:]
+        return map_bytes[:cursor], map_bytes[data_start:data_start+length], map_bytes[data_start+length:]
     
     def _parse_array_struct_property(self, array_struct_bytes, array_macro, struct_macro, child_macro):
         # TODO Add multi-level search to ensure proper segment parsed
@@ -1126,9 +1139,8 @@ class GenericParsers(DictMacros, ByteMacros, IO):
         
         data_start = length_end + data_offset
         data_end = data_start + length - data_length_offset
-        data_out = array_struct_bytes[data_start:data_end]
         
-        return array_struct_bytes[:cursor], data_out, array_struct_bytes[data_end:]
+        return array_struct_bytes[:cursor], array_struct_bytes[data_start:data_end], array_struct_bytes[data_end:]
     
     def _parse_text_property(self, text_bytes, text_macro):
         cursor = text_bytes.find(text_macro)
@@ -1271,192 +1283,192 @@ class GenericParsers(DictMacros, ByteMacros, IO):
         return bytes_out
     
     
-    def _try_parse_int_property(self, data_in, int_macro):
+    def _try_parse_int_property(self, bytes_in, int_macro):
         int_macro += self.INT_PROPERTY
         try:
-            pre_data, int_prop, data_in = self._parse_int_property(data_in, int_macro)
+            pre_data, int_prop, bytes_in = self._parse_int_property(bytes_in, int_macro)
         except Exception as e:
             pre_data = b''
             int_prop = b''
-        return pre_data, int_prop, data_in
+        return pre_data, int_prop, bytes_in
     
-    def _try_parse_float_property(self, data_in, float_macro):
+    def _try_parse_float_property(self, bytes_in, float_macro):
         float_macro += self.FLOAT_PROPERTY
         try:
-            pre_data, float_prop, data_in = self._parse_float_property(data_in, float_macro)
+            pre_data, float_prop, bytes_in = self._parse_float_property(bytes_in, float_macro)
         except:
             pre_data = b''
             float_prop = b''
-        return pre_data, float_prop, data_in
+        return pre_data, float_prop, bytes_in
     
-    def _try_parse_struct_property(self, data_in, struct_macro, child_macro):
+    def _try_parse_struct_property(self, bytes_in, struct_macro, child_macro):
         struct_macro += self.STRUCT_PROPERTY
         try:
-            pre_data, struct_prop, data_in = self._parse_struct_property(data_in, struct_macro, child_macro)
+            pre_data, struct_prop, bytes_in = self._parse_struct_property(bytes_in, struct_macro, child_macro)
         except:
             pre_data = b''
             struct_prop = b''
-        return pre_data, struct_prop, data_in
+        return pre_data, struct_prop, bytes_in
     
-    def _try_parse_array_property(self, data_in, array_macro, child_macro, child_data_size=None):
+    def _try_parse_array_property(self, bytes_in, array_macro, child_macro, child_data_size=None):
         array_macro += self.ARRAY_PROPERTY
         try:
-            pre_data, array_prop, data_in = self._parse_array_property(data_in, array_macro, child_macro, child_data_size)
+            pre_data, array_prop, bytes_in = self._parse_array_property(bytes_in, array_macro, child_macro, child_data_size)
         except:
             pre_data = b''
             array_prop = b''
-        return pre_data, array_prop, data_in
+        return pre_data, array_prop, bytes_in
     
-    def _try_parse_map_property(self, data_in, map_macro, child_macro):
+    def _try_parse_map_property(self, bytes_in, map_macro, child_macro):
         map_macro += self.MAP_PROPERTY
         try:
-            pre_data, map_prop, data_in = self._parse_map_property(data_in, map_macro, child_macro)
+            pre_data, map_prop, bytes_in = self._parse_map_property(bytes_in, map_macro, child_macro)
         except:
             pre_data = b''
             map_prop = b''
-        return pre_data, map_prop, data_in
+        return pre_data, map_prop, bytes_in
     
-    def _try_parse_name_property(self, data_in, name_macro):
+    def _try_parse_name_property(self, bytes_in, name_macro):
         name_macro += self.NAME_PROPERTY
         try:
-            pre_data, name_prop, data_in = self._parse_name_property(data_in, name_macro)
+            pre_data, name_prop, bytes_in = self._parse_name_property(bytes_in, name_macro)
         except:
             pre_data = b''
             name_prop = b''
-        return pre_data, name_prop, data_in
+        return pre_data, name_prop, bytes_in
     
-    def _try_parse_byte_property(self, data_in, byte_macro):
+    def _try_parse_byte_property(self, bytes_in, byte_macro):
         byte_macro += self.BYTE_PROPERTY
         try:
-            pre_data, byte_prop, data_in = self._parse_byte_property(data_in, byte_macro)
+            pre_data, byte_prop, bytes_in = self._parse_byte_property(bytes_in, byte_macro)
         except Exception as e:
             pre_data = b''
             byte_prop = b''
-        return pre_data, byte_prop, data_in
+        return pre_data, byte_prop, bytes_in
     
-    def _try_parse_array_struct_property(self, data_in, array_macro, struct_macro, child_macro):
+    def _try_parse_array_struct_property(self, bytes_in, array_macro, struct_macro, child_macro):
         array_macro += self.ARRAY_PROPERTY
         try:
-            pre_data, array_struct_prop, data_in = self._parse_array_struct_property(data_in, array_macro, struct_macro, child_macro)
+            pre_data, array_struct_prop, bytes_in = self._parse_array_struct_property(bytes_in, array_macro, struct_macro, child_macro)
         except:
             pre_data = b''
             array_struct_prop = b''
-        return pre_data, array_struct_prop, data_in
+        return pre_data, array_struct_prop, bytes_in
     
-    def _try_parse_text_property(self, data_in, text_macro):
+    def _try_parse_text_property(self, bytes_in, text_macro):
         text_macro += self.TEXT_PROPERTY
         try:
-            pre_data, text_prop, data_in = self._parse_text_property(data_in, text_macro)
+            pre_data, text_prop, bytes_in = self._parse_text_property(bytes_in, text_macro)
         except:
             pre_data = b''
             text_prop = b''
-        return pre_data, text_prop, data_in
+        return pre_data, text_prop, bytes_in
     
-    def _try_parse_bool_property(self, data_in, bool_macro):
+    def _try_parse_bool_property(self, bytes_in, bool_macro):
         bool_macro += self.BOOL_PROPERTY
         try:
-            pre_data, bool_prop, data_in = self._parse_bool_property(data_in, bool_macro)
+            pre_data, bool_prop, bytes_in = self._parse_bool_property(bytes_in, bool_macro)
         except:
             pre_data = b''
             bool_prop = b''
-        return pre_data, bool_prop, data_in
+        return pre_data, bool_prop, bytes_in
     
-    def _try_parse_str_property(self, data_in, str_macro):
+    def _try_parse_str_property(self, bytes_in, str_macro):
         str_macro += self.STR_PROPERTY
         try:
-            pre_data, str_prop, data_in = self._parse_str_property(data_in, str_macro)
+            pre_data, str_prop, bytes_in = self._parse_str_property(bytes_in, str_macro)
         except:
             pre_data = b''
             str_prop = b''
-        return pre_data, str_prop, data_in
+        return pre_data, str_prop, bytes_in
     
     
-    def _try_get_int_property_bytes(self, data_in, int_macro):
-        if data_in == b'':
+    def _try_get_int_property_bytes(self, bytes_in, int_macro):
+        if bytes_in == b'':
             data = b''
         else:
             int_macro += self.INT_PROPERTY
-            data = self._get_int_property_bytes(data_in, int_macro)
+            data = self._get_int_property_bytes(bytes_in, int_macro)
         return data
     
-    def _try_get_float_property_bytes(self, data_in, float_macro):
-        if data_in == b'':
+    def _try_get_float_property_bytes(self, bytes_in, float_macro):
+        if bytes_in == b'':
             data = b''
         else:
             float_macro += self.FLOAT_PROPERTY
-            data = self._get_float_property_bytes(data_in, float_macro)
+            data = self._get_float_property_bytes(bytes_in, float_macro)
         return data
     
-    def _try_get_struct_property_bytes(self, data_in, struct_macro, child_macro):
-        if data_in == b'':
+    def _try_get_struct_property_bytes(self, bytes_in, struct_macro, child_macro):
+        if bytes_in == b'':
             data = b''
         else:
             struct_macro += self.STRUCT_PROPERTY
-            data = self._get_struct_property_bytes(data_in, struct_macro, child_macro)
+            data = self._get_struct_property_bytes(bytes_in, struct_macro, child_macro)
         return data
     
-    def _try_get_array_property_bytes(self, data_in, array_macro, child_macro, child_data_size=None):
-        if data_in == b'':
+    def _try_get_array_property_bytes(self, bytes_in, array_macro, child_macro, child_data_size=None):
+        if bytes_in == b'':
             data = b''
         else:
             array_macro += self.ARRAY_PROPERTY
-            data = self._get_array_property_bytes(data_in, array_macro, child_macro, child_data_size)
+            data = self._get_array_property_bytes(bytes_in, array_macro, child_macro, child_data_size)
         return data
     
-    def _try_get_map_property_bytes(self, data_in, map_macro, child_macro):
-        if data_in == b'':
+    def _try_get_map_property_bytes(self, bytes_in, map_macro, child_macro):
+        if bytes_in == b'':
             data = b''
         else:
             map_macro += self.MAP_PROPERTY
-            data = self._get_map_property_bytes(data_in, map_macro, child_macro)
+            data = self._get_map_property_bytes(bytes_in, map_macro, child_macro)
         return data
     
-    def _try_get_name_property_bytes(self, data_in, name_macro):
-        if data_in == b'':
+    def _try_get_name_property_bytes(self, bytes_in, name_macro):
+        if bytes_in == b'':
             data = b''
         else:
             name_macro += self.NAME_PROPERTY
-            data = self._get_name_property_bytes(data_in, name_macro)
+            data = self._get_name_property_bytes(bytes_in, name_macro)
         return data
     
-    def _try_get_byte_property_bytes(self, data_in, byte_macro):
-        if data_in == b'':
+    def _try_get_byte_property_bytes(self, bytes_in, byte_macro):
+        if bytes_in == b'':
             data = b''
         else:
             byte_macro += self.BYTE_PROPERTY
-            data = self._get_byte_property_bytes(data_in, byte_macro)
+            data = self._get_byte_property_bytes(bytes_in, byte_macro)
         return data
     
-    def _try_get_array_struct_property_bytes(self, data_in, array_macro, struct_macro, child_macro):
-        if data_in == []:
-            data_out = b''
+    def _try_get_array_struct_property_bytes(self, bytes_in, array_macro, struct_macro, child_macro):
+        if bytes_in == []:
+            bytes_out = b''
         else:
             array_macro += self.ARRAY_PROPERTY
-            data_out = self._get_array_struct_property_bytes(data_in, array_macro, struct_macro, child_macro)
-        return data_out
+            bytes_out = self._get_array_struct_property_bytes(bytes_in, array_macro, struct_macro, child_macro)
+        return bytes_out
     
-    def _try_get_text_property_bytes(self, data_in, text_macro):
-        if data_in == b'':
-            data_out = b''
+    def _try_get_text_property_bytes(self, bytes_in, text_macro):
+        if bytes_in == b'':
+            bytes_out = b''
         else:
             text_macro += self.TEXT_PROPERTY
-            data_out = self._get_text_property_bytes(data_in, text_macro)
-        return data_out
+            bytes_out = self._get_text_property_bytes(bytes_in, text_macro)
+        return bytes_out
     
-    def _try_get_bool_property_bytes(self, data_in, bool_macro):
-        if data_in == b'':
-            data_out = b''
+    def _try_get_bool_property_bytes(self, bytes_in, bool_macro):
+        if bytes_in == b'':
+            bytes_out = b''
         else:
             bool_macro += self.BOOL_PROPERTY
-            data_out = self._get_bool_property_bytes(data_in, bool_macro)
-        return data_out
+            bytes_out = self._get_bool_property_bytes(bytes_in, bool_macro)
+        return bytes_out
     
-    def _try_get_str_property_bytes(self, data_in, str_macro):
-        if data_in == b'':
+    def _try_get_str_property_bytes(self, bytes_in, str_macro):
+        if bytes_in == b'':
             data = b''
         else:
             str_macro += self.STR_PROPERTY
-            data = self._get_str_property_bytes(data_in, str_macro)
+            data = self._get_str_property_bytes(bytes_in, str_macro)
         return data
     
     
@@ -1502,15 +1514,72 @@ class Header(GenericParsers):
         self.remain = header_data
         
         self.playerbodyfluids = PlayerBodyFluids(playerbodyfluids)
+        Gvas(self.gvas)
     
     def get_data(self):
-        data_out = []
-        data_out.append(self.gvas)
-        data_out.append(self._try_get_struct_property_bytes(self.playerguid,  self.PLAYER_UNIQUE_ID, self.GUID_PROP))
-        data_out.append(self._try_get_array_property_bytes(self.playerwealth, self.PLAYERWEALTH,     self.INT_PROPERTY, 4))
-        data_out.append(self._try_get_array_struct_property_bytes(self.playerbodyfluids.get_data(),  self.PLAYERBODYFLUIDS, self.PLAYERBODYFLUIDS, self.BODYFLUIDS))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self.gvas)
+        bytes_out.append(self._try_get_struct_property_bytes(self.playerguid,  self.PLAYER_UNIQUE_ID, self.GUID_PROP))
+        bytes_out.append(self._try_get_array_property_bytes(self.playerwealth, self.PLAYERWEALTH,     self.INT_PROPERTY, 4))
+        bytes_out.append(self._try_get_array_struct_property_bytes(self.playerbodyfluids.get_data(),  self.PLAYERBODYFLUIDS, self.PLAYERBODYFLUIDS, self.BODYFLUIDS))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
+
+class Gvas(GenericParsers):
+    '''Header Data for determining UE version and stuff'''
+    def __init__(self, gvas_data):
+        self._parse_gvas_data(gvas_data)
+        
+    def _parse_gvas_data(self, gvas_data):
+        self.gvas = gvas_data[:4]
+        gvas_data = gvas_data[4:]
+        self.number1 = gvas_data[:4]
+        gvas_data = gvas_data[4:]
+        self.number2 = gvas_data[:4]
+        gvas_data = gvas_data[4:]
+        self.file_version_major = gvas_data[:2]
+        gvas_data = gvas_data[2:]
+        self.file_version_minor = gvas_data[:2]
+        gvas_data = gvas_data[2:]
+        self.file_version_patch = gvas_data[:2]
+        gvas_data = gvas_data[2:]
+        self.file_version_sub_patch = gvas_data[:2]
+        gvas_data = gvas_data[2:]
+        self.file_version_sub_sub_patch = gvas_data[:2]
+        gvas_data = gvas_data[2:]
+        
+        length = int.from_bytes(gvas_data[:4], 'little')
+        gvas_data = gvas_data[4:]
+        self.ue_version_string = gvas_data[:length]
+        gvas_data = gvas_data[length:]
+        
+        self.number3 = gvas_data[:4]
+        gvas_data = gvas_data[4:]
+        
+        elements = int.from_bytes(gvas_data[:4], 'little')
+        gvas_data = gvas_data[4:]
+        
+        
+        self.unknown_elements = []
+        self.unknown_elements_value = []
+        for _ in range(elements):
+            self.unknown_elements.append(gvas_data[:16])
+            self.unknown_elements_value.append(gvas_data[16:20])
+            gvas_data = gvas_data[20:]
+        
+        length = int.from_bytes(gvas_data[:4], 'little')
+        gvas_data = gvas_data[4:]
+        self.ue_custom_script = gvas_data[:length]
+        gvas_data = gvas_data[length:]
+        
+        _, self.version, gvas_data = self._try_parse_int_property(gvas_data, self.VERSION)
+        
+        self.remain = gvas_data
+    
+    def get_data(self):
+        return b''
+
+
 
 class PlayerBodyFluids(GenericParsers):
     def __init__(self, playerbodyfluids_data):
@@ -1540,15 +1609,15 @@ class BodyFluid(GenericParsers):
         self.remain = remain
     
     def get_data(self):
-        data_out = []
+        bytes_out = []
         racetag = self._try_get_name_property_bytes(self.racetag, self.TAGNAME) + self.NONE
-        data_out.append(self._try_get_struct_property_bytes(racetag, self.RACETAG, self.GAMEPLAY_TAG))
-        data_out.append(self._try_get_int_property_bytes(self.milkml, self.MILKML))
-        data_out.append(self._try_get_int_property_bytes(self.semenml, self.SEMENML))
-        data_out.append(self._try_get_int_property_bytes(self.maxmilkml, self.MAXMILKML))
-        data_out.append(self._try_get_int_property_bytes(self.maxsemenml, self.MAXSEMENML))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out.append(self._try_get_struct_property_bytes(racetag, self.RACETAG, self.GAMEPLAY_TAG))
+        bytes_out.append(self._try_get_int_property_bytes(self.milkml, self.MILKML))
+        bytes_out.append(self._try_get_int_property_bytes(self.semenml, self.SEMENML))
+        bytes_out.append(self._try_get_int_property_bytes(self.maxmilkml, self.MAXMILKML))
+        bytes_out.append(self._try_get_int_property_bytes(self.maxsemenml, self.MAXSEMENML))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 
 '''Base Nephelym Classes'''
@@ -1666,28 +1735,28 @@ class NephelymBase(GenericParsers):
         Takes all the information in the Nephelym and returns a complete datablock in save format
         Order doesn't seem to matter, but comparison is easier.
         '''
-        data_out = []
-        data_out.append(self._try_get_str_property_bytes(self.name, self.NAME))
-        data_out.append(self._try_get_struct_property_bytes(self.guid, self.UNIQUEID, self.GUID_PROP))
-        data_out.append(self._try_get_struct_property_bytes(self.variant.get_data(), self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._try_get_struct_property_bytes(self.appearance.get_data(), self.APPEARANCE, self.CHARACTER_APPEARANCE))
-        data_out.append(self._try_get_struct_property_bytes(self.splatter.get_data(), self.SPLATTER, self.FLUID_SPLATTER))
-        data_out.append(self._try_get_struct_property_bytes(self.citargetvalue.get_data(), self.CITARGETVALUE, self.CHARACTER_MORPH))
-        data_out.append(self._try_get_struct_property_bytes(self.cibuffer.get_data(), self.CIBUFFER, self.CHARACTER_MORPH))
-        data_out.append(self._try_get_float_property_bytes(self.cirate, self.CIRATE))
-        data_out.append(self._try_get_float_property_bytes(self.cialpha, self.CIALPHA))
-        data_out.append(self._try_get_struct_property_bytes(self.appliedscheme.get_data(), self.APPLIEDSCHEME, self.CHARACTER_APPLIED_SCHEME))
-        data_out.append(self._try_get_struct_property_bytes(self.stats.get_data(), self.STAT, self.CHARACTER_STATS))
-        data_out.append(self._try_get_struct_property_bytes(self.mother.get_data(), self.MOTHER, self.CHARACTER_PARENT_DATA))
-        data_out.append(self._try_get_struct_property_bytes(self.father.get_data(), self.FATHER, self.CHARACTER_PARENT_DATA))
-        data_out.append(self._try_get_struct_property_bytes(self.traits.get_data(), self.TRAITS, self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._try_get_struct_property_bytes(self.playertags.get_data(), self.PLAYERTAGS, self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._try_get_struct_property_bytes(self.states.get_data(), self.STATES, self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._try_get_struct_property_bytes(self.offspringid, self.OFFSPRINGID, self.GUID_PROP))
-        data_out.append(self._try_get_struct_property_bytes(self.lastmateid, self.LASTMATEID, self.GUID_PROP))
-        data_out.append(self._try_get_byte_property_bytes(self.lastmatesexcount, self.LASTMATESEXCOUNT))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self._try_get_str_property_bytes(self.name, self.NAME))
+        bytes_out.append(self._try_get_struct_property_bytes(self.guid, self.UNIQUEID, self.GUID_PROP))
+        bytes_out.append(self._try_get_struct_property_bytes(self.variant.get_data(), self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_struct_property_bytes(self.appearance.get_data(), self.APPEARANCE, self.CHARACTER_APPEARANCE))
+        bytes_out.append(self._try_get_struct_property_bytes(self.splatter.get_data(), self.SPLATTER, self.FLUID_SPLATTER))
+        bytes_out.append(self._try_get_struct_property_bytes(self.citargetvalue.get_data(), self.CITARGETVALUE, self.CHARACTER_MORPH))
+        bytes_out.append(self._try_get_struct_property_bytes(self.cibuffer.get_data(), self.CIBUFFER, self.CHARACTER_MORPH))
+        bytes_out.append(self._try_get_float_property_bytes(self.cirate, self.CIRATE))
+        bytes_out.append(self._try_get_float_property_bytes(self.cialpha, self.CIALPHA))
+        bytes_out.append(self._try_get_struct_property_bytes(self.appliedscheme.get_data(), self.APPLIEDSCHEME, self.CHARACTER_APPLIED_SCHEME))
+        bytes_out.append(self._try_get_struct_property_bytes(self.stats.get_data(), self.STAT, self.CHARACTER_STATS))
+        bytes_out.append(self._try_get_struct_property_bytes(self.mother.get_data(), self.MOTHER, self.CHARACTER_PARENT_DATA))
+        bytes_out.append(self._try_get_struct_property_bytes(self.father.get_data(), self.FATHER, self.CHARACTER_PARENT_DATA))
+        bytes_out.append(self._try_get_struct_property_bytes(self.traits.get_data(), self.TRAITS, self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_struct_property_bytes(self.playertags.get_data(), self.PLAYERTAGS, self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_struct_property_bytes(self.states.get_data(), self.STATES, self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_struct_property_bytes(self.offspringid, self.OFFSPRINGID, self.GUID_PROP))
+        bytes_out.append(self._try_get_struct_property_bytes(self.lastmateid, self.LASTMATEID, self.GUID_PROP))
+        bytes_out.append(self._try_get_byte_property_bytes(self.lastmatesexcount, self.LASTMATESEXCOUNT))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
     
     def copy(self):
         '''get an exact copy of current nephelym'''
@@ -1813,15 +1882,15 @@ class PlayerSpiritForm(NephelymBase):
         self.change_sex(nephelym.variant.sex)
     
     def get_data(self):
-        data_out = []
-        data_out.append(self._try_get_struct_property_bytes(self.guid, self.UNIQUEID, self.GUID_PROP))
-        data_out.append(self._try_get_struct_property_bytes(self.variant.get_data(), self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._try_get_struct_property_bytes(self.appearance.get_data(), self.APPEARANCE, self.CHARACTER_APPEARANCE))
-        data_out.append(self._try_get_struct_property_bytes(self.appliedscheme.get_data(), self.APPLIEDSCHEME, self.CHARACTER_APPLIED_SCHEME))
-        data_out.append(self._try_get_struct_property_bytes(self.mother.get_data(), self.MOTHER, self.CHARACTER_PARENT_DATA))
-        data_out.append(self._try_get_struct_property_bytes(self.father.get_data(), self.FATHER, self.CHARACTER_PARENT_DATA))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self._try_get_struct_property_bytes(self.guid, self.UNIQUEID, self.GUID_PROP))
+        bytes_out.append(self._try_get_struct_property_bytes(self.variant.get_data(), self.VARIANT,  self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_struct_property_bytes(self.appearance.get_data(), self.APPEARANCE, self.CHARACTER_APPEARANCE))
+        bytes_out.append(self._try_get_struct_property_bytes(self.appliedscheme.get_data(), self.APPLIEDSCHEME, self.CHARACTER_APPLIED_SCHEME))
+        bytes_out.append(self._try_get_struct_property_bytes(self.mother.get_data(), self.MOTHER, self.CHARACTER_PARENT_DATA))
+        bytes_out.append(self._try_get_struct_property_bytes(self.father.get_data(), self.FATHER, self.CHARACTER_PARENT_DATA))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 class Parent(GenericParsers):
     def __init__(self, parent_data):
@@ -2009,18 +2078,18 @@ class NephelymPreset(NephelymBase):
         return preset_data[:cursor], preset_data[cursor:]
     
     def get_data(self):
-        data_out = []
-        data_out.append(self.gvas)
-        data_out.append(self._try_get_name_property_bytes(self.name, self.PRESETNAME))
-        data_out.append(self._try_get_struct_property_bytes(self.variant.get_data(), self.VARIANT, self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._try_get_struct_property_bytes(self.appearance.get_data(), self.SCHEME, self.CHARACTER_APPEARANCE))
-        data_out.append(self._try_get_bool_property_bytes(self.common,    self.COMMON))
-        data_out.append(self._try_get_bool_property_bytes(self.uncommon,  self.UNCOMMON))
-        data_out.append(self._try_get_bool_property_bytes(self.rare,      self.RARE))
-        data_out.append(self._try_get_bool_property_bytes(self.unique,    self.UNIQUE))
-        data_out.append(self._try_get_bool_property_bytes(self.legendary, self.LEGENDARY))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self.gvas)
+        bytes_out.append(self._try_get_name_property_bytes(self.name, self.PRESETNAME))
+        bytes_out.append(self._try_get_struct_property_bytes(self.variant.get_data(), self.VARIANT, self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_struct_property_bytes(self.appearance.get_data(), self.SCHEME, self.CHARACTER_APPEARANCE))
+        bytes_out.append(self._try_get_bool_property_bytes(self.common,    self.COMMON))
+        bytes_out.append(self._try_get_bool_property_bytes(self.uncommon,  self.UNCOMMON))
+        bytes_out.append(self._try_get_bool_property_bytes(self.rare,      self.RARE))
+        bytes_out.append(self._try_get_bool_property_bytes(self.unique,    self.UNIQUE))
+        bytes_out.append(self._try_get_bool_property_bytes(self.legendary, self.LEGENDARY))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 
 '''Appearance Classes'''
@@ -2083,46 +2152,46 @@ class Appearance(GenericParsers):
         self.meatyshape = BaseShape(meatyshape)
 
     def get_data(self):
-        data_out = []
-        data_out.append(self._try_get_struct_property_bytes(self.tags.get_data(),               self.TAGS, self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._try_get_struct_property_bytes(self.morph.get_data(),              self.MORPH, self.CHARACTER_MORPH))
-        data_out.append(self._try_get_struct_property_bytes(self.physics.get_data(),            self.PHYSICS, self.BOUNCE_PHYSICS))
-        data_out.append(self._try_get_struct_property_bytes(self.baseshape.get_data(),          self.BASESHAPE, self.BODY_SHAPE))
-        data_out.append(self._try_get_struct_property_bytes(self.chubbyshape.get_data(),        self.CHUBBYSHAPE, self.BODY_SHAPE))
-        data_out.append(self._try_get_struct_property_bytes(self.slendershape.get_data(),       self.SLENDERSHAPE, self.BODY_SHAPE))
-        data_out.append(self._try_get_struct_property_bytes(self.meatyshape.get_data(),         self.MEATYSHAPE, self.BODY_SHAPE))
-        data_out.append(self._try_get_struct_property_bytes(self.material.get_data(),           self.MATERIAL, self.CHARACTER_MATERIAL))
-        data_out.append(self._try_get_int_property_bytes(self.eyerindex,                        self.EYERINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.eyelindex,                        self.EYELINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.eyebrowindex,                     self.EYEBROWINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.facedecorindex,                   self.FACEDECORINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.bodydecorindex,                   self.BODYDECORINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.bodymarksindex,                   self.BODYMARKSINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.additionalmaterialmaskindex,      self.ADDITIONALMATERIALMASKINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.additionalmaterialindex,          self.ADDITIONALMATERIALINDEX))
-        data_out.append(self._try_get_struct_property_bytes(self.attachmentmaterial.get_data(), self.ATTACHMENTMATERIAL, self.CHARACTER_ATTACHMENT_SCHEME))
-        data_out.append(self._try_get_int_property_bytes(self.torsoattachmentindex,             self.TORSOATTACHMENTINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.pubichairindex,                   self.PUBICHAIRINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.headattachmentindex,              self.HEADATTACHMENTINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.headextraattachmentindex,         self.HEADEXTRAATTACHMENTINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.legsattachmentindex,              self.LEGSATTACHMENTINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.armsattachmentindex,              self.ARMSATTACHMENTINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.tailattachmentindex,              self.TAILATTACHMENTINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.wingattachmentindex,              self.WINGATTACHMENTINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.earsattachmentindex,              self.EARSATTACHMENTINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.hairattachmentindex,              self.HAIRATTACHMENTINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.facialhairindex,                  self.FACIALHAIRINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.dickattachmentindex,              self.DICKATTACHMENTINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.accessoryattachmentindex,         self.ACCESSORYATTACHMENTINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.collarattachmentindex,            self.COLLARATTACHMENTINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.ambientparticleattachmentindex,   self.AMBIENTPARTICLEATTACHMENTINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.upperclothingindex,               self.UPPERCLOTHINGINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.lowerclothingindex,               self.LOWERCLOTHINGINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.underwearindex,                   self.UNDERWEARINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.bootsindex,                       self.BOOTSINDEX))
-        data_out.append(self._try_get_int_property_bytes(self.idleanimationindex,               self.IDLEANIMATIONINDEX))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self._try_get_struct_property_bytes(self.tags.get_data(),               self.TAGS, self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_struct_property_bytes(self.morph.get_data(),              self.MORPH, self.CHARACTER_MORPH))
+        bytes_out.append(self._try_get_struct_property_bytes(self.physics.get_data(),            self.PHYSICS, self.BOUNCE_PHYSICS))
+        bytes_out.append(self._try_get_struct_property_bytes(self.baseshape.get_data(),          self.BASESHAPE, self.BODY_SHAPE))
+        bytes_out.append(self._try_get_struct_property_bytes(self.chubbyshape.get_data(),        self.CHUBBYSHAPE, self.BODY_SHAPE))
+        bytes_out.append(self._try_get_struct_property_bytes(self.slendershape.get_data(),       self.SLENDERSHAPE, self.BODY_SHAPE))
+        bytes_out.append(self._try_get_struct_property_bytes(self.meatyshape.get_data(),         self.MEATYSHAPE, self.BODY_SHAPE))
+        bytes_out.append(self._try_get_struct_property_bytes(self.material.get_data(),           self.MATERIAL, self.CHARACTER_MATERIAL))
+        bytes_out.append(self._try_get_int_property_bytes(self.eyerindex,                        self.EYERINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.eyelindex,                        self.EYELINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.eyebrowindex,                     self.EYEBROWINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.facedecorindex,                   self.FACEDECORINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.bodydecorindex,                   self.BODYDECORINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.bodymarksindex,                   self.BODYMARKSINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.additionalmaterialmaskindex,      self.ADDITIONALMATERIALMASKINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.additionalmaterialindex,          self.ADDITIONALMATERIALINDEX))
+        bytes_out.append(self._try_get_struct_property_bytes(self.attachmentmaterial.get_data(), self.ATTACHMENTMATERIAL, self.CHARACTER_ATTACHMENT_SCHEME))
+        bytes_out.append(self._try_get_int_property_bytes(self.torsoattachmentindex,             self.TORSOATTACHMENTINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.pubichairindex,                   self.PUBICHAIRINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.headattachmentindex,              self.HEADATTACHMENTINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.headextraattachmentindex,         self.HEADEXTRAATTACHMENTINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.legsattachmentindex,              self.LEGSATTACHMENTINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.armsattachmentindex,              self.ARMSATTACHMENTINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.tailattachmentindex,              self.TAILATTACHMENTINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.wingattachmentindex,              self.WINGATTACHMENTINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.earsattachmentindex,              self.EARSATTACHMENTINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.hairattachmentindex,              self.HAIRATTACHMENTINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.facialhairindex,                  self.FACIALHAIRINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.dickattachmentindex,              self.DICKATTACHMENTINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.accessoryattachmentindex,         self.ACCESSORYATTACHMENTINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.collarattachmentindex,            self.COLLARATTACHMENTINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.ambientparticleattachmentindex,   self.AMBIENTPARTICLEATTACHMENTINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.upperclothingindex,               self.UPPERCLOTHINGINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.lowerclothingindex,               self.LOWERCLOTHINGINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.underwearindex,                   self.UNDERWEARINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.bootsindex,                       self.BOOTSINDEX))
+        bytes_out.append(self._try_get_int_property_bytes(self.idleanimationindex,               self.IDLEANIMATIONINDEX))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 class BaseShape(GenericParsers):
     def __init__(self, shape_data):
@@ -2149,17 +2218,17 @@ class BaseShape(GenericParsers):
         self.physicspregnant = Physics(physicspregnant)
     
     def get_data(self):
-        data_out = []
-        data_out.append(self._try_get_struct_property_bytes(self.morph.get_data(),           self.MORPH,           self.CHARACTER_MORPH))
-        data_out.append(self._try_get_struct_property_bytes(self.morphbusty.get_data(),      self.MORPHBUSTY,      self.CHARACTER_MORPH))
-        data_out.append(self._try_get_struct_property_bytes(self.morphbuxom.get_data(),      self.MORPHBUXOM,      self.CHARACTER_MORPH))
-        data_out.append(self._try_get_struct_property_bytes(self.morphpregnant.get_data(),   self.MORPHPREGNANT,   self.CHARACTER_MORPH))
-        data_out.append(self._try_get_struct_property_bytes(self.physics.get_data(),         self.PHYSICS,         self.BOUNCE_PHYSICS))
-        data_out.append(self._try_get_struct_property_bytes(self.physicsbusty.get_data(),    self.PHYSICSBUSTY,    self.BOUNCE_PHYSICS))
-        data_out.append(self._try_get_struct_property_bytes(self.physicsbuxom.get_data(),    self.PHYSICSBUXOM,    self.BOUNCE_PHYSICS))
-        data_out.append(self._try_get_struct_property_bytes(self.physicspregnant.get_data(), self.PHYSICSPREGNANT, self.BOUNCE_PHYSICS))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self._try_get_struct_property_bytes(self.morph.get_data(),           self.MORPH,           self.CHARACTER_MORPH))
+        bytes_out.append(self._try_get_struct_property_bytes(self.morphbusty.get_data(),      self.MORPHBUSTY,      self.CHARACTER_MORPH))
+        bytes_out.append(self._try_get_struct_property_bytes(self.morphbuxom.get_data(),      self.MORPHBUXOM,      self.CHARACTER_MORPH))
+        bytes_out.append(self._try_get_struct_property_bytes(self.morphpregnant.get_data(),   self.MORPHPREGNANT,   self.CHARACTER_MORPH))
+        bytes_out.append(self._try_get_struct_property_bytes(self.physics.get_data(),         self.PHYSICS,         self.BOUNCE_PHYSICS))
+        bytes_out.append(self._try_get_struct_property_bytes(self.physicsbusty.get_data(),    self.PHYSICSBUSTY,    self.BOUNCE_PHYSICS))
+        bytes_out.append(self._try_get_struct_property_bytes(self.physicsbuxom.get_data(),    self.PHYSICSBUXOM,    self.BOUNCE_PHYSICS))
+        bytes_out.append(self._try_get_struct_property_bytes(self.physicspregnant.get_data(), self.PHYSICSPREGNANT, self.BOUNCE_PHYSICS))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 class Morph(GenericParsers):
     def __init__(self, morph_data):
@@ -2295,132 +2364,132 @@ class Morph(GenericParsers):
         self.breastclothed = Breast(breastclothed)
     
     def get_data(self):
-        data_out = []
-        data_out.append(self._try_get_float_property_bytes(self.facedepth, self.FACEDEPTH))
-        data_out.append(self._try_get_float_property_bytes(self.facewidth, self.FACEWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.eyesclose, self.EYESCLOSE))
-        data_out.append(self._try_get_float_property_bytes(self.eyesvertical, self.EYESVERTICAL))
-        data_out.append(self._try_get_float_property_bytes(self.eyesdepth, self.EYESDEPTH))
-        data_out.append(self._try_get_float_property_bytes(self.eyesdistance, self.EYESDISTANCE))
-        data_out.append(self._try_get_float_property_bytes(self.eyessize, self.EYESSIZE))
-        data_out.append(self._try_get_float_property_bytes(self.eyesangle, self.EYESANGLE))
-        data_out.append(self._try_get_float_property_bytes(self.humanearsize, self.HUMANEARSIZE))
-        data_out.append(self._try_get_float_property_bytes(self.humanearpointeda, self.HUMANEARPOINTEDA))
-        data_out.append(self._try_get_float_property_bytes(self.humanearpointedb, self.HUMANEARPOINTEDB))
-        data_out.append(self._try_get_float_property_bytes(self.humanearpointedc, self.HUMANEARPOINTEDC))
-        data_out.append(self._try_get_float_property_bytes(self.attachedearsize, self.ATTACHEDEARSIZE))
-        data_out.append(self._try_get_float_property_bytes(self.hairsize, self.HAIRSIZE))
-        data_out.append(self._try_get_float_property_bytes(self.hairback, self.HAIRBACK))
-        data_out.append(self._try_get_float_property_bytes(self.browvertical, self.BROWVERTICAL))
-        data_out.append(self._try_get_float_property_bytes(self.browdepth, self.BROWDEPTH))
-        data_out.append(self._try_get_float_property_bytes(self.browinnervertical, self.BROWINNERVERTICAL))
-        data_out.append(self._try_get_float_property_bytes(self.nosebridgewidth, self.NOSEBRIDGEWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.nosebridgedepth, self.NOSEBRIDGEDEPTH))
-        data_out.append(self._try_get_float_property_bytes(self.nosewidth, self.NOSEWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.nosedepth, self.NOSEDEPTH))
-        data_out.append(self._try_get_float_property_bytes(self.nosevertical, self.NOSEVERTICAL))
-        data_out.append(self._try_get_float_property_bytes(self.noseangle, self.NOSEANGLE))
-        data_out.append(self._try_get_float_property_bytes(self.cheekbonedepth, self.CHEEKBONEDEPTH))
-        data_out.append(self._try_get_float_property_bytes(self.cheekbonevertical, self.CHEEKBONEVERTICAL))
-        data_out.append(self._try_get_float_property_bytes(self.cheekbonewidth, self.CHEEKBONEWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.cheekbonesize, self.CHEEKBONESIZE))
-        data_out.append(self._try_get_float_property_bytes(self.cheekdepth, self.CHEEKDEPTH))
-        data_out.append(self._try_get_float_property_bytes(self.cheekwidth, self.CHEEKWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.mouthwidth, self.MOUTHWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.mouthvertical, self.MOUTHVERTICAL))
-        data_out.append(self._try_get_float_property_bytes(self.mouthdepth, self.MOUTHDEPTH))
-        data_out.append(self._try_get_float_property_bytes(self.mouthopen, self.MOUTHOPEN))
-        data_out.append(self._try_get_float_property_bytes(self.mouthcornersvertical, self.MOUTHCORNERSVERTICAL))
-        data_out.append(self._try_get_float_property_bytes(self.mouthcornersdepth, self.MOUTHCORNERSDEPTH))
-        data_out.append(self._try_get_float_property_bytes(self.lipupperfat, self.LIPUPPERFAT))
-        data_out.append(self._try_get_float_property_bytes(self.lipupperwidth, self.LIPUPPERWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.lipupperdepth, self.LIPUPPERDEPTH))
-        data_out.append(self._try_get_float_property_bytes(self.lipupperpeakvertical, self.LIPUPPERPEAKVERTICAL))
-        data_out.append(self._try_get_float_property_bytes(self.liplowerfat, self.LIPLOWERFAT))
-        data_out.append(self._try_get_float_property_bytes(self.liplowerwidth, self.LIPLOWERWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.liplowerdepth, self.LIPLOWERDEPTH))
-        data_out.append(self._try_get_float_property_bytes(self.lipcentervertical, self.LIPCENTERVERTICAL))
-        data_out.append(self._try_get_float_property_bytes(self.lipcurves, self.LIPCURVES))
-        data_out.append(self._try_get_float_property_bytes(self.jawcornerwidth, self.JAWCORNERWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.jawcornervertical, self.JAWCORNERVERTICAL))
-        data_out.append(self._try_get_float_property_bytes(self.jawwidth, self.JAWWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.jawvertical, self.JAWVERTICAL))
-        data_out.append(self._try_get_float_property_bytes(self.chinwidth, self.CHINWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.chinvertical, self.CHINVERTICAL))
-        data_out.append(self._try_get_float_property_bytes(self.chindepth, self.CHINDEPTH))
-        data_out.append(self._try_get_float_property_bytes(self.chinfat, self.CHINFAT))
-        data_out.append(self._try_get_float_property_bytes(self.neckgirth, self.NECKGIRTH))
-        data_out.append(self._try_get_float_property_bytes(self.shoulderwidth, self.SHOULDERWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.shoulderspread, self.SHOULDERSPREAD))
-        data_out.append(self._try_get_float_property_bytes(self.shoulderheight, self.SHOULDERHEIGHT))
-        data_out.append(self._try_get_float_property_bytes(self.shoulderforward, self.SHOULDERFORWARD))
-        data_out.append(self._try_get_float_property_bytes(self.upperarmgirth, self.UPPERARMGIRTH))
-        data_out.append(self._try_get_float_property_bytes(self.upperarmfit, self.UPPERARMFIT))
-        data_out.append(self._try_get_float_property_bytes(self.upperbodyfit, self.UPPERBODYFIT))
-        data_out.append(self._try_get_float_property_bytes(self.forearmgirth, self.FOREARMGIRTH))
+        bytes_out = []
+        bytes_out.append(self._try_get_float_property_bytes(self.facedepth, self.FACEDEPTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.facewidth, self.FACEWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.eyesclose, self.EYESCLOSE))
+        bytes_out.append(self._try_get_float_property_bytes(self.eyesvertical, self.EYESVERTICAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.eyesdepth, self.EYESDEPTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.eyesdistance, self.EYESDISTANCE))
+        bytes_out.append(self._try_get_float_property_bytes(self.eyessize, self.EYESSIZE))
+        bytes_out.append(self._try_get_float_property_bytes(self.eyesangle, self.EYESANGLE))
+        bytes_out.append(self._try_get_float_property_bytes(self.humanearsize, self.HUMANEARSIZE))
+        bytes_out.append(self._try_get_float_property_bytes(self.humanearpointeda, self.HUMANEARPOINTEDA))
+        bytes_out.append(self._try_get_float_property_bytes(self.humanearpointedb, self.HUMANEARPOINTEDB))
+        bytes_out.append(self._try_get_float_property_bytes(self.humanearpointedc, self.HUMANEARPOINTEDC))
+        bytes_out.append(self._try_get_float_property_bytes(self.attachedearsize, self.ATTACHEDEARSIZE))
+        bytes_out.append(self._try_get_float_property_bytes(self.hairsize, self.HAIRSIZE))
+        bytes_out.append(self._try_get_float_property_bytes(self.hairback, self.HAIRBACK))
+        bytes_out.append(self._try_get_float_property_bytes(self.browvertical, self.BROWVERTICAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.browdepth, self.BROWDEPTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.browinnervertical, self.BROWINNERVERTICAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.nosebridgewidth, self.NOSEBRIDGEWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.nosebridgedepth, self.NOSEBRIDGEDEPTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.nosewidth, self.NOSEWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.nosedepth, self.NOSEDEPTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.nosevertical, self.NOSEVERTICAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.noseangle, self.NOSEANGLE))
+        bytes_out.append(self._try_get_float_property_bytes(self.cheekbonedepth, self.CHEEKBONEDEPTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.cheekbonevertical, self.CHEEKBONEVERTICAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.cheekbonewidth, self.CHEEKBONEWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.cheekbonesize, self.CHEEKBONESIZE))
+        bytes_out.append(self._try_get_float_property_bytes(self.cheekdepth, self.CHEEKDEPTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.cheekwidth, self.CHEEKWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.mouthwidth, self.MOUTHWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.mouthvertical, self.MOUTHVERTICAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.mouthdepth, self.MOUTHDEPTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.mouthopen, self.MOUTHOPEN))
+        bytes_out.append(self._try_get_float_property_bytes(self.mouthcornersvertical, self.MOUTHCORNERSVERTICAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.mouthcornersdepth, self.MOUTHCORNERSDEPTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.lipupperfat, self.LIPUPPERFAT))
+        bytes_out.append(self._try_get_float_property_bytes(self.lipupperwidth, self.LIPUPPERWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.lipupperdepth, self.LIPUPPERDEPTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.lipupperpeakvertical, self.LIPUPPERPEAKVERTICAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.liplowerfat, self.LIPLOWERFAT))
+        bytes_out.append(self._try_get_float_property_bytes(self.liplowerwidth, self.LIPLOWERWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.liplowerdepth, self.LIPLOWERDEPTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.lipcentervertical, self.LIPCENTERVERTICAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.lipcurves, self.LIPCURVES))
+        bytes_out.append(self._try_get_float_property_bytes(self.jawcornerwidth, self.JAWCORNERWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.jawcornervertical, self.JAWCORNERVERTICAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.jawwidth, self.JAWWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.jawvertical, self.JAWVERTICAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.chinwidth, self.CHINWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.chinvertical, self.CHINVERTICAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.chindepth, self.CHINDEPTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.chinfat, self.CHINFAT))
+        bytes_out.append(self._try_get_float_property_bytes(self.neckgirth, self.NECKGIRTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.shoulderwidth, self.SHOULDERWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.shoulderspread, self.SHOULDERSPREAD))
+        bytes_out.append(self._try_get_float_property_bytes(self.shoulderheight, self.SHOULDERHEIGHT))
+        bytes_out.append(self._try_get_float_property_bytes(self.shoulderforward, self.SHOULDERFORWARD))
+        bytes_out.append(self._try_get_float_property_bytes(self.upperarmgirth, self.UPPERARMGIRTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.upperarmfit, self.UPPERARMFIT))
+        bytes_out.append(self._try_get_float_property_bytes(self.upperbodyfit, self.UPPERBODYFIT))
+        bytes_out.append(self._try_get_float_property_bytes(self.forearmgirth, self.FOREARMGIRTH))
 
-        data_out.append(self._try_get_struct_property_bytes(self.breast.get_data(), self.BREAST, self.BREAST_SHAPE))
-        data_out.append(self._try_get_struct_property_bytes(self.breastclothed.get_data(), self.BREASTCLOTHED, self.BREAST_SHAPE))
+        bytes_out.append(self._try_get_struct_property_bytes(self.breast.get_data(), self.BREAST, self.BREAST_SHAPE))
+        bytes_out.append(self._try_get_struct_property_bytes(self.breastclothed.get_data(), self.BREASTCLOTHED, self.BREAST_SHAPE))
 
-        data_out.append(self._try_get_float_property_bytes(self.bellyfat, self.BELLYFAT))
-        data_out.append(self._try_get_float_property_bytes(self.bellymega, self.BELLYMEGA))
-        data_out.append(self._try_get_float_property_bytes(self.bellydepth, self.BELLYDEPTH))
-        data_out.append(self._try_get_float_property_bytes(self.bellywidth, self.BELLYWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.bellydepth2, self.BELLYDEPTH2))
-        data_out.append(self._try_get_float_property_bytes(self.bellywidth2, self.BELLYWIDTH2))
-        data_out.append(self._try_get_float_property_bytes(self.bellyheight, self.BELLYHEIGHT))
-        data_out.append(self._try_get_float_property_bytes(self.bellyvertical, self.BELLYVERTICAL))
-        data_out.append(self._try_get_float_property_bytes(self.bellypregnant, self.BELLYPREGNANT))
-        data_out.append(self._try_get_float_property_bytes(self.bellyfit, self.BELLYFIT))
-        data_out.append(self._try_get_float_property_bytes(self.bellypelviscrease, self.BELLYPELVISCREASE))
-        data_out.append(self._try_get_float_property_bytes(self.bellysmooth, self.BELLYSMOOTH))
-        data_out.append(self._try_get_float_property_bytes(self.navelwidth, self.NAVELWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.navelheight, self.NAVELHEIGHT))
-        data_out.append(self._try_get_float_property_bytes(self.navelvertical, self.NAVELVERTICAL))
-        data_out.append(self._try_get_float_property_bytes(self.naveldepth, self.NAVELDEPTH))
-        data_out.append(self._try_get_float_property_bytes(self.waistwidth, self.WAISTWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.hipwidth, self.HIPWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.groingirth, self.GROINGIRTH))
-        data_out.append(self._try_get_float_property_bytes(self.vaginafat, self.VAGINAFAT))
-        data_out.append(self._try_get_float_property_bytes(self.vaginaopen, self.VAGINAOPEN))
-        data_out.append(self._try_get_float_property_bytes(self.buttsize, self.BUTTSIZE))
-        data_out.append(self._try_get_float_property_bytes(self.buttdepth, self.BUTTDEPTH))
-        data_out.append(self._try_get_float_property_bytes(self.buttheight, self.BUTTHEIGHT))
-        data_out.append(self._try_get_float_property_bytes(self.buttwidth, self.BUTTWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.buttcleavage, self.BUTTCLEAVAGE))
-        data_out.append(self._try_get_float_property_bytes(self.buttvertical, self.BUTTVERTICAL))
-        data_out.append(self._try_get_float_property_bytes(self.buttprotrude, self.BUTTPROTRUDE))
-        data_out.append(self._try_get_float_property_bytes(self.buttcrease, self.BUTTCREASE))
-        data_out.append(self._try_get_float_property_bytes(self.thighgirth, self.THIGHGIRTH))
-        data_out.append(self._try_get_float_property_bytes(self.thighfit, self.THIGHFIT))
-        data_out.append(self._try_get_float_property_bytes(self.calfgirth, self.CALFGIRTH))
-        data_out.append(self._try_get_float_property_bytes(self.dickblursheathoffset, self.DICKBLURSHEATHOFFSET))
-        data_out.append(self._try_get_float_property_bytes(self.dickblursheathtapera, self.DICKBLURSHEATHTAPERA))
-        data_out.append(self._try_get_float_property_bytes(self.dickblursheathtaperb, self.DICKBLURSHEATHTAPERB))
-        data_out.append(self._try_get_float_property_bytes(self.dickblursheathconstrict, self.DICKBLURSHEATHCONSTRICT))
-        data_out.append(self._try_get_float_property_bytes(self.dickheadgirth, self.DICKHEADGIRTH))
-        data_out.append(self._try_get_float_property_bytes(self.dicklength, self.DICKLENGTH))
-        data_out.append(self._try_get_float_property_bytes(self.dickshaftgirth, self.DICKSHAFTGIRTH))
-        data_out.append(self._try_get_float_property_bytes(self.dicksize, self.DICKSIZE))
-        data_out.append(self._try_get_float_property_bytes(self.scrotumsize, self.SCROTUMSIZE))
-        data_out.append(self._try_get_float_property_bytes(self.teethsharp, self.TEETHSHARP))
-        data_out.append(self._try_get_float_property_bytes(self.tailsize, self.TAILSIZE))
-        data_out.append(self._try_get_float_property_bytes(self.wingssize, self.WINGSSIZE))
-        data_out.append(self._try_get_float_property_bytes(self.legspread, self.LEGSPREAD))
-        data_out.append(self._try_get_float_property_bytes(self.fullbodystacked, self.FULLBODYSTACKED))
-        data_out.append(self._try_get_float_property_bytes(self.fullbodybulk, self.FULLBODYBULK))
-        data_out.append(self._try_get_float_property_bytes(self.fullbodychubby, self.FULLBODYCHUBBY))
-        data_out.append(self._try_get_float_property_bytes(self.fullbodyslender, self.FULLBODYSLENDER))
-        data_out.append(self._try_get_float_property_bytes(self.spineadjust, self.SPINEADJUST))
-        data_out.append(self._try_get_float_property_bytes(self.headsize, self.HEADSIZE))
-        data_out.append(self._try_get_float_property_bytes(self.armscale_0, self.ARMSCALE_0))
-        data_out.append(self._try_get_float_property_bytes(self.armscale_1, self.ARMSCALE_1))
-        data_out.append(self._try_get_float_property_bytes(self.armscale_2, self.ARMSCALE_2))
-        data_out.append(self._try_get_float_property_bytes(self.armscale_3, self.ARMSCALE_3))
-        data_out.append(self._try_get_float_property_bytes(self.armscale_4, self.ARMSCALE_4))
-        data_out.append(self._try_get_float_property_bytes(self.armscale_5, self.ARMSCALE_5))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out.append(self._try_get_float_property_bytes(self.bellyfat, self.BELLYFAT))
+        bytes_out.append(self._try_get_float_property_bytes(self.bellymega, self.BELLYMEGA))
+        bytes_out.append(self._try_get_float_property_bytes(self.bellydepth, self.BELLYDEPTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.bellywidth, self.BELLYWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.bellydepth2, self.BELLYDEPTH2))
+        bytes_out.append(self._try_get_float_property_bytes(self.bellywidth2, self.BELLYWIDTH2))
+        bytes_out.append(self._try_get_float_property_bytes(self.bellyheight, self.BELLYHEIGHT))
+        bytes_out.append(self._try_get_float_property_bytes(self.bellyvertical, self.BELLYVERTICAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.bellypregnant, self.BELLYPREGNANT))
+        bytes_out.append(self._try_get_float_property_bytes(self.bellyfit, self.BELLYFIT))
+        bytes_out.append(self._try_get_float_property_bytes(self.bellypelviscrease, self.BELLYPELVISCREASE))
+        bytes_out.append(self._try_get_float_property_bytes(self.bellysmooth, self.BELLYSMOOTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.navelwidth, self.NAVELWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.navelheight, self.NAVELHEIGHT))
+        bytes_out.append(self._try_get_float_property_bytes(self.navelvertical, self.NAVELVERTICAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.naveldepth, self.NAVELDEPTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.waistwidth, self.WAISTWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.hipwidth, self.HIPWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.groingirth, self.GROINGIRTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.vaginafat, self.VAGINAFAT))
+        bytes_out.append(self._try_get_float_property_bytes(self.vaginaopen, self.VAGINAOPEN))
+        bytes_out.append(self._try_get_float_property_bytes(self.buttsize, self.BUTTSIZE))
+        bytes_out.append(self._try_get_float_property_bytes(self.buttdepth, self.BUTTDEPTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.buttheight, self.BUTTHEIGHT))
+        bytes_out.append(self._try_get_float_property_bytes(self.buttwidth, self.BUTTWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.buttcleavage, self.BUTTCLEAVAGE))
+        bytes_out.append(self._try_get_float_property_bytes(self.buttvertical, self.BUTTVERTICAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.buttprotrude, self.BUTTPROTRUDE))
+        bytes_out.append(self._try_get_float_property_bytes(self.buttcrease, self.BUTTCREASE))
+        bytes_out.append(self._try_get_float_property_bytes(self.thighgirth, self.THIGHGIRTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.thighfit, self.THIGHFIT))
+        bytes_out.append(self._try_get_float_property_bytes(self.calfgirth, self.CALFGIRTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.dickblursheathoffset, self.DICKBLURSHEATHOFFSET))
+        bytes_out.append(self._try_get_float_property_bytes(self.dickblursheathtapera, self.DICKBLURSHEATHTAPERA))
+        bytes_out.append(self._try_get_float_property_bytes(self.dickblursheathtaperb, self.DICKBLURSHEATHTAPERB))
+        bytes_out.append(self._try_get_float_property_bytes(self.dickblursheathconstrict, self.DICKBLURSHEATHCONSTRICT))
+        bytes_out.append(self._try_get_float_property_bytes(self.dickheadgirth, self.DICKHEADGIRTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.dicklength, self.DICKLENGTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.dickshaftgirth, self.DICKSHAFTGIRTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.dicksize, self.DICKSIZE))
+        bytes_out.append(self._try_get_float_property_bytes(self.scrotumsize, self.SCROTUMSIZE))
+        bytes_out.append(self._try_get_float_property_bytes(self.teethsharp, self.TEETHSHARP))
+        bytes_out.append(self._try_get_float_property_bytes(self.tailsize, self.TAILSIZE))
+        bytes_out.append(self._try_get_float_property_bytes(self.wingssize, self.WINGSSIZE))
+        bytes_out.append(self._try_get_float_property_bytes(self.legspread, self.LEGSPREAD))
+        bytes_out.append(self._try_get_float_property_bytes(self.fullbodystacked, self.FULLBODYSTACKED))
+        bytes_out.append(self._try_get_float_property_bytes(self.fullbodybulk, self.FULLBODYBULK))
+        bytes_out.append(self._try_get_float_property_bytes(self.fullbodychubby, self.FULLBODYCHUBBY))
+        bytes_out.append(self._try_get_float_property_bytes(self.fullbodyslender, self.FULLBODYSLENDER))
+        bytes_out.append(self._try_get_float_property_bytes(self.spineadjust, self.SPINEADJUST))
+        bytes_out.append(self._try_get_float_property_bytes(self.headsize, self.HEADSIZE))
+        bytes_out.append(self._try_get_float_property_bytes(self.armscale_0, self.ARMSCALE_0))
+        bytes_out.append(self._try_get_float_property_bytes(self.armscale_1, self.ARMSCALE_1))
+        bytes_out.append(self._try_get_float_property_bytes(self.armscale_2, self.ARMSCALE_2))
+        bytes_out.append(self._try_get_float_property_bytes(self.armscale_3, self.ARMSCALE_3))
+        bytes_out.append(self._try_get_float_property_bytes(self.armscale_4, self.ARMSCALE_4))
+        bytes_out.append(self._try_get_float_property_bytes(self.armscale_5, self.ARMSCALE_5))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 class Physics(GenericParsers):
     def __init__(self, physics_data):
@@ -2434,13 +2503,13 @@ class Physics(GenericParsers):
         self.remain = physics_data
     
     def get_data(self):
-        data_out = []
-        data_out.append(self._try_get_float_property_bytes(self.bellybounce, self.BELLYBOUNCE))
-        data_out.append(self._try_get_float_property_bytes(self.breastbounce, self.BREASTBOUNCE))
-        data_out.append(self._try_get_float_property_bytes(self.buttbounce, self.BUTTBOUNCE))
-        data_out.append(self._try_get_float_property_bytes(self.thighbounce, self.THIGHBOUNCE))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self._try_get_float_property_bytes(self.bellybounce, self.BELLYBOUNCE))
+        bytes_out.append(self._try_get_float_property_bytes(self.breastbounce, self.BREASTBOUNCE))
+        bytes_out.append(self._try_get_float_property_bytes(self.buttbounce, self.BUTTBOUNCE))
+        bytes_out.append(self._try_get_float_property_bytes(self.thighbounce, self.THIGHBOUNCE))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 class Breast(GenericParsers):
     def __init__(self, breast_data):
@@ -2484,23 +2553,23 @@ class Breast(GenericParsers):
         ]
     
     def get_data(self):
-        data_out = []
-        data_out.append(self._try_get_float_property_bytes(self.breastsize, self.BREASTSIZE))
-        data_out.append(self._try_get_float_property_bytes(self.breastdepth, self.BREASTDEPTH))
-        data_out.append(self._try_get_float_property_bytes(self.breastheight, self.BREASTHEIGHT))
-        data_out.append(self._try_get_float_property_bytes(self.breastprotrude, self.BREASTPROTRUDE))
-        data_out.append(self._try_get_float_property_bytes(self.breastcleavage, self.BREASTCLEAVAGE))
-        data_out.append(self._try_get_float_property_bytes(self.breastvertical, self.BREASTVERTICAL))
-        data_out.append(self._try_get_float_property_bytes(self.breastwidth, self.BREASTWIDTH))
-        data_out.append(self._try_get_float_property_bytes(self.tinytitties, self.TINYTITTIES))
-        data_out.append(self._try_get_float_property_bytes(self.nippleradius, self.NIPPLERADIUS))
-        data_out.append(self._try_get_float_property_bytes(self.nipplefat, self.NIPPLEFAT))
-        data_out.append(self._try_get_float_property_bytes(self.nippleperk, self.NIPPLEPERK))
-        data_out.append(self._try_get_float_property_bytes(self.areolaeradius, self.AREOLAERADIUS))
-        data_out.append(self._try_get_float_property_bytes(self.areolaefat, self.AREOLAEFAT))
-        data_out.append(self._try_get_float_property_bytes(self.areolaedepth, self.AREOLAEDEPTH))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self._try_get_float_property_bytes(self.breastsize, self.BREASTSIZE))
+        bytes_out.append(self._try_get_float_property_bytes(self.breastdepth, self.BREASTDEPTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.breastheight, self.BREASTHEIGHT))
+        bytes_out.append(self._try_get_float_property_bytes(self.breastprotrude, self.BREASTPROTRUDE))
+        bytes_out.append(self._try_get_float_property_bytes(self.breastcleavage, self.BREASTCLEAVAGE))
+        bytes_out.append(self._try_get_float_property_bytes(self.breastvertical, self.BREASTVERTICAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.breastwidth, self.BREASTWIDTH))
+        bytes_out.append(self._try_get_float_property_bytes(self.tinytitties, self.TINYTITTIES))
+        bytes_out.append(self._try_get_float_property_bytes(self.nippleradius, self.NIPPLERADIUS))
+        bytes_out.append(self._try_get_float_property_bytes(self.nipplefat, self.NIPPLEFAT))
+        bytes_out.append(self._try_get_float_property_bytes(self.nippleperk, self.NIPPLEPERK))
+        bytes_out.append(self._try_get_float_property_bytes(self.areolaeradius, self.AREOLAERADIUS))
+        bytes_out.append(self._try_get_float_property_bytes(self.areolaefat, self.AREOLAEFAT))
+        bytes_out.append(self._try_get_float_property_bytes(self.areolaedepth, self.AREOLAEDEPTH))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 class Material(GenericParsers):
     def __init__(self, material_data):
@@ -2690,126 +2759,126 @@ class Material(GenericParsers):
         self.additionalmaterialglow = LinearColor(additionalmaterialglow)
     
     def get_data(self):
-        data_out = []
-        data_out.append(self._try_get_struct_property_bytes(self.lightcolor.get_data(),self.LIGHTCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.lightintensity, self.LIGHTINTENSITY))
-        data_out.append(self._try_get_struct_property_bytes(self.effectcolor.get_data(), self.EFFECTCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.effectglow, self.EFFECTGLOW))
-        data_out.append(self._try_get_struct_property_bytes(self.skincolor.get_data(), self.SKINCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.muscledetails, self.MUSCLEDETAILS))
-        data_out.append(self._try_get_float_property_bytes(self.softdetails, self.SOFTDETAILS))
-        data_out.append(self._try_get_float_property_bytes(self.bodydetails, self.BODYDETAILS))
-        data_out.append(self._try_get_struct_property_bytes(self.skinfadecolor.get_data(), self.SKINFADECOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.skinroughness, self.SKINROUGHNESS))
-        data_out.append(self._try_get_float_property_bytes(self.skinmetal, self.SKINMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.skinglow.get_data(), self.SKINGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.skinssscolor.get_data(), self.SKINSSSCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.specular, self.SPECULAR))
-        data_out.append(self._try_get_float_property_bytes(self.skinfade, self.SKINFADE))
-        data_out.append(self._try_get_float_property_bytes(self.animatedglow, self.ANIMATEDGLOW))
-        data_out.append(self._try_get_struct_property_bytes(self.nipplecolor.get_data(), self.NIPPLECOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.nippleroughness, self.NIPPLEROUGHNESS))
-        data_out.append(self._try_get_float_property_bytes(self.nipplemetal, self.NIPPLEMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.nippleglow.get_data(), self.NIPPLEGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.nippleaccentcolor.get_data(), self.NIPPLEACCENTCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.nippleaccentroughness, self.NIPPLEACCENTROUGHNESS))
-        data_out.append(self._try_get_float_property_bytes(self.nippleaccentmetal, self.NIPPLEACCENTMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.nippleaccentglow.get_data(), self.NIPPLEACCENTGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.vaginacolor.get_data(), self.VAGINACOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.vaginaroughness, self.VAGINAROUGHNESS))
-        data_out.append(self._try_get_float_property_bytes(self.vaginametal, self.VAGINAMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.vaginaglow.get_data(), self.VAGINAGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.dickbasecolor.get_data(), self.DICKBASECOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.dickcolor.get_data(), self.DICKCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.dickroughness, self.DICKROUGHNESS))
-        data_out.append(self._try_get_float_property_bytes(self.dickmetal, self.DICKMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.dickglow.get_data(), self.DICKGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.dicktipcolor.get_data(), self.DICKTIPCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.dicktiproughness, self.DICKTIPROUGHNESS))
-        data_out.append(self._try_get_float_property_bytes(self.dicktipmetal, self.DICKTIPMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.dicktipglow.get_data(), self.DICKTIPGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.scrotumcolor.get_data(), self.SCROTUMCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.scrotumroughness, self.SCROTUMROUGHNESS))
-        data_out.append(self._try_get_float_property_bytes(self.scrotummetal, self.SCROTUMMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.scrotumglow.get_data(), self.SCROTUMGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.blursheathtint.get_data(), self.BLURSHEATHTINT, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.anuscolor.get_data(), self.ANUSCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.anusroughness, self.ANUSROUGHNESS))
-        data_out.append(self._try_get_float_property_bytes(self.anusmetal, self.ANUSMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.anusglow.get_data(), self.ANUSGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.lipscolor.get_data(), self.LIPSCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.lipsroughness, self.LIPSROUGHNESS))
-        data_out.append(self._try_get_float_property_bytes(self.lipsmetal, self.LIPSMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.lipsglow.get_data(), self.LIPSGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.eyesocketcolor.get_data(), self.EYESOCKETCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.eyesocketshadow, self.EYESOCKETSHADOW))
-        data_out.append(self._try_get_struct_property_bytes(self.eyerimcolor.get_data(), self.EYERIMCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.eyerimglow.get_data(), self.EYERIMGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.eyerimmetal, self.EYERIMMETAL))
-        data_out.append(self._try_get_float_property_bytes(self.eyerimroughness, self.EYERIMROUGHNESS))
-        data_out.append(self._try_get_struct_property_bytes(self.eyercolor.get_data(), self.EYERCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.eyerglow.get_data(), self.EYERGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.eyelcolor.get_data(), self.EYELCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.eyelglow.get_data(), self.EYELGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.eyescleracolor.get_data(), self.EYESCLERACOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.eyescleraglow.get_data(), self.EYESCLERAGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.eyeroughness, self.EYEROUGHNESS))
-        data_out.append(self._try_get_float_property_bytes(self.eyemetal, self.EYEMETAL))
-        data_out.append(self._try_get_float_property_bytes(self.wholeeyemetal, self.WHOLEEYEMETAL))
-        data_out.append(self._try_get_float_property_bytes(self.wholeeyeglow, self.WHOLEEYEGLOW))
-        data_out.append(self._try_get_struct_property_bytes(self.haircolor.get_data(), self.HAIRCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.hairmetal, self.HAIRMETAL))
-        data_out.append(self._try_get_float_property_bytes(self.hairroughnessmin, self.HAIRROUGHNESSMIN))
-        data_out.append(self._try_get_float_property_bytes(self.hairroughnessmax, self.HAIRROUGHNESSMAX))
-        data_out.append(self._try_get_struct_property_bytes(self.hairrootcolor.get_data(), self.HAIRROOTCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.hairtipcolor.get_data(), self.HAIRTIPCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.hairglow.get_data(), self.HAIRGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.hairroughness, self.HAIRROUGHNESS))
-        data_out.append(self._try_get_float_property_bytes(self.hairscatter, self.HAIRSCATTER))
-        data_out.append(self._try_get_float_property_bytes(self.hairhuevariation, self.HAIRHUEVARIATION))
-        data_out.append(self._try_get_float_property_bytes(self.hairvaluevariation, self.HAIRVALUEVARIATION))
-        data_out.append(self._try_get_float_property_bytes(self.hairedgemaskcontrast, self.HAIREDGEMASKCONTRAST))
-        data_out.append(self._try_get_float_property_bytes(self.hairedgemaskmin, self.HAIREDGEMASKMIN))
-        data_out.append(self._try_get_float_property_bytes(self.hairdepthcontrast, self.HAIRDEPTHCONTRAST))
-        data_out.append(self._try_get_float_property_bytes(self.hairdepthoffset, self.HAIRDEPTHOFFSET))
-        data_out.append(self._try_get_struct_property_bytes(self.facialhaircolor.get_data(), self.FACIALHAIRCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.eyebrowcolor.get_data(), self.EYEBROWCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.eyebrowroughness, self.EYEBROWROUGHNESS))
-        data_out.append(self._try_get_float_property_bytes(self.eyebrowmetal, self.EYEBROWMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.eyebrowglow.get_data(), self.EYEBROWGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.facedecorcolor.get_data(), self.FACEDECORCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.facedecorroughness, self.FACEDECORROUGHNESS))
-        data_out.append(self._try_get_float_property_bytes(self.facedecormetal, self.FACEDECORMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.facedecorglow.get_data(), self.FACEDECORGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.bodydecorcolor.get_data(), self.BODYDECORCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.bodydecorroughness, self.BODYDECORROUGHNESS))
-        data_out.append(self._try_get_float_property_bytes(self.bodydecormetal, self.BODYDECORMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.bodydecorglow.get_data(), self.BODYDECORGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.bodymarkscolor.get_data(), self.BODYMARKSCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.bodymarksroughness, self.BODYMARKSROUGHNESS))
-        data_out.append(self._try_get_float_property_bytes(self.bodymarksmetal, self.BODYMARKSMETAL))
-        data_out.append(self._try_get_struct_property_bytes(self.bodymarksglow.get_data(), self.BODYMARKSGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.nailscolor.get_data(), self.NAILSCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.nailsglow.get_data(), self.NAILSGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.mawcolor.get_data(), self.MAWCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.mawglow.get_data(), self.MAWGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.teethcolor.get_data(), self.TEETHCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.furcolora.get_data(), self.FURCOLORA, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.furcolorb.get_data(), self.FURCOLORB, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.furcolorc.get_data(), self.FURCOLORC, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.furcolord.get_data(), self.FURCOLORD, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.furtipcolor.get_data(), self.FURTIPCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.pubicfurcolor.get_data(), self.PUBICFURCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.pubicfurtipcolor.get_data(), self.PUBICFURTIPCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.bodyattachmentscolor.get_data(), self.BODYATTACHMENTSCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.additionalmaterialtile.get_data(), self.ADDITIONALMATERIALTILE, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.additionalmaterialcolor.get_data(), self.ADDITIONALMATERIALCOLOR, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.additionalmaterialglow.get_data(), self.ADDITIONALMATERIALGLOW, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.additionalmaterialuseoffset, self.ADDITIONALMATERIALUSEOFFSET))
-        data_out.append(self._try_get_float_property_bytes(self.additionalmaterialoffset, self.ADDITIONALMATERIALOFFSET))
-        data_out.append(self._try_get_float_property_bytes(self.glint, self.GLINT))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self._try_get_struct_property_bytes(self.lightcolor.get_data(),self.LIGHTCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.lightintensity, self.LIGHTINTENSITY))
+        bytes_out.append(self._try_get_struct_property_bytes(self.effectcolor.get_data(), self.EFFECTCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.effectglow, self.EFFECTGLOW))
+        bytes_out.append(self._try_get_struct_property_bytes(self.skincolor.get_data(), self.SKINCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.muscledetails, self.MUSCLEDETAILS))
+        bytes_out.append(self._try_get_float_property_bytes(self.softdetails, self.SOFTDETAILS))
+        bytes_out.append(self._try_get_float_property_bytes(self.bodydetails, self.BODYDETAILS))
+        bytes_out.append(self._try_get_struct_property_bytes(self.skinfadecolor.get_data(), self.SKINFADECOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.skinroughness, self.SKINROUGHNESS))
+        bytes_out.append(self._try_get_float_property_bytes(self.skinmetal, self.SKINMETAL))
+        bytes_out.append(self._try_get_struct_property_bytes(self.skinglow.get_data(), self.SKINGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.skinssscolor.get_data(), self.SKINSSSCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.specular, self.SPECULAR))
+        bytes_out.append(self._try_get_float_property_bytes(self.skinfade, self.SKINFADE))
+        bytes_out.append(self._try_get_float_property_bytes(self.animatedglow, self.ANIMATEDGLOW))
+        bytes_out.append(self._try_get_struct_property_bytes(self.nipplecolor.get_data(), self.NIPPLECOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.nippleroughness, self.NIPPLEROUGHNESS))
+        bytes_out.append(self._try_get_float_property_bytes(self.nipplemetal, self.NIPPLEMETAL))
+        bytes_out.append(self._try_get_struct_property_bytes(self.nippleglow.get_data(), self.NIPPLEGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.nippleaccentcolor.get_data(), self.NIPPLEACCENTCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.nippleaccentroughness, self.NIPPLEACCENTROUGHNESS))
+        bytes_out.append(self._try_get_float_property_bytes(self.nippleaccentmetal, self.NIPPLEACCENTMETAL))
+        bytes_out.append(self._try_get_struct_property_bytes(self.nippleaccentglow.get_data(), self.NIPPLEACCENTGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.vaginacolor.get_data(), self.VAGINACOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.vaginaroughness, self.VAGINAROUGHNESS))
+        bytes_out.append(self._try_get_float_property_bytes(self.vaginametal, self.VAGINAMETAL))
+        bytes_out.append(self._try_get_struct_property_bytes(self.vaginaglow.get_data(), self.VAGINAGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.dickbasecolor.get_data(), self.DICKBASECOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.dickcolor.get_data(), self.DICKCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.dickroughness, self.DICKROUGHNESS))
+        bytes_out.append(self._try_get_float_property_bytes(self.dickmetal, self.DICKMETAL))
+        bytes_out.append(self._try_get_struct_property_bytes(self.dickglow.get_data(), self.DICKGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.dicktipcolor.get_data(), self.DICKTIPCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.dicktiproughness, self.DICKTIPROUGHNESS))
+        bytes_out.append(self._try_get_float_property_bytes(self.dicktipmetal, self.DICKTIPMETAL))
+        bytes_out.append(self._try_get_struct_property_bytes(self.dicktipglow.get_data(), self.DICKTIPGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.scrotumcolor.get_data(), self.SCROTUMCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.scrotumroughness, self.SCROTUMROUGHNESS))
+        bytes_out.append(self._try_get_float_property_bytes(self.scrotummetal, self.SCROTUMMETAL))
+        bytes_out.append(self._try_get_struct_property_bytes(self.scrotumglow.get_data(), self.SCROTUMGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.blursheathtint.get_data(), self.BLURSHEATHTINT, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.anuscolor.get_data(), self.ANUSCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.anusroughness, self.ANUSROUGHNESS))
+        bytes_out.append(self._try_get_float_property_bytes(self.anusmetal, self.ANUSMETAL))
+        bytes_out.append(self._try_get_struct_property_bytes(self.anusglow.get_data(), self.ANUSGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.lipscolor.get_data(), self.LIPSCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.lipsroughness, self.LIPSROUGHNESS))
+        bytes_out.append(self._try_get_float_property_bytes(self.lipsmetal, self.LIPSMETAL))
+        bytes_out.append(self._try_get_struct_property_bytes(self.lipsglow.get_data(), self.LIPSGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.eyesocketcolor.get_data(), self.EYESOCKETCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.eyesocketshadow, self.EYESOCKETSHADOW))
+        bytes_out.append(self._try_get_struct_property_bytes(self.eyerimcolor.get_data(), self.EYERIMCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.eyerimglow.get_data(), self.EYERIMGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.eyerimmetal, self.EYERIMMETAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.eyerimroughness, self.EYERIMROUGHNESS))
+        bytes_out.append(self._try_get_struct_property_bytes(self.eyercolor.get_data(), self.EYERCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.eyerglow.get_data(), self.EYERGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.eyelcolor.get_data(), self.EYELCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.eyelglow.get_data(), self.EYELGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.eyescleracolor.get_data(), self.EYESCLERACOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.eyescleraglow.get_data(), self.EYESCLERAGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.eyeroughness, self.EYEROUGHNESS))
+        bytes_out.append(self._try_get_float_property_bytes(self.eyemetal, self.EYEMETAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.wholeeyemetal, self.WHOLEEYEMETAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.wholeeyeglow, self.WHOLEEYEGLOW))
+        bytes_out.append(self._try_get_struct_property_bytes(self.haircolor.get_data(), self.HAIRCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.hairmetal, self.HAIRMETAL))
+        bytes_out.append(self._try_get_float_property_bytes(self.hairroughnessmin, self.HAIRROUGHNESSMIN))
+        bytes_out.append(self._try_get_float_property_bytes(self.hairroughnessmax, self.HAIRROUGHNESSMAX))
+        bytes_out.append(self._try_get_struct_property_bytes(self.hairrootcolor.get_data(), self.HAIRROOTCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.hairtipcolor.get_data(), self.HAIRTIPCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.hairglow.get_data(), self.HAIRGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.hairroughness, self.HAIRROUGHNESS))
+        bytes_out.append(self._try_get_float_property_bytes(self.hairscatter, self.HAIRSCATTER))
+        bytes_out.append(self._try_get_float_property_bytes(self.hairhuevariation, self.HAIRHUEVARIATION))
+        bytes_out.append(self._try_get_float_property_bytes(self.hairvaluevariation, self.HAIRVALUEVARIATION))
+        bytes_out.append(self._try_get_float_property_bytes(self.hairedgemaskcontrast, self.HAIREDGEMASKCONTRAST))
+        bytes_out.append(self._try_get_float_property_bytes(self.hairedgemaskmin, self.HAIREDGEMASKMIN))
+        bytes_out.append(self._try_get_float_property_bytes(self.hairdepthcontrast, self.HAIRDEPTHCONTRAST))
+        bytes_out.append(self._try_get_float_property_bytes(self.hairdepthoffset, self.HAIRDEPTHOFFSET))
+        bytes_out.append(self._try_get_struct_property_bytes(self.facialhaircolor.get_data(), self.FACIALHAIRCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.eyebrowcolor.get_data(), self.EYEBROWCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.eyebrowroughness, self.EYEBROWROUGHNESS))
+        bytes_out.append(self._try_get_float_property_bytes(self.eyebrowmetal, self.EYEBROWMETAL))
+        bytes_out.append(self._try_get_struct_property_bytes(self.eyebrowglow.get_data(), self.EYEBROWGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.facedecorcolor.get_data(), self.FACEDECORCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.facedecorroughness, self.FACEDECORROUGHNESS))
+        bytes_out.append(self._try_get_float_property_bytes(self.facedecormetal, self.FACEDECORMETAL))
+        bytes_out.append(self._try_get_struct_property_bytes(self.facedecorglow.get_data(), self.FACEDECORGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.bodydecorcolor.get_data(), self.BODYDECORCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.bodydecorroughness, self.BODYDECORROUGHNESS))
+        bytes_out.append(self._try_get_float_property_bytes(self.bodydecormetal, self.BODYDECORMETAL))
+        bytes_out.append(self._try_get_struct_property_bytes(self.bodydecorglow.get_data(), self.BODYDECORGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.bodymarkscolor.get_data(), self.BODYMARKSCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.bodymarksroughness, self.BODYMARKSROUGHNESS))
+        bytes_out.append(self._try_get_float_property_bytes(self.bodymarksmetal, self.BODYMARKSMETAL))
+        bytes_out.append(self._try_get_struct_property_bytes(self.bodymarksglow.get_data(), self.BODYMARKSGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.nailscolor.get_data(), self.NAILSCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.nailsglow.get_data(), self.NAILSGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.mawcolor.get_data(), self.MAWCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.mawglow.get_data(), self.MAWGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.teethcolor.get_data(), self.TEETHCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.furcolora.get_data(), self.FURCOLORA, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.furcolorb.get_data(), self.FURCOLORB, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.furcolorc.get_data(), self.FURCOLORC, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.furcolord.get_data(), self.FURCOLORD, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.furtipcolor.get_data(), self.FURTIPCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.pubicfurcolor.get_data(), self.PUBICFURCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.pubicfurtipcolor.get_data(), self.PUBICFURTIPCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.bodyattachmentscolor.get_data(), self.BODYATTACHMENTSCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.additionalmaterialtile.get_data(), self.ADDITIONALMATERIALTILE, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.additionalmaterialcolor.get_data(), self.ADDITIONALMATERIALCOLOR, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.additionalmaterialglow.get_data(), self.ADDITIONALMATERIALGLOW, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.additionalmaterialuseoffset, self.ADDITIONALMATERIALUSEOFFSET))
+        bytes_out.append(self._try_get_float_property_bytes(self.additionalmaterialoffset, self.ADDITIONALMATERIALOFFSET))
+        bytes_out.append(self._try_get_float_property_bytes(self.glint, self.GLINT))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 class CharacterAttachmentColor(GenericParsers):
     def __init__(self, color_data):
@@ -2843,24 +2912,24 @@ class CharacterAttachmentColor(GenericParsers):
         self.glowd = LinearColor(glowd)
     
     def get_data(self):
-        data_out = []
-        data_out.append(self._try_get_struct_property_bytes(self.colora.get_data(), self.COLORA, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.colorb.get_data(), self.COLORB, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.colorc.get_data(), self.COLORC, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.colord.get_data(), self.COLORD, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.glowa.get_data(), self.GLOWA, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.glowb.get_data(), self.GLOWB, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.glowc.get_data(), self.GLOWC, self.LINEAR_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.glowd.get_data(), self.GLOWD, self.LINEAR_COLOR))
-        data_out.append(self._try_get_float_property_bytes(self.metala, self.METALA))
-        data_out.append(self._try_get_float_property_bytes(self.metalb, self.METALB))
-        data_out.append(self._try_get_float_property_bytes(self.metalc, self.METALC))
-        data_out.append(self._try_get_float_property_bytes(self.metald, self.METALD))
-        data_out.append(self._try_get_float_property_bytes(self.roughnessmin, self.ROUGHNESSMIN))
-        data_out.append(self._try_get_float_property_bytes(self.roughnessmax, self.ROUGHNESSMAX))
-        data_out.append(self._try_get_float_property_bytes(self.underfuradjust, self.UNDERFURADJUST))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self._try_get_struct_property_bytes(self.colora.get_data(), self.COLORA, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.colorb.get_data(), self.COLORB, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.colorc.get_data(), self.COLORC, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.colord.get_data(), self.COLORD, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.glowa.get_data(), self.GLOWA, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.glowb.get_data(), self.GLOWB, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.glowc.get_data(), self.GLOWC, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.glowd.get_data(), self.GLOWD, self.LINEAR_COLOR))
+        bytes_out.append(self._try_get_float_property_bytes(self.metala, self.METALA))
+        bytes_out.append(self._try_get_float_property_bytes(self.metalb, self.METALB))
+        bytes_out.append(self._try_get_float_property_bytes(self.metalc, self.METALC))
+        bytes_out.append(self._try_get_float_property_bytes(self.metald, self.METALD))
+        bytes_out.append(self._try_get_float_property_bytes(self.roughnessmin, self.ROUGHNESSMIN))
+        bytes_out.append(self._try_get_float_property_bytes(self.roughnessmax, self.ROUGHNESSMAX))
+        bytes_out.append(self._try_get_float_property_bytes(self.underfuradjust, self.UNDERFURADJUST))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 class LinearColor(GenericParsers):
     def __init__(self, linearcolor_data):
@@ -2876,13 +2945,13 @@ class LinearColor(GenericParsers):
             raise
     
     def get_data(self):
-        data_out = []
-        data_out.append(self.red)
-        data_out.append(self.green)
-        data_out.append(self.blue)
-        data_out.append(self.alpha)
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self.red)
+        bytes_out.append(self.green)
+        bytes_out.append(self.blue)
+        bytes_out.append(self.alpha)
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 class AttachmentMaterial(GenericParsers):
     def __init__(self, material_data):
@@ -2903,14 +2972,14 @@ class AttachmentMaterial(GenericParsers):
         self.bootscolor = CharacterAttachmentColor(bootscolor)
         
     def get_data(self):
-        data_out = []
-        data_out.append(self._try_get_struct_property_bytes(self.bodyattachmentscolor.get_data(), self.ACCESSORYCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.upperclothingcolor.get_data(), self.UPPERCLOTHINGCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.lowerclothingcolor.get_data(), self.LOWERCLOTHINGCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.underwearcolor.get_data(), self.UNDERWEARCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
-        data_out.append(self._try_get_struct_property_bytes(self.bootscolor.get_data(), self.BOOTSCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self._try_get_struct_property_bytes(self.bodyattachmentscolor.get_data(), self.ACCESSORYCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.upperclothingcolor.get_data(), self.UPPERCLOTHINGCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.lowerclothingcolor.get_data(), self.LOWERCLOTHINGCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.underwearcolor.get_data(), self.UNDERWEARCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
+        bytes_out.append(self._try_get_struct_property_bytes(self.bootscolor.get_data(), self.BOOTSCOLOR, self.CHARACTER_ATTACHMENT_COLOR))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 class GameplayTag(GenericParsers):
     def __init__(self, gameplaytag_data):
@@ -3024,13 +3093,13 @@ class MonsterLevels(GenericParsers):
         self.remain = monsterlevels_data
         
     def get_data(self):
-        data_out = []
-        data_out.append(self.MAP_PADDING)
-        data_out.append(len(self.monsterlevel).to_bytes(4, 'little'))
+        bytes_out = []
+        bytes_out.append(self.MAP_PADDING)
+        bytes_out.append(len(self.monsterlevel).to_bytes(4, 'little'))
         for monsterlevel in self.monsterlevel:
-            data_out.append(monsterlevel.get_data())
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+            bytes_out.append(monsterlevel.get_data())
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 class MonsterLevel(GenericParsers):
     def __init__(self, tagname, level, progress, remain):
@@ -3040,13 +3109,13 @@ class MonsterLevel(GenericParsers):
         self.remain = remain
         
     def get_data(self):
-        data_out = []
-        data_out.append(self._try_get_name_property_bytes(self.tagname, self.TAGNAME))
-        data_out.append(self.NONE)
-        data_out.append(self._try_get_int_property_bytes(self.level, self.LEVEL))
-        data_out.append(self._try_get_int_property_bytes(self.progress, self.PROGRESS))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self._try_get_name_property_bytes(self.tagname, self.TAGNAME))
+        bytes_out.append(self.NONE)
+        bytes_out.append(self._try_get_int_property_bytes(self.level, self.LEVEL))
+        bytes_out.append(self._try_get_int_property_bytes(self.progress, self.PROGRESS))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 
 '''Sex Posistion Classes'''
@@ -3070,10 +3139,10 @@ class SexPosition(GenericParsers):
         self.remain = remain
     
     def get_data(self):
-        data_out = []
-        data_out.append(self._try_get_name_property_bytes(self.sexposition, self.TAGNAME))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self._try_get_name_property_bytes(self.sexposition, self.TAGNAME))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 
 '''Breeder Stat Progress Class'''
@@ -3090,14 +3159,14 @@ class BreederStatProgress(GenericParsers):
         self.remain = breederstatprogress_data
         
     def get_data(self):
-        data_out = []
-        data_out.append(self._try_get_int_property_bytes(self.strengthprogress,  self.STRENGTHPROGRESS))
-        data_out.append(self._try_get_int_property_bytes(self.dexterityprogress, self.DEXTERITYPROGRESS))
-        data_out.append(self._try_get_int_property_bytes(self.willpowerprogress, self.WILLPOWERPROGRESS))
-        data_out.append(self._try_get_int_property_bytes(self.allureprogress,    self.ALLUREPROGRESS))
-        data_out.append(self._try_get_int_property_bytes(self.fertilityprogress, self.FERTILITYPROGRESS))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self._try_get_int_property_bytes(self.strengthprogress,  self.STRENGTHPROGRESS))
+        bytes_out.append(self._try_get_int_property_bytes(self.dexterityprogress, self.DEXTERITYPROGRESS))
+        bytes_out.append(self._try_get_int_property_bytes(self.willpowerprogress, self.WILLPOWERPROGRESS))
+        bytes_out.append(self._try_get_int_property_bytes(self.allureprogress,    self.ALLUREPROGRESS))
+        bytes_out.append(self._try_get_int_property_bytes(self.fertilityprogress, self.FERTILITYPROGRESS))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 
 '''World State Classes'''
@@ -3129,22 +3198,22 @@ class WorldState(GenericParsers):
         self.specialbreedingtasks =  BreedingTasks(specialbreedingtasks)
         
     def get_data(self):
-        data_out = []
-        data_out.append(self._try_get_int_property_bytes(self.seconds, self.SECONDS))
-        data_out.append(self._try_get_int_property_bytes(self.minute, self.MINUTE))
-        data_out.append(self._try_get_int_property_bytes(self.hour, self.HOUR))
-        data_out.append(self._try_get_int_property_bytes(self.day, self.DAY))
-        data_out.append(self._try_get_int_property_bytes(self.month, self.MONTH))
-        data_out.append(self._try_get_struct_property_bytes(self.activetravelshrines.get_data(), self.ACTIVETRAVELSHRINES, self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._try_get_struct_property_bytes(self.acquiredranchupgrades.get_data(), self.ACQUIREDRANCHUPGRADES, self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._try_get_array_struct_property_bytes(self.dialoguestates.get_data(), self.DIALOGUESTATES, self.DIALOGUESTATES, self.DIALOGUE_STATE))
-        data_out.append(self._try_get_map_property_bytes(self.monsterlevels.get_data(), self.MONSTERLEVELS, self.STRUCT_PROPERTY))
-        data_out.append(self._try_get_int_property_bytes(self.fernfed, self.FERNFED))
-        data_out.append(self._try_get_array_struct_property_bytes(self.breedingtasks.get_data(), self.BREEDINGTASKS, self.BREEDINGTASKS, self.BREEDING_TASK))
-        data_out.append(self._try_get_array_struct_property_bytes(self.specialbreedingtasks.get_data(), self.SPECIALBREEDINGTASKS, self.SPECIALBREEDINGTASKS, self.BREEDING_TASK))
-        data_out.append(self._try_get_int_property_bytes(self.dayssincebreedingtaskrefresh, self.DAYSSINCEBREEDINGTASKREFRESH))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self._try_get_int_property_bytes(self.seconds, self.SECONDS))
+        bytes_out.append(self._try_get_int_property_bytes(self.minute, self.MINUTE))
+        bytes_out.append(self._try_get_int_property_bytes(self.hour, self.HOUR))
+        bytes_out.append(self._try_get_int_property_bytes(self.day, self.DAY))
+        bytes_out.append(self._try_get_int_property_bytes(self.month, self.MONTH))
+        bytes_out.append(self._try_get_struct_property_bytes(self.activetravelshrines.get_data(), self.ACTIVETRAVELSHRINES, self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_struct_property_bytes(self.acquiredranchupgrades.get_data(), self.ACQUIREDRANCHUPGRADES, self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_array_struct_property_bytes(self.dialoguestates.get_data(), self.DIALOGUESTATES, self.DIALOGUESTATES, self.DIALOGUE_STATE))
+        bytes_out.append(self._try_get_map_property_bytes(self.monsterlevels.get_data(), self.MONSTERLEVELS, self.STRUCT_PROPERTY))
+        bytes_out.append(self._try_get_int_property_bytes(self.fernfed, self.FERNFED))
+        bytes_out.append(self._try_get_array_struct_property_bytes(self.breedingtasks.get_data(), self.BREEDINGTASKS, self.BREEDINGTASKS, self.BREEDING_TASK))
+        bytes_out.append(self._try_get_array_struct_property_bytes(self.specialbreedingtasks.get_data(), self.SPECIALBREEDINGTASKS, self.SPECIALBREEDINGTASKS, self.BREEDING_TASK))
+        bytes_out.append(self._try_get_int_property_bytes(self.dayssincebreedingtaskrefresh, self.DAYSSINCEBREEDINGTASKREFRESH))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 class DialogueStates(GenericParsers):
     def __init__(self, dialoguestates_data):
@@ -3306,13 +3375,16 @@ class Variant(GenericParsers):
         if len(variant_data_list) == 0:
             self.race = b''
             self.sex = b''
+            return
         elif len(variant_data_list) != 2:
-            raise Exception(f'Invalid Variant block. expected 2 values, got {len(variant_data_list)}')
+            if len(variant_data_list) == 3:
+                print("Warning Preset is for Exotic Preset")
+            else:
+                raise Exception(f'Invalid Variant block. expected 2 values, got {len(variant_data_list)}. {variant_data_list}')
         elif remain:
             raise Exception(f'Invalid Variant block. Unexpected traiting data:\n{remain}')
-        else:
-            self.race = variant_data_list[0][4:]
-            self.sex  = variant_data_list[1][4:]
+        self.race = variant_data_list[0][4:]
+        self.sex  = variant_data_list[1][4:]
     
     def _calc_output(self):
         length = 0
@@ -3521,27 +3593,27 @@ class NephelymSaveEditor(Appearance):
         if preset_out_path == None:
             race_out = preset_template.variant.race[:-1].decode('utf-8').split('Race.')[-1].replace('.','_')
             sex_out = preset_template.variant.sex[:-1].decode('utf-8').split('Sex.')[-1].replace('.','_')
-            name_out = preset_template.variant.name[:-1].decode('utf-8')
+            name_out = preset_template.name[:-1].decode('utf-8')
             preset_out_path = os.path.join(os.path.split(preset_in_path)[0], f'CP_{race_out}_{sex_out}_{name_out}.sav')
         
         self.write_save(preset_out_path, preset_template.get_data())
 
     def get_data(self):
         '''Return data in save file format'''
-        data_out = []
-        data_out.append(self.header.get_data())
-        data_out.append(self._try_get_array_struct_property_bytes(self.nephelyms,                         self.PLAYERMONSTER,          self.PLAYERMONSTER,          self.CHARACTER_DATA))
-        data_out.append(self._try_get_array_struct_property_bytes(self.offspringbuffer,                   self.OFFSPRINGBUFFER,        self.OFFSPRINGBUFFER,        self.CHARACTER_DATA))
-        data_out.append(self._try_get_array_struct_property_bytes(self.playersexpositions.get_data(),     self.PLAYERSEXPOSITIONS,     self.PLAYERSEXPOSITIONS,     self.GAMEPLAY_TAG))
-        data_out.append(self._try_get_int_property_bytes(self.playerspirit, self.PLAYERSPIRIT))
-        data_out.append(self._try_get_struct_property_bytes(self.playerspiritform.get_data(),    self.PLAYERSPIRITFORM,    self.CHATACTER_DATA))
-        data_out.append(self._try_get_array_struct_property_bytes(self.playerobtainedvariants.get_data(), self.PLAYEROBTAINEDVARIANTS, self.PLAYEROBTAINEDVARIANTS, self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._try_get_array_struct_property_bytes(self.playerseenvariants.get_data(),     self.PLAYERSEENVARIANTS,     self.PLAYERSEENVARIANTS,     self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._try_get_struct_property_bytes(self.gameflags.get_data(),           self.GAMEFLAGS,           self.GAMEPLAY_TAG_CONTAINER))
-        data_out.append(self._try_get_struct_property_bytes(self.worldstate.get_data(),          self.WORLDSTATE,          self.SEXY_WOLD_STATE))
-        data_out.append(self._try_get_struct_property_bytes(self.breederstatprogress.get_data(), self.BREEDERSTATPROGRESS, self.BREEDER_STAT_RANK_PROGRESS))
-        data_out.append(self.remain)
-        return self.list_to_bytes(data_out)
+        bytes_out = []
+        bytes_out.append(self.header.get_data())
+        bytes_out.append(self._try_get_array_struct_property_bytes(self.nephelyms,                         self.PLAYERMONSTER,          self.PLAYERMONSTER,          self.CHARACTER_DATA))
+        bytes_out.append(self._try_get_array_struct_property_bytes(self.offspringbuffer,                   self.OFFSPRINGBUFFER,        self.OFFSPRINGBUFFER,        self.CHARACTER_DATA))
+        bytes_out.append(self._try_get_array_struct_property_bytes(self.playersexpositions.get_data(),     self.PLAYERSEXPOSITIONS,     self.PLAYERSEXPOSITIONS,     self.GAMEPLAY_TAG))
+        bytes_out.append(self._try_get_int_property_bytes(self.playerspirit, self.PLAYERSPIRIT))
+        bytes_out.append(self._try_get_struct_property_bytes(self.playerspiritform.get_data(),    self.PLAYERSPIRITFORM,    self.CHATACTER_DATA))
+        bytes_out.append(self._try_get_array_struct_property_bytes(self.playerobtainedvariants.get_data(), self.PLAYEROBTAINEDVARIANTS, self.PLAYEROBTAINEDVARIANTS, self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_array_struct_property_bytes(self.playerseenvariants.get_data(),     self.PLAYERSEENVARIANTS,     self.PLAYERSEENVARIANTS,     self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_struct_property_bytes(self.gameflags.get_data(),           self.GAMEFLAGS,           self.GAMEPLAY_TAG_CONTAINER))
+        bytes_out.append(self._try_get_struct_property_bytes(self.worldstate.get_data(),          self.WORLDSTATE,          self.SEXY_WOLD_STATE))
+        bytes_out.append(self._try_get_struct_property_bytes(self.breederstatprogress.get_data(), self.BREEDERSTATPROGRESS, self.BREEDER_STAT_RANK_PROGRESS))
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
 
 
 if __name__ == "__main__":
@@ -3584,13 +3656,13 @@ if __name__ == "__main__":
         exit()
     
     
-    #Example: Saving Nephelym as a preset
+    #Example: Saving Nephelym as a preset. Requires template for header data
     if False:
         x = NephelymSaveEditor(save_in)
         breeder = x.nephelyms[0]
         template_preset_path = os.listdir(preset_folder)[0]
         template_preset = os.path.join(preset_folder, template_preset_path)
-        x.nephelym_to_preset(template_preset, breeder)
+        NephelymSaveEditor().nephelym_to_preset(template_preset, breeder)
         exit()
     
     
