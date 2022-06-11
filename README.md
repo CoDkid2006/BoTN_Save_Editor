@@ -42,12 +42,13 @@ If applicable to the bug/issue any of the following
 - list of functions executed
 - preset files
 
+## Known Issues
+- Presets for Exotics do not save/load properly, will be converted to hominal. This will NOT be addressed.
+
 ## TODO
 Lower level parsing and editing for the following classes
 
 - Refactoring of code
-
-- Moving of all macros into own class
 
 - Better Understanding of text, array struct, and map properties for better generic parsing
 
