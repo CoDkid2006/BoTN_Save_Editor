@@ -38,8 +38,6 @@ def guid_to_string(bytes_in):
     return f'{p1}-{p2}-{p3}-{p4}-{p5}'
 
 
-
-
 ''' Batch Editor for Save Files
 # New size ONLY shows inside of breeding session and during sex
 # Breaks animations with wild nephelyms
@@ -1531,6 +1529,7 @@ class Gvas(GenericParsers):
         self._parse_gvas_data(gvas_data)
         
     def _parse_gvas_data(self, gvas_data):
+        '''WIP still trying to understand what everthing means'''
         self.gvas = gvas_data[:4]
         gvas_data = gvas_data[4:]
         self.number1 = gvas_data[:4]
@@ -1577,7 +1576,7 @@ class Gvas(GenericParsers):
         self.remain = gvas_data
     
     def get_data(self):
-        return b''
+        raise
 
 
 
@@ -1867,6 +1866,7 @@ class PlayerSpiritForm(NephelymBase):
         _, appliedscheme, spiritform_data = self._try_parse_struct_property(spiritform_data, self.APPLIEDSCHEME, self.CHARACTER_APPLIED_SCHEME)
         _, mother,        spiritform_data = self._try_parse_struct_property(spiritform_data, self.MOTHER,        self.CHARACTER_PARENT_DATA)
         _, father,        spiritform_data = self._try_parse_struct_property(spiritform_data, self.FATHER,        self.CHARACTER_PARENT_DATA)
+        _, traits,        spiritform_data = self._try_parse_struct_property(spiritform_data, self.TRAITS,        self.GAMEPLAY_TAG_CONTAINER)
         self.remain = spiritform_data
         
         self.variant = Variant(variant)
@@ -1874,6 +1874,7 @@ class PlayerSpiritForm(NephelymBase):
         self.appliedscheme = AppliedScheme(appliedscheme)
         self.mother = Parent(mother)
         self.father = Parent(father)
+        self.traits = TagContainer(traits)
     
     def change_form(self, nephelym):
         '''Update spirit form to be incoming nephelym'''
@@ -1889,6 +1890,7 @@ class PlayerSpiritForm(NephelymBase):
         bytes_out.append(self._try_get_struct_property_bytes(self.appliedscheme.get_data(), self.APPLIEDSCHEME, self.CHARACTER_APPLIED_SCHEME))
         bytes_out.append(self._try_get_struct_property_bytes(self.mother.get_data(), self.MOTHER, self.CHARACTER_PARENT_DATA))
         bytes_out.append(self._try_get_struct_property_bytes(self.father.get_data(), self.FATHER, self.CHARACTER_PARENT_DATA))
+        bytes_out.append(self._try_get_struct_property_bytes(self.traits.get_data(), self.TRAITS, self.GAMEPLAY_TAG_CONTAINER))
         bytes_out.append(self.remain)
         return self.list_to_bytes(bytes_out)
 
@@ -3422,7 +3424,7 @@ class NephelymSaveEditor(Appearance):
         _, offspringbuffer,                   save_data = self._try_parse_array_struct_property(save_data, self.OFFSPRINGBUFFER,        self.PLAYERMONSTER,          self.CHARACTER_DATA)
         _, playersexpositions,                save_data = self._try_parse_array_struct_property(save_data, self.PLAYERSEXPOSITIONS,     self.PLAYERSEXPOSITIONS,     self.GAMEPLAY_TAG)
         _, self.playerspirit,                 save_data = self._try_parse_int_property(save_data, self.PLAYERSPIRIT)
-        _, playerspiritform_data,             save_data = self._try_parse_struct_property(save_data, self.PLAYERSPIRITFORM,    self.CHATACTER_DATA)
+        _, playerspiritform,                  save_data = self._try_parse_struct_property(save_data, self.PLAYERSPIRITFORM,    self.CHATACTER_DATA)
         _, playerobtainedvariants,            save_data = self._try_parse_array_struct_property(save_data, self.PLAYEROBTAINEDVARIANTS, self.PLAYEROBTAINEDVARIANTS, self.GAMEPLAY_TAG_CONTAINER)
         _, playerseenvariants,                save_data = self._try_parse_array_struct_property(save_data, self.PLAYERSEENVARIANTS,     self.PLAYERSEENVARIANTS,     self.GAMEPLAY_TAG_CONTAINER)
         _, gameflags,                         save_data = self._try_parse_struct_property(save_data, self.GAMEFLAGS,           self.GAMEPLAY_TAG_CONTAINER)
@@ -3434,7 +3436,7 @@ class NephelymSaveEditor(Appearance):
         self.nephelyms              = self._parse_nephelyms(data_monster_and_player)
         self.playersexpositions     = PlayerSexPositions(playersexpositions)
         self.offspringbuffer        = self._parse_nephelyms(offspringbuffer)
-        self.playerspiritform       = PlayerSpiritForm(playerspiritform_data)
+        self.playerspiritform       = PlayerSpiritForm(playerspiritform)
         self.playerobtainedvariants = PlayerObtainedVariants(playerobtainedvariants)
         self.playerseenvariants     = PlayerObtainedVariants(playerseenvariants)
         self.gameflags              = GameplayTag(gameflags)
