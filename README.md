@@ -48,8 +48,6 @@ If applicable to the bug/issue any of the following
 ## TODO
 Lower level parsing and editing for the following classes
 
-- Refactoring of code
-
 - Better Understanding of text, array struct, and map properties for better generic parsing
 
 - Interface functions for lower level variables like appearance and game flags
