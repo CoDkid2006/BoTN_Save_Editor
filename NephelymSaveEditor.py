@@ -1001,6 +1001,10 @@ class ByteMacros:
     REWARDMESSAGE = b'\x0E\x00\x00\x00\x52\x65\x77\x61\x72\x64\x4D\x65\x73\x73\x61\x67\x65\x00'
     
     
+    # Vagrants
+    VAGRANTS = b'\x09\x00\x00\x00\x56\x61\x67\x72\x61\x6E\x74\x73\x00'
+    
+    
     ### Preset Macros
     PRESETNAME = b'\x0B\x00\x00\x00\x50\x72\x65\x73\x65\x74\x4E\x61\x6D\x65\x00'
     SCHEME = b'\x07\x00\x00\x00\x53\x63\x68\x65\x6D\x65\x00'
@@ -1512,7 +1516,7 @@ class Header(GenericParsers):
         self.remain = header_data
         
         self.playerbodyfluids = PlayerBodyFluids(playerbodyfluids)
-        Gvas(self.gvas)
+        # Gvas(self.gvas)
     
     def get_data(self):
         bytes_out = []
@@ -1559,12 +1563,13 @@ class Gvas(GenericParsers):
         gvas_data = gvas_data[4:]
         
         
-        self.unknown_elements = []
-        self.unknown_elements_value = []
+        self.unknown_guid = []
+        self.unknown_value = []
         for _ in range(elements):
-            self.unknown_elements.append(gvas_data[:16])
-            self.unknown_elements_value.append(gvas_data[16:20])
+            self.unknown_guid.append(gvas_data[:16])
+            self.unknown_value.append(gvas_data[16:20])
             gvas_data = gvas_data[20:]
+            print(guid_to_string(self.unknown_guid[-1]), int.from_bytes(self.unknown_value[-1] ,'little'))
         
         length = int.from_bytes(gvas_data[:4], 'little')
         gvas_data = gvas_data[4:]
@@ -2078,6 +2083,12 @@ class NephelymPreset(NephelymBase):
         if cursor == -1:
             raise Exception('Invalid Header: PRESETNAME')
         return preset_data[:cursor], preset_data[cursor:]
+    
+    def preset_name(self):
+        race_out = self.variant.race[:-1].decode('utf-8').split('Race.')[-1].replace('.','_')
+        sex_out = self.variant.sex[:-1].decode('utf-8').split('Sex.')[-1].replace('.','_')
+        name_out = self.name[:-1].decode('utf-8')
+        return f'CP_{race_out}_{sex_out}_{name_out}.sav'
     
     def get_data(self):
         bytes_out = []
@@ -3171,6 +3182,46 @@ class BreederStatProgress(GenericParsers):
         return self.list_to_bytes(bytes_out)
 
 
+'''Vagrant Classes'''
+class Vagrants(GenericParsers):
+    def __init__(self, vagrants_data):
+        self._parse_vagrants_data(vagrants_data)
+    
+    def _parse_vagrants_data(self, vagrants_data):
+        self.vagrants = []
+        vagrants_data = vagrants_data[len(self.MAP_PADDING):]
+        count = int.from_bytes(vagrants_data[:4], 'little')
+        vagrants_data = vagrants_data[4:]
+        for _ in range(count):
+            _, barn,  vagrants_data = self._try_parse_name_property(vagrants_data, self.TAGNAME)
+            vagrants_data = vagrants_data[len(self.NONE):]
+            guid = vagrants_data[:16]
+            vagrants_data = vagrants_data[16:]
+            self.vagrants.append(Vagrant(barn, guid))
+        self.remain = vagrants_data
+    
+    def get_data(self):
+        bytes_out = []
+        bytes_out.append(self.MAP_PADDING)
+        bytes_out.append(len(self.vagrants).to_bytes(4, 'little'))
+        for vagrant in self.vagrants:
+            bytes_out.append(vagrant.get_data())
+        bytes_out.append(self.remain)
+        return self.list_to_bytes(bytes_out)
+
+class Vagrant(GenericParsers):
+    def __init__(self, barn, guid):
+        self.barn = barn
+        self.guid = guid
+    
+    def get_data(self):
+        bytes_out = []
+        bytes_out.append(self._try_get_name_property_bytes(self.barn, self.TAGNAME))
+        bytes_out.append(self.NONE)
+        bytes_out.append(self.guid)
+        return self.list_to_bytes(bytes_out)
+
+
 '''World State Classes'''
 class WorldState(GenericParsers):
     def __init__(self, worldstate_data):
@@ -3430,6 +3481,7 @@ class NephelymSaveEditor(Appearance):
         _, gameflags,                         save_data = self._try_parse_struct_property(save_data, self.GAMEFLAGS,           self.GAMEPLAY_TAG_CONTAINER)
         _, worldstate,                        save_data = self._try_parse_struct_property(save_data, self.WORLDSTATE,          self.SEXY_WOLD_STATE)
         _, breederstatprogress,               save_data = self._try_parse_struct_property(save_data, self.BREEDERSTATPROGRESS, self.BREEDER_STAT_RANK_PROGRESS)
+        _, vagrants,                          save_data = self._try_parse_map_property(save_data, self.VAGRANTS, self.STRUCT_PROPERTY)
         self.remain = save_data
         
         self.header                 = Header(data_header)
@@ -3442,6 +3494,7 @@ class NephelymSaveEditor(Appearance):
         self.gameflags              = GameplayTag(gameflags)
         self.worldstate             = WorldState(worldstate)
         self.breederstatprogress    = BreederStatProgress(breederstatprogress)
+        self.vagrants               = Vagrants(vagrants)
 
     def _parse_nephelyms(self, monster_and_player_data):
         '''
@@ -3583,22 +3636,23 @@ class NephelymSaveEditor(Appearance):
         return new_nephelym
 
     def nephelym_to_preset(self, preset_in_path, nephelym, preset_out_path=None):
-        preset_template = NephelymPreset(preset_in_path)
-        preset_template.variant.race = nephelym.variant.race
+        nephelym_preset = NephelymPreset(preset_in_path)
+        nephelym_preset.variant.race = nephelym.variant.race
         if nephelym.variant.sex == self.SEXES['futa']:
-            preset_template.variant.sex = self.SEXES['female']
+            nephelym_preset.variant.sex = self.SEXES['female']
         else:
-            preset_template.variant.sex = nephelym.variant.sex
-        preset_template.name = nephelym.name
-        preset_template.appearance = nephelym.appearance
-        
+            nephelym_preset.variant.sex = nephelym.variant.sex
+        nephelym_preset.name = nephelym.name
+        nephelym_preset.appearance = nephelym.appearance
         if preset_out_path == None:
-            race_out = preset_template.variant.race[:-1].decode('utf-8').split('Race.')[-1].replace('.','_')
-            sex_out = preset_template.variant.sex[:-1].decode('utf-8').split('Sex.')[-1].replace('.','_')
-            name_out = preset_template.name[:-1].decode('utf-8')
-            preset_out_path = os.path.join(os.path.split(preset_in_path)[0], f'CP_{race_out}_{sex_out}_{name_out}.sav')
+            preset_out_path = os.path.join(os.path.split(preset_in_path)[0], nephelym_preset.preset_name())
+        self.export_preset(nephelym_preset, preset_out_path)
+
+    def export_preset(self, nephelym_preset, preset_out_path=None):
+        if preset_out_path == None:
+            preset_out_path = nephelym_preset.preset_name()
         
-        self.write_save(preset_out_path, preset_template.get_data())
+        self.write_save(preset_out_path, nephelym_preset.get_data())
 
     def get_data(self):
         '''Return data in save file format'''
@@ -3614,6 +3668,7 @@ class NephelymSaveEditor(Appearance):
         bytes_out.append(self._try_get_struct_property_bytes(self.gameflags.get_data(),           self.GAMEFLAGS,           self.GAMEPLAY_TAG_CONTAINER))
         bytes_out.append(self._try_get_struct_property_bytes(self.worldstate.get_data(),          self.WORLDSTATE,          self.SEXY_WOLD_STATE))
         bytes_out.append(self._try_get_struct_property_bytes(self.breederstatprogress.get_data(), self.BREEDERSTATPROGRESS, self.BREEDER_STAT_RANK_PROGRESS))
+        bytes_out.append(self._try_get_map_property_bytes(self.vagrants.get_data(), self.VAGRANTS, self.STRUCT_PROPERTY))
         bytes_out.append(self.remain)
         return self.list_to_bytes(bytes_out)
 
@@ -3663,8 +3718,8 @@ if __name__ == "__main__":
         x = NephelymSaveEditor(save_in)
         breeder = x.nephelyms[0]
         template_preset_path = os.listdir(preset_folder)[0]
-        template_preset = os.path.join(preset_folder, template_preset_path)
-        NephelymSaveEditor().nephelym_to_preset(template_preset, breeder)
+        preset_in_path = os.path.join(preset_folder, template_preset_path)
+        x.nephelym_to_preset(preset_in_path, breeder)
         exit()
     
     

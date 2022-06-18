@@ -1,5 +1,5 @@
 # BoTN Save Editor
-Save Editor for Breeders of the Nephelym. Current Build 0.754.3
+Save Editor for Breeders of the Nephelym. Current Build 0.756.3. Check releases for older versions
 
 Requires python 3.7+
 
