@@ -4,7 +4,7 @@ Save Editor for Breeders of the Nephelym. Current Build 0.756.3. Check releases 
 Requires python 3.7+
 
 # DISCLAIMER!
-Make backups of saves before modifing them. Program should be able to make working saves, but there is no 100% guarantee. Invalid options should throw an exception during runtime. 
+Make backups of saves before modifing them. Program should be able to make working saves, but there is no 100% guarantee.
 
 # GUIDE
 Place editor in save directory or change files paths to save directory.
@@ -29,7 +29,7 @@ Saves should be fully parsed so other sub-values can be changes like individual 
 
 
 ## Brief
-Mostly started this because of not wanting to spend hours breeding perfect nehpelyms but it morphed into curiosity of how UE serializes it saves. Figuring out how to parse save game file data structures down to a simple form and recreating them back into a working save has been and interesting challenge. This is more of a tech exploration than a 'Proper' save editor, but included are functions to help facilitate bulk editing of a save. More ganular editing is possible but will require more logical thinking on the users end to achieve the desired changes. The main function provides examples of most higher level program functions. Functions starting with _ are ment to be internal and should only be used inside class or if debugging.
+Mostly started this because of not wanting to spend hours breeding perfect nehpelyms but it morphed into curiosity of how UE serializes it saves. Figuring out how to parse save game file data structures down to a simple form and recreating them back into a working save has been an interesting challenge. This is more of a tech exploration than a 'Proper' save editor, but included are functions to help facilitate bulk editing of a save. More ganular editing is possible but will require more logical thinking on the users end to achieve the desired changes. The main function provides examples of most higher level program functions. Functions starting with _ are ment to be internal and should only be used inside class or if debugging.
 
 # BUGS and ISSUES
 If you encounter a bug in the program or it creates corrupted saves. Create a new Issue on the Issues page, with the following and it will maybe get fixed

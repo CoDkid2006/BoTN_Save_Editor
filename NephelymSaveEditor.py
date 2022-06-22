@@ -470,7 +470,6 @@ class ByteMacros:
     
     
     ### Individual Nephelym Macros
-    PLAYER_MONSTER_NAME = b'\x05\x00\x00\x00\x4E\x61\x6D\x65\x00\x0C\x00\x00\x00\x53\x74\x72\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
     UNIQUEID = b'\x09\x00\x00\x00\x55\x6E\x69\x71\x75\x65\x49\x44\x00'
     
     
@@ -1628,6 +1627,7 @@ class NephelymBase(GenericParsers):
         _, self.lastmateid,       nephelym_data = self._parse_struct_property(nephelym_data, self.LASTMATEID,    self.GUID_PROP)
         _, self.lastmatesexcount, nephelym_data = self._parse_byte_property(nephelym_data, self.LASTMATESEXCOUNT)
         self.remain = nephelym_data
+        
         
         self.variant        = Variant(variant)
         self.appearance     = Appearance(appearance)
@@ -3437,7 +3437,7 @@ class NephelymSaveEditor(Appearance):
 
     def _parse_save_data(self, save_data):
         data_header, data_monster_and_player, save_data = self._parse_array_struct_property(save_data, self.PLAYERMONSTER,          self.PLAYERMONSTER,          self.CHARACTER_DATA)
-        _, offspringbuffer,                   save_data = self._parse_array_struct_property(save_data, self.OFFSPRINGBUFFER,        self.PLAYERMONSTER,          self.CHARACTER_DATA)
+        _, offspringbuffer,                   save_data = self._parse_array_struct_property(save_data, self.OFFSPRINGBUFFER,        self.OFFSPRINGBUFFER,          self.CHARACTER_DATA)
         _, playersexpositions,                save_data = self._parse_array_struct_property(save_data, self.PLAYERSEXPOSITIONS,     self.PLAYERSEXPOSITIONS,     self.GAMEPLAY_TAG)
         _, self.playerspirit,                 save_data = self._parse_int_property(save_data, self.PLAYERSPIRIT)
         _, playerspiritform,                  save_data = self._parse_struct_property(save_data, self.PLAYERSPIRITFORM,    self.CHATACTER_DATA)
@@ -3451,8 +3451,8 @@ class NephelymSaveEditor(Appearance):
         
         self.header                 = Header(data_header)
         self.nephelyms              = self._parse_nephelyms(data_monster_and_player)
-        self.playersexpositions     = PlayerSexPositions(playersexpositions)
         self.offspringbuffer        = self._parse_nephelyms(offspringbuffer)
+        self.playersexpositions     = PlayerSexPositions(playersexpositions)
         self.playerspiritform       = PlayerSpiritForm(playerspiritform)
         self.playerobtainedvariants = PlayerObtainedVariants(playerobtainedvariants)
         self.playerseenvariants     = PlayerObtainedVariants(playerseenvariants)
@@ -3466,26 +3466,20 @@ class NephelymSaveEditor(Appearance):
         Parse out Breeder and Nephelyms from PlayerMonster Block
         returns list of Nephelym
         '''
-        cursor = 0
-        nephelyms = []
-        nephelym_name_positions = []
-        while cursor != -1:
-            pos_name = monster_and_player_data.find(self.PLAYER_MONSTER_NAME, cursor)
-            if pos_name == -1:
-                break
-            nephelym_name_positions.append(pos_name)
-            cursor = pos_name + 1
+        # Parsing Should be done in order so if a new datablock is added in future an error should be raised
+        # if monster_and_player_data[:len(self.NAME)] != self.NAME and monster_and_player_data != b'':
+            # raise Exception(f'Expected "{self.NAME}". Found "{monster_and_player_data[:25]}"')
         
-        nephelym_name_count = len(nephelym_name_positions)
-        if nephelym_name_count == 4:
-            nephelyms.append(Nephelym(monster_and_player_data[nephelym_name_positions[0]:]))
-        elif nephelym_name_count > 4:
-            data_start = 0
-            for position_index in range(4, nephelym_name_count, 4):
-                nephelym = Nephelym(monster_and_player_data[nephelym_name_positions[data_start]:nephelym_name_positions[position_index]])
-                nephelyms.append(nephelym)
-                data_start = position_index
-            nephelyms.append(Nephelym(monster_and_player_data[nephelym_name_positions[-4]:]))
+        #might cause issues if part of the nephelym data structure is missing for one
+        nephelyms = []
+        while monster_and_player_data[:len(self.NAME)] == self.NAME:
+            nephelym = Nephelym(monster_and_player_data)
+            monster_and_player_data = nephelym.remain[len(self.NONE):]
+            nephelym.remain = self.NONE
+            nephelyms.append(nephelym)
+        if monster_and_player_data != b'':
+            print(monster_and_player_data)
+            raise
         return nephelyms
 
     def _possible_nephelyms(self):
