@@ -1290,7 +1290,7 @@ class GenericParsers(DictMacros, ByteMacros, IO):
             bytes_out = str_bytes[data_end:]
         except:
             pre_data = b''
-            str_prop = b''
+            str_prop = None
             bytes_out = str_bytes
         return pre_data, str_prop, bytes_out
     
@@ -1430,7 +1430,7 @@ class GenericParsers(DictMacros, ByteMacros, IO):
         return bytes_out
     
     def _get_str_property_bytes(self, str_bytes, str_macro):
-        if str_bytes == b'':
+        if str_bytes == None:
             bytes_out = b''
         else:
             str_macro += self.STR_PROPERTY
@@ -2967,7 +2967,9 @@ class AttachmentMaterial(GenericParsers):
 
 class GameplayTag(GenericParsers):
     def __init__(self, gameplaytag_data):
-        self._parse_tags(gameplaytag_data)
+        self.tags = None
+        if gameplaytag_data != b'':
+            self._parse_tags(gameplaytag_data)
     
     def _parse_tags(self, gameplaytag_data):
         self.tags = []
@@ -2983,10 +2985,11 @@ class GameplayTag(GenericParsers):
     
     def get_data(self):
         bytes_out = []
-        bytes_out.append(len(self.tags).to_bytes(4, 'little'))
-        for tag in self.tags:
-            bytes_out.append(tag)
-        bytes_out.append(self.remain)
+        if isinstance(self.tags, list):
+            bytes_out.append(len(self.tags).to_bytes(4, 'little'))
+            for tag in self.tags:
+                bytes_out.append(tag)
+            bytes_out.append(self.remain)
         return self.list_to_bytes(bytes_out)
 
 class Splatter(GenericParsers):
@@ -3356,12 +3359,15 @@ class PlayerObtainedVariants(GenericParsers):
 
 class TagContainer(GenericParsers):
     def __init__(self, tag_bytes):
-        self.tags = []
-        tags, remain = self.split_byte_list(tag_bytes)
-        if remain:
-            raise
-        for tag in tags:
-            self.tags.append(tag[4:])
+        if tag_bytes == b'':
+            self.tags = None
+        else:
+            self.tags = []
+            tags, remain = self.split_byte_list(tag_bytes)
+            if remain:
+                raise
+            for tag in tags:
+                self.tags.append(tag[4:])
     
     def _fixed_tags(self):
         tags_out = []
@@ -3371,8 +3377,9 @@ class TagContainer(GenericParsers):
     
     def get_data(self):
         bytes_out = []
-        bytes_out.append(len(self.tags).to_bytes(4, 'little'))
-        bytes_out.append(self.list_to_bytes(self._fixed_tags()))
+        if isinstance(self.tags, list):
+            bytes_out.append(len(self.tags).to_bytes(4, 'little'))
+            bytes_out.append(self.list_to_bytes(self._fixed_tags()))
         return self.list_to_bytes(bytes_out)
 
 class Variant(GenericParsers):
@@ -3638,10 +3645,7 @@ if __name__ == "__main__":
     preset_folder = r'..\CharacterPresets'
     
     # DEBUGGING: test if parsing and save of save works.
-    # Files should be identical, with a maybe a few execptions becuase of parsing/serialization differences
-    # - some additional gameplaytags container
-    # - name str_property in breeder appliedscheme being removed. (original value is blank)
-    # These should have no affect on the actual save
+    # Files should be identical, if not raise an issue and include both saves.
     if True:
         NephelymSaveEditor(save_in).save(save_out)
         # x = NephelymSaveEditor(save_in)
