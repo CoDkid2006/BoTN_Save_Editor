@@ -1765,6 +1765,8 @@ class Nephelym(NephelymBase):
         self.father.new_guid(guid)
     
     def add_trait(self, trait, level='3'):
+        if self.traits.tags == None:
+            self.traits.tags = []
         self.traits.tags.append(self._format_trait(trait, level))
     
     def all_positive_traits(self):
@@ -1773,8 +1775,7 @@ class Nephelym(NephelymBase):
                 continue
             if trait in self.TRAIT_SIZE:
                 continue
-            new_trait = self._format_trait(trait, '3')
-            self.traits.tags.append(new_trait)
+            self.add_trait(trait)
     
     def all_traits(self):
         for trait in self.NEPHELYM_TRAITS:
@@ -1831,7 +1832,7 @@ class Nephelym(NephelymBase):
         clone.replace_father_guid()
         return clone
 
-class PlayerSpiritForm(NephelymBase):
+class PlayerSpiritForm(Nephelym):
     def __init__(self, spiritform_data):
         self._parse_spiritform_data(spiritform_data)
     
@@ -3081,11 +3082,12 @@ class MonsterLevels(GenericParsers):
         
     def get_data(self):
         bytes_out = []
-        bytes_out.append(self.MAP_PADDING)
-        bytes_out.append(len(self.monsterlevel).to_bytes(4, 'little'))
-        for monsterlevel in self.monsterlevel:
-            bytes_out.append(monsterlevel.get_data())
-        bytes_out.append(self.remain)
+        if self.monsterlevel != []:
+            bytes_out.append(self.MAP_PADDING)
+            bytes_out.append(len(self.monsterlevel).to_bytes(4, 'little'))
+            for monsterlevel in self.monsterlevel:
+                bytes_out.append(monsterlevel.get_data())
+            bytes_out.append(self.remain)
         return self.list_to_bytes(bytes_out)
 
 class MonsterLevel(GenericParsers):
