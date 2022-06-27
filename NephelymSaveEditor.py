@@ -251,6 +251,7 @@ class DictMacros:
     RACES_FEMININE = {
         'defualt_spirit_race': b'',
         'ayrshire' : b'Race.Bovaur.Ayrshire\x00',
+        'mare' : b'Race.Bovaur.Mare\x00',
         'minotaur' : b'Race.Bovaur.Minotaur\x00',
         'cambion' : b'Race.Demon.Cambion\x00',
         'succubus' : b'Race.Demon.Succubus\x00',
@@ -278,6 +279,7 @@ class DictMacros:
         'ryu' : b'Race.Hybrid.Ryu\x00',
         'surabhi' : b'Race.Hybrid.Surabhi\x00',
         'tenko' : b'Race.Hybrid.Tenko\x00',
+        'unicorn' : b'Race.Hybrid.Unicorn\x00',
         'tabby' : b'Race.Neko.Tabby\x00',
         'bunny' : b'Race.Risu.Bunny\x00',
         'malakhim' : b'Race.Seraphim.Malakhim\x00',
@@ -1554,7 +1556,7 @@ class Gvas(GenericParsers):
         raise
 
 
-
+'''Body Fluid Classes'''
 class PlayerBodyFluids(GenericParsers):
     def __init__(self, playerbodyfluids_data):
         self._parse_playerbodyfluids_data(playerbodyfluids_data)
@@ -2481,10 +2483,10 @@ class Physics(GenericParsers):
         self._parse_physics_data(physics_data)
     
     def _parse_physics_data(self, physics_data):
-        _, self.bellybounce,               physics_data = self._parse_float_property(physics_data, self.BELLYBOUNCE)
-        _, self.breastbounce,               physics_data = self._parse_float_property(physics_data, self.BREASTBOUNCE)
-        _, self.buttbounce,               physics_data = self._parse_float_property(physics_data, self.BUTTBOUNCE)
-        _, self.thighbounce,               physics_data = self._parse_float_property(physics_data, self.THIGHBOUNCE)
+        _, self.bellybounce,  physics_data = self._parse_float_property(physics_data, self.BELLYBOUNCE)
+        _, self.breastbounce, physics_data = self._parse_float_property(physics_data, self.BREASTBOUNCE)
+        _, self.buttbounce,   physics_data = self._parse_float_property(physics_data, self.BUTTBOUNCE)
+        _, self.thighbounce,  physics_data = self._parse_float_property(physics_data, self.THIGHBOUNCE)
         self.remain = physics_data
     
     def get_data(self):
