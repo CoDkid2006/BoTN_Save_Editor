@@ -432,8 +432,7 @@ class ByteMacros:
     STRUCT_PROPERTY = b'\x0F\x00\x00\x00\x53\x74\x72\x75\x63\x74\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
     INT_PROPERTY = b'\x0C\x00\x00\x00\x49\x6E\x74\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
     FLOAT_PROPERTY = b'\x0E\x00\x00\x00\x46\x6C\x6F\x61\x74\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
-    _BYTE_PROPERTY = b'\x0D\x00\x00\x00\x42\x79\x74\x65\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
-    BYTE_PROPERTY = _BYTE_PROPERTY + b'\x01\x00\x00\x00\x00\x00\x00\x00\x05\x00\x00\x00\x4E\x6F\x6E\x65\x00\x00'
+    BYTE_PROPERTY = b'\x0D\x00\x00\x00\x42\x79\x74\x65\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
     NAME_PROPERTY = b'\x0D\x00\x00\x00\x4E\x61\x6D\x65\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
     BOOL_PROPERTY = b'\x0D\x00\x00\x00\x42\x6F\x6F\x6C\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
     MAP_PROPERTY = b'\x0C\x00\x00\x00\x4D\x61\x70\x50\x72\x6F\x70\x65\x72\x74\x79\x00'
@@ -1169,8 +1168,13 @@ class GenericParsers(DictMacros, ByteMacros, IO):
             cursor = byte_bytes.find(byte_macro)
             if cursor == -1:
                 raise Exception(f'Invalid Save: {byte_macro}')
-            data_start = cursor + len(byte_macro)
-            data_end = data_start + 1
+            length_start = cursor + len(byte_macro)
+            length_end = length_start + 8
+            length_bytes = byte_bytes[length_start:length_end]
+            length = int.from_bytes(length_bytes, 'little')
+            
+            data_start = length_end + len(self.NONE) + 1
+            data_end = data_start + length
             
             pre_data = byte_bytes[:cursor]
             byte_prop = byte_bytes[data_start:data_end]
@@ -1371,7 +1375,11 @@ class GenericParsers(DictMacros, ByteMacros, IO):
             bytes_out = b''
         else:
             byte_macro += self.BYTE_PROPERTY
+            byte_length = len(byte_bytes)
             bytes_out = byte_macro \
+                + byte_length.to_bytes(8, 'little') \
+                + self.NONE \
+                + b'\x00' \
                 + byte_bytes
         return bytes_out
     
@@ -1603,7 +1611,7 @@ class NephelymBase(GenericParsers):
     Used for parsing specific datablocks of a nephelym
     '''
     def __str__(self):
-        return f'Nephelym\n{self.name} {self.sex} {self.race} {self.guid}'
+        return f'Nephelym\n{self.name} {self.variant.sex} {self.variant.race} {self.guid}'
     
     def __init__(self, nephelym_data):
         self._parse_nephelym_data(nephelym_data)
@@ -2034,7 +2042,11 @@ class NephelymPreset(NephelymBase):
     
     def __init__(self, preset_file):
         self.preset_file = preset_file
-        preset_data = self.load_save(preset_file)
+        try:
+            preset_data = self.load_save(preset_file)
+        except PermissionError:
+            preset_file = os.path.join(preset_file, os.listdir(preset_file)[0])
+            preset_data = self.load_save(preset_file)
         self._parse_preset(preset_data)
     
     def _parse_preset(self, preset_data):
@@ -3586,6 +3598,7 @@ class NephelymSaveEditor(Appearance):
             self.nephelyms.append(new_nephelym)
 
     def generate_all_from_presets(self, preset_path, template_nephelym=None):
+        '''Create a new nephelym for all presets'''
         if template_nephelym is None:
             template_nephelym = self.nephelyms[0]
         for root, dirs, files in os.walk(preset_path):
@@ -3594,6 +3607,7 @@ class NephelymSaveEditor(Appearance):
                     self.nephelyms.append(self.generate_from_preset(os.path.join(root, file), template_nephelym))
 
     def generate_from_preset(self, preset_path, template_nephelym=None):
+        '''Create a new nephelym from a preset'''
         # @TODO generate without having to use a template_nephelym
         if template_nephelym is None:
             template_nephelym = self.nephelyms[0]
@@ -3606,6 +3620,7 @@ class NephelymSaveEditor(Appearance):
         return new_nephelym
 
     def nephelym_to_preset(self, preset_in_path, nephelym, preset_out_path=None):
+        '''using a preset as a base, export nephelym to preset'''
         nephelym_preset = NephelymPreset(preset_in_path)
         nephelym_preset.variant.race = nephelym.variant.race
         if nephelym.variant.sex == self.SEXES['futa']:
@@ -3712,68 +3727,68 @@ if __name__ == "__main__":
         print(hex_to_float(tit_min.appearance.baseshape.morph.buttsize))
         exit()
     
-    
-    # Instance of Editor
-    nephelym_save_editor = NephelymSaveEditor(save_in)
-    
-    # Breeder/Player is always the first Nephelym unless changed in the save header
-    breeder = nephelym_save_editor.nephelyms[0]
-    
-    # Change the Spirit form to be breeder. Any NephelymBase derived object will work
-    nephelym_save_editor.playerspiritform.change_form(breeder)
-    
-    # DEBUGGING: Export nephelym_data block to file.
-    nephelym_save_editor.export_nephelym(breeder)
-    
-    
-    # Looping over nephelyms require copy if altering number of nephelyms.
-    for nephelym in nephelym_save_editor.nephelyms.copy():
-        nephelym.change_stat_level('rarity', 'E')
-    
-    # Remove all nephelym from save editor. Includes breeder
-    nephelym_save_editor.remove_all_nephelym()
-    
-    # Add Nephelym to editor
-    nephelym_save_editor.add_nephelym(breeder)
-    
-    # Clone all nephelyms currently in editor producing in all sizes
-    nephelym_save_editor.all_size_nephelyms()
-    
-    # New Nephelym object instance. Needed or changes with affect all instance of exact object. New guid for clones to fix issue of not showing in game
-    breeder_clone = breeder.clone()
-    
-    # Remove ALL traits of Nephelym
-    breeder_clone.remove_all_traits()
-    
-    # Change all stat ranks of Nephelym
-    breeder_clone.replace_all_stat_levels('S')
-    
-    # Change Rarity of Nephelym. A Legendary, E Common
-    breeder_clone.change_stat_level('rarity', 'A')
-    
-    # Give Nephelym all positive traits 
-    breeder_clone.all_positive_traits()
-    
-    # Change Nephelym size
-    breeder_clone.change_size('massive')
-    
-    # Generate Nephelyms from all presets. Template Nephelym for size and traits
-    nephelym_save_editor.generate_all_from_presets(preset_folder, breeder_clone)
-    
-    # Change appearance from another Nephelym. Current example uses last preset
-    breeder_clone.change_appearance(nephelym_save_editor.nephelyms[-1])
-    
-    # Add Nephelym to Nephelyms
-    nephelym_save_editor.add_nephelym(breeder_clone)
-    
-    # Generate all valid possible nephelym. Template Nephelym for appearance, size and traits
-    nephelym_save_editor.generate_all_from_nephelym(breeder_clone)
-    
-    # Change Race. Auto correct sex if invalid pairing
-    breeder.change_race('kestrel')
-    
-    # Change Sex. Auto correct sex if invalid pairing
-    breeder.change_sex('female')
-    
-    # Export Editor data to specified file
-    nephelym_save_editor.save(save_out)
+    if False:
+        # Instance of Editor
+        nephelym_save_editor = NephelymSaveEditor(save_in)
+        
+        # Breeder/Player is always the first Nephelym unless changed in the save header
+        breeder = nephelym_save_editor.nephelyms[0]
+        
+        # Change the Spirit form to be breeder. Any NephelymBase derived object will work
+        nephelym_save_editor.playerspiritform.change_form(breeder)
+        
+        # DEBUGGING: Export nephelym_data block to file.
+        nephelym_save_editor.export_nephelym(breeder)
+        
+        
+        # Looping over nephelyms require copy if altering number of nephelyms.
+        for nephelym in nephelym_save_editor.nephelyms.copy():
+            nephelym.change_stat_level('rarity', 'E')
+        
+        # Remove all nephelym from save editor. Includes breeder
+        nephelym_save_editor.remove_all_nephelym()
+        
+        # Add Nephelym to editor
+        nephelym_save_editor.add_nephelym(breeder)
+        
+        # Clone all nephelyms currently in editor producing in all sizes
+        nephelym_save_editor.all_size_nephelyms()
+        
+        # New Nephelym object instance. Needed or changes with affect all instance of exact object. New guid for clones to fix issue of not showing in game
+        breeder_clone = breeder.clone()
+        
+        # Remove ALL traits of Nephelym
+        breeder_clone.remove_all_traits()
+        
+        # Change all stat ranks of Nephelym
+        breeder_clone.replace_all_stat_levels('S')
+        
+        # Change Rarity of Nephelym. A Legendary, E Common
+        breeder_clone.change_stat_level('rarity', 'A')
+        
+        # Give Nephelym all positive traits 
+        breeder_clone.all_positive_traits()
+        
+        # Change Nephelym size
+        breeder_clone.change_size('massive')
+        
+        # Generate Nephelyms from all presets. Template Nephelym for size and traits
+        nephelym_save_editor.generate_all_from_presets(preset_folder, breeder_clone)
+        
+        # Change appearance from another Nephelym. Current example uses last preset
+        breeder_clone.change_appearance(nephelym_save_editor.nephelyms[-1])
+        
+        # Add Nephelym to Nephelyms
+        nephelym_save_editor.add_nephelym(breeder_clone)
+        
+        # Generate all valid possible nephelym. Template Nephelym for appearance, size and traits
+        nephelym_save_editor.generate_all_from_nephelym(breeder_clone)
+        
+        # Change Race. Auto correct sex if invalid pairing
+        breeder.change_race('kestrel')
+        
+        # Change Sex. Auto correct sex if invalid pairing
+        breeder.change_sex('female')
+        
+        # Export Editor data to specified file
+        nephelym_save_editor.save(save_out)
