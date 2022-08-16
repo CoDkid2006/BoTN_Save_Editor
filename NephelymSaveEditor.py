@@ -455,6 +455,8 @@ class ByteMacros:
     VERSION = b'\x08\x00\x00\x00\x56\x65\x72\x73\x69\x6F\x6E\x00'
     
     BODYFLUIDS = b'\x0B\x00\x00\x00\x42\x6F\x64\x79\x46\x6C\x75\x69\x64\x73\x00' + STRUCT_PADDING
+    SEXYCHARACTERPRESET = b'\x20\x00\x00\x00\x2F\x53\x63\x72\x69\x70\x74\x2F\x4F\x42\x46\x2E\x53\x65\x78\x79\x43\x68\x61\x72\x61\x63\x74\x65\x72\x50\x72\x65\x73\x65\x74\x00'
+    SEXYSAVEGAME =b'\x19\x00\x00\x00\x2F\x53\x63\x72\x69\x70\x74\x2F\x4F\x42\x46\x2E\x53\x65\x78\x79\x53\x61\x76\x65\x47\x61\x6D\x65\x00'
     
     
     #Player Body Fluids
@@ -1018,6 +1020,7 @@ class ByteMacros:
     RARE = b'\x06\x00\x00\x00\x62\x52\x61\x72\x65\x00'
     UNIQUE = b'\x08\x00\x00\x00\x62\x55\x6E\x69\x71\x75\x65\x00'
     LEGENDARY = b'\x0B\x00\x00\x00\x62\x4C\x65\x67\x65\x6E\x64\x61\x72\x79\x00'
+    PRESETTERMINATOR = NONE + b'\x00\x00\x00\x00\x07\x00\x00\x00' #ending of preset. Required for morphs to import properly
 
 class IO:
     '''Functions that deal with IO'''
@@ -1490,17 +1493,17 @@ class Header(GenericParsers):
         self._parse_header_data(header_data)
     
     def _parse_header_data(self, header_data):
-        self.gvas, self.playerguid,   header_data = self._parse_struct_property(header_data,       self.PLAYER_UNIQUE_ID, self.GUID_PROP)
+        gvas, self.playerguid,   header_data = self._parse_struct_property(header_data,       self.PLAYER_UNIQUE_ID, self.GUID_PROP)
         _,         self.playerwealth, header_data = self._parse_array_property(header_data,        self.PLAYERWEALTH,     self.INT_PROPERTY, 4)
         _,         playerbodyfluids,  header_data = self._parse_array_struct_property(header_data, self.PLAYERBODYFLUIDS, self.PLAYERBODYFLUIDS, self.BODYFLUIDS)
         self.remain = header_data
         
         self.playerbodyfluids = PlayerBodyFluids(playerbodyfluids)
-        # Gvas(self.gvas)
+        self.gvas = Gvas(gvas)
     
     def get_data(self):
         bytes_out = []
-        bytes_out.append(self.gvas)
+        bytes_out.append(self.gvas.get_data())
         bytes_out.append(self._get_struct_property_bytes(self.playerguid,  self.PLAYER_UNIQUE_ID, self.GUID_PROP))
         bytes_out.append(self._get_array_property_bytes(self.playerwealth, self.PLAYERWEALTH,     self.INT_PROPERTY, 4))
         bytes_out.append(self._get_array_struct_property_bytes(self.playerbodyfluids.get_data(),  self.PLAYERBODYFLUIDS, self.PLAYERBODYFLUIDS, self.BODYFLUIDS))
@@ -1531,8 +1534,7 @@ class Gvas(GenericParsers):
         self.file_version_sub_sub_patch = gvas_data[:2]
         gvas_data = gvas_data[2:]
         
-        length = int.from_bytes(gvas_data[:4], 'little')
-        gvas_data = gvas_data[4:]
+        length = int.from_bytes(gvas_data[:4], 'little') + 4
         self.ue_version_string = gvas_data[:length]
         gvas_data = gvas_data[length:]
         
@@ -1549,10 +1551,8 @@ class Gvas(GenericParsers):
             self.unknown_guid.append(gvas_data[:16])
             self.unknown_value.append(gvas_data[16:20])
             gvas_data = gvas_data[20:]
-            print(guid_to_string(self.unknown_guid[-1]), int.from_bytes(self.unknown_value[-1] ,'little'))
         
-        length = int.from_bytes(gvas_data[:4], 'little')
-        gvas_data = gvas_data[4:]
+        length = int.from_bytes(gvas_data[:4], 'little') + 4
         self.ue_custom_script = gvas_data[:length]
         gvas_data = gvas_data[length:]
         
@@ -1561,7 +1561,26 @@ class Gvas(GenericParsers):
         self.remain = gvas_data
     
     def get_data(self):
-        raise
+        bytes_out = []
+        guid_list_length = len(self.unknown_guid)
+        
+        bytes_out.append(self.gvas)
+        bytes_out.append(self.number1)
+        bytes_out.append(self.number2)
+        bytes_out.append(self.file_version_major)
+        bytes_out.append(self.file_version_minor)
+        bytes_out.append(self.file_version_patch)
+        bytes_out.append(self.file_version_sub_patch)
+        bytes_out.append(self.file_version_sub_sub_patch)
+        bytes_out.append(self.ue_version_string)
+        bytes_out.append(self.number3)
+        bytes_out.append(guid_list_length.to_bytes(4, 'little'))
+        for index in range(guid_list_length):
+            bytes_out.append(self.unknown_guid[index])
+            bytes_out.append(self.unknown_value[index])
+        bytes_out.append(self.ue_custom_script)
+        bytes_out.append(self._get_int_property_bytes(self.version, self.VERSION))
+        return self.list_to_bytes(bytes_out)
 
 
 '''Body Fluid Classes'''
@@ -1648,7 +1667,7 @@ class NephelymBase(GenericParsers):
         self.stats          = Stats(stats)
         self.mother         = Parent(mother)
         self.father         = Parent(father)
-        self.traits         = TagContainer(traits)
+        self.traits         = Traits(traits)
         self.playertags     = TagContainer(playertags)
         self.states         = TagContainer(states)
      
@@ -1854,14 +1873,18 @@ class PlayerSpiritForm(Nephelym):
         _, mother,        spiritform_data = self._parse_struct_property(spiritform_data, self.MOTHER,        self.CHARACTER_PARENT_DATA)
         _, father,        spiritform_data = self._parse_struct_property(spiritform_data, self.FATHER,        self.CHARACTER_PARENT_DATA)
         _, traits,        spiritform_data = self._parse_struct_property(spiritform_data, self.TRAITS,        self.GAMEPLAY_TAG_CONTAINER)
-        self.remain = spiritform_data
+        self.remain =     spiritform_data
         
         self.variant = Variant(variant)
         self.appearance = Appearance(appearance)
         self.appliedscheme = AppliedScheme(appliedscheme)
         self.mother = Parent(mother)
         self.father = Parent(father)
-        self.traits = TagContainer(traits)
+        self.traits = Traits(traits)
+        
+        if self.remain != self.NONE:
+            print(f'Invalid spiritform remains. {self.remain}')
+            self.remain = self.NONE
     
     def change_form(self, nephelym):
         '''Update spirit form to be incoming nephelym'''
@@ -2040,17 +2063,18 @@ class NephelymPreset(NephelymBase):
     def __str__(self):
         return f'Preset\n{self.name} {self.sex} {self.race}'
     
-    def __init__(self, preset_file):
-        self.preset_file = preset_file
-        try:
-            preset_data = self.load_save(preset_file)
-        except PermissionError:
-            preset_file = os.path.join(preset_file, os.listdir(preset_file)[0])
-            preset_data = self.load_save(preset_file)
+    def __init__(self, preset_file=b''):
+        if preset_file != b'':
+            try:
+                preset_data = self.load_save(preset_file)
+            except PermissionError:
+                preset_data = b''
+        else:
+            preset_data = b''
         self._parse_preset(preset_data)
     
     def _parse_preset(self, preset_data):
-        self.gvas,         preset_data = self._parse_gvas(preset_data)
+        gvas,              preset_data = self._parse_gvas(preset_data)
         _, self.name,      preset_data = self._parse_name_property(preset_data, self.PRESETNAME)
         _, variant,        preset_data = self._parse_struct_property(preset_data, self.VARIANT, self.GAMEPLAY_TAG_CONTAINER)
         _, appearance,     preset_data = self._parse_struct_property(preset_data, self.SCHEME, self.CHARACTER_APPEARANCE)
@@ -2061,13 +2085,21 @@ class NephelymPreset(NephelymBase):
         _, self.legendary, preset_data = self._parse_bool_property(preset_data, self.LEGENDARY)
         self.remain = preset_data
         
+        self.gvas = Gvas(gvas)
         self.variant = Variant(variant)
         self.appearance = Appearance(appearance)
+        
+        if self.remain != self.PRESETTERMINATOR:
+            print(f'Invalid Preset Terminator. {self.remain}')
+            self.remain = self.PRESETTERMINATOR
     
     def _parse_gvas(self, preset_data):
-        cursor = preset_data.find(self.PRESETNAME)
-        if cursor == -1:
-            raise Exception('Invalid Header: PRESETNAME')
+        if preset_data != b'':
+            cursor = preset_data.find(self.PRESETNAME)
+            if cursor == -1:
+                raise Exception('Invalid Header: PRESETNAME')
+        else:
+            cursor = 0
         return preset_data[:cursor], preset_data[cursor:]
     
     def preset_name(self):
@@ -2078,7 +2110,7 @@ class NephelymPreset(NephelymBase):
     
     def get_data(self):
         bytes_out = []
-        bytes_out.append(self.gvas)
+        bytes_out.append(self.gvas.get_data())
         bytes_out.append(self._get_name_property_bytes(self.name, self.PRESETNAME))
         bytes_out.append(self._get_struct_property_bytes(self.variant.get_data(), self.VARIANT, self.GAMEPLAY_TAG_CONTAINER))
         bytes_out.append(self._get_struct_property_bytes(self.appearance.get_data(), self.SCHEME, self.CHARACTER_APPEARANCE))
@@ -3450,6 +3482,18 @@ class Variant(GenericParsers):
             bytes_out.append(sex)
         return self.list_to_bytes(bytes_out)
 
+class Traits(TagContainer):
+    def __init__(self, traits):
+        if traits == b'\x00\x00\x00\x00': #If there are 0 Traits then trait block should not be added. Fixed broken save edits
+            msg_warning('Traits block with no traits')
+            traits = b''
+        super().__init__(traits)
+    
+    def get_data(self):
+        if self.tags == []:
+            return b''
+        return super().get_data()
+
 
 '''Base Save Editor Class'''
 class NephelymSaveEditor(Appearance):
@@ -3619,9 +3663,13 @@ class NephelymSaveEditor(Appearance):
         new_nephelym.change_sex(preset.variant.sex)
         return new_nephelym
 
-    def nephelym_to_preset(self, preset_in_path, nephelym, preset_out_path=None):
+    def nephelym_to_preset(self, nephelym, preset_out_path=None):
         '''using a preset as a base, export nephelym to preset'''
-        nephelym_preset = NephelymPreset(preset_in_path)
+        nephelym_preset = NephelymPreset()
+        nephelym_preset.gvas = Gvas(self.header.gvas.get_data())
+        nephelym_preset.gvas.version = b''
+        nephelym_preset.gvas.ue_custom_script = self.SEXYCHARACTERPRESET
+        
         nephelym_preset.variant.race = nephelym.variant.race
         if nephelym.variant.sex == self.SEXES['futa']:
             nephelym_preset.variant.sex = self.SEXES['female']
@@ -3629,13 +3677,13 @@ class NephelymSaveEditor(Appearance):
             nephelym_preset.variant.sex = nephelym.variant.sex
         nephelym_preset.name = nephelym.name
         nephelym_preset.appearance = nephelym.appearance
-        if preset_out_path == None:
-            preset_out_path = os.path.join(os.path.split(preset_in_path)[0], nephelym_preset.preset_name())
         self.export_preset(nephelym_preset, preset_out_path)
 
     def export_preset(self, nephelym_preset, preset_out_path=None):
         if preset_out_path == None:
             preset_out_path = nephelym_preset.preset_name()
+        else:
+            preset_out_path = os.path.join(preset_out_path, nephelym_preset.preset_name())
         
         self.write_save(preset_out_path, nephelym_preset.get_data())
 
