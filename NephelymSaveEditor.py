@@ -1494,8 +1494,8 @@ class Header(GenericParsers):
     
     def _parse_header_data(self, header_data):
         gvas, self.playerguid,   header_data = self._parse_struct_property(header_data,       self.PLAYER_UNIQUE_ID, self.GUID_PROP)
-        _,         self.playerwealth, header_data = self._parse_array_property(header_data,        self.PLAYERWEALTH,     self.INT_PROPERTY, 4)
-        _,         playerbodyfluids,  header_data = self._parse_array_struct_property(header_data, self.PLAYERBODYFLUIDS, self.PLAYERBODYFLUIDS, self.BODYFLUIDS)
+        _,    self.playerwealth, header_data = self._parse_array_property(header_data,        self.PLAYERWEALTH,     self.INT_PROPERTY, 4)
+        _,    playerbodyfluids,  header_data = self._parse_array_struct_property(header_data, self.PLAYERBODYFLUIDS, self.PLAYERBODYFLUIDS, self.BODYFLUIDS)
         self.remain = header_data
         
         self.playerbodyfluids = PlayerBodyFluids(playerbodyfluids)
@@ -1873,7 +1873,7 @@ class PlayerSpiritForm(Nephelym):
         _, mother,        spiritform_data = self._parse_struct_property(spiritform_data, self.MOTHER,        self.CHARACTER_PARENT_DATA)
         _, father,        spiritform_data = self._parse_struct_property(spiritform_data, self.FATHER,        self.CHARACTER_PARENT_DATA)
         _, traits,        spiritform_data = self._parse_struct_property(spiritform_data, self.TRAITS,        self.GAMEPLAY_TAG_CONTAINER)
-        self.remain =     spiritform_data
+        self.remain = spiritform_data
         
         self.variant = Variant(variant)
         self.appearance = Appearance(appearance)
@@ -3485,7 +3485,7 @@ class Variant(GenericParsers):
 class Traits(TagContainer):
     def __init__(self, traits):
         if traits == b'\x00\x00\x00\x00': #If there are 0 Traits then trait block should not be added. Fixed broken save edits
-            msg_warning('Traits block with no traits')
+            print('Traits block with no traits')
             traits = b''
         super().__init__(traits)
     
@@ -3664,7 +3664,7 @@ class NephelymSaveEditor(Appearance):
         return new_nephelym
 
     def nephelym_to_preset(self, nephelym, preset_out_path=None):
-        '''using a preset as a base, export nephelym to preset'''
+        '''Export nephelym to preset'''
         nephelym_preset = NephelymPreset()
         nephelym_preset.gvas = Gvas(self.header.gvas.get_data())
         nephelym_preset.gvas.version = b''
@@ -3715,11 +3715,6 @@ if __name__ == "__main__":
     # Files should be identical, if not raise an issue and include both saves.
     if True:
         NephelymSaveEditor(save_in).save(save_out)
-        # x = NephelymSaveEditor(save_in)
-        # breeder_guid = x.nephelyms[4].guid
-        # for vagrant in x.vagrants.vagrants:
-            # vagrant.guid = breeder_guid
-        # x.save(save_out)
         exit()
     
     
