@@ -9,7 +9,8 @@ Make backups of saves before modifing them. Program should be able to make worki
 # GUIDE
 Place editor in save directory or change files paths to save directory.
 
-MODIFY LOGIC IN MAIN TO PREFORM DESIRED EDITS. Default logic is a bit identity check for the editor.
+MODIFY LOGIC IN MAIN TO PREFORM DESIRED EDITS. Default logic is a bit identity check for the editor. Save editor requires basic knowledge of python as users will need to program the logic for the edits they desire.
+
 
 To execute run 'python NephelymSaveEditor.py'
 
