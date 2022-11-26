@@ -337,6 +337,7 @@ class DictMacros:
         'sloth' : b'Race.Demon.MindFlayer.Sloth\x00',
         'widow' : b'Race.Thriae.Spider.Widow\x00',
         'yasmine' : b'Race.Formurian.Clam.Yasmine\x00',
+        'pride' : b'Race.Demon.Pride\x00',
     }
     
     RACES_NPC_FUTA = {
@@ -1717,6 +1718,8 @@ class NephelymBase(GenericParsers):
             return
         else:
             for _sex in self.SEXES:
+                if _sex == 'defualt_spirit_sex':
+                    continue
                 self.variant.sex = self.SEXES[_sex]
                 if race in self.SEX_RACE[self.variant.sex].values():
                     return
@@ -3017,6 +3020,9 @@ class AttachmentMaterial(GenericParsers):
         return self.list_to_bytes(bytes_out)
 
 class GameplayTag(GenericParsers):
+    def __str__(self):
+        return str(self.tags)
+
     def __init__(self, gameplaytag_data):
         self.tags = None
         if gameplaytag_data != b'':
@@ -3289,6 +3295,9 @@ class WorldState(GenericParsers):
         return self.list_to_bytes(bytes_out)
 
 class DialogueStates(GenericParsers):
+    def __str__(self):
+        return "\n".join(str(x) for x in self.dialoguestates_list)
+    
     def __init__(self, dialoguestates_data):
         self._parse_dialoguestates_data(dialoguestates_data)
     
@@ -3304,6 +3313,9 @@ class DialogueStates(GenericParsers):
         return self.dialoguestates_list
 
 class DialogueState(GenericParsers):
+    def __str__(self):
+        return str(self.npc) + str(self.tags)
+    
     def __init__(self, npc, tags, remain):
         self.npc = Variant(npc)
         self.tags = self._parse_tags(tags)
@@ -3439,6 +3451,9 @@ class TagContainer(GenericParsers):
         return self.list_to_bytes(bytes_out)
 
 class Variant(GenericParsers):
+    def __str__(self):
+        return f'{self.race} {self.sex}'
+    
     def __init__(self, variant_data):
         self._has_data = True
         if variant_data == b'': # No variant, Spirit form
