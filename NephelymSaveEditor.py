@@ -285,7 +285,7 @@ class DictMacros:
         'malakhim' : b'Race.Seraphim.Malakhim\x00',
         'elf' : b'Race.Sylvan.Elf\x00',
         'goblin' : b'Race.Sylvan.Goblin\x00',
-        'oic' : b'Race.Sylvan.Orc\x00',
+        'orc' : b'Race.Sylvan.Orc\x00',
         'slime' : b'Race.Sylvan.Slime\x00',
         'bee' : b'Race.Thriae.Bee\x00',
         'colossus' : b'Race.Titan.Colossus\x00',
@@ -782,10 +782,11 @@ class ByteMacros:
     
     
     #Physics
-    BELLYBOUNCE =  b'\x0C\x00\x00\x00\x42\x65\x6C\x6C\x79\x42\x6F\x75\x6E\x63\x65\x00'
-    BREASTBOUNCE =  b'\x0D\x00\x00\x00\x42\x72\x65\x61\x73\x74\x42\x6F\x75\x6E\x63\x65\x00'
-    BUTTBOUNCE =  b'\x0B\x00\x00\x00\x42\x75\x74\x74\x42\x6F\x75\x6E\x63\x65\x00'
-    THIGHBOUNCE =  b'\x0C\x00\x00\x00\x54\x68\x69\x67\x68\x42\x6F\x75\x6E\x63\x65\x00'
+    BELLYBOUNCE = b'\x0C\x00\x00\x00\x42\x65\x6C\x6C\x79\x42\x6F\x75\x6E\x63\x65\x00'
+    BREASTBOUNCE = b'\x0D\x00\x00\x00\x42\x72\x65\x61\x73\x74\x42\x6F\x75\x6E\x63\x65\x00'
+    BUTTBOUNCE = b'\x0B\x00\x00\x00\x42\x75\x74\x74\x42\x6F\x75\x6E\x63\x65\x00'
+    THIGHBOUNCE = b'\x0C\x00\x00\x00\x54\x68\x69\x67\x68\x42\x6F\x75\x6E\x63\x65\x00'
+    DICKBOUNCE = b'\x0B\x00\x00\x00\x44\x69\x63\x6B\x42\x6F\x75\x6E\x63\x65\x00'
     
     
     #Breast
@@ -1006,6 +1007,7 @@ class ByteMacros:
     DAYS = b'\x05\x00\x00\x00\x44\x61\x79\x73\x00'
     COMPLETIONTAGS = b'\x0F\x00\x00\x00\x43\x6F\x6D\x70\x6C\x65\x74\x69\x6F\x6E\x54\x61\x67\x73\x00'
     REWARDMESSAGE = b'\x0E\x00\x00\x00\x52\x65\x77\x61\x72\x64\x4D\x65\x73\x73\x61\x67\x65\x00'
+    BNOREWARD = b'\x0A\x00\x00\x00\x62\x4E\x6F\x52\x65\x77\x61\x72\x64\x00'
     
     
     # Vagrants
@@ -1873,7 +1875,7 @@ class PlayerSpiritForm(Nephelym):
         _, mother,        spiritform_data = self._parse_struct_property(spiritform_data, self.MOTHER,        self.CHARACTER_PARENT_DATA)
         _, father,        spiritform_data = self._parse_struct_property(spiritform_data, self.FATHER,        self.CHARACTER_PARENT_DATA)
         _, traits,        spiritform_data = self._parse_struct_property(spiritform_data, self.TRAITS,        self.GAMEPLAY_TAG_CONTAINER)
-        self.remain = spiritform_data
+        self.remain =     spiritform_data
         
         self.variant = Variant(variant)
         self.appearance = Appearance(appearance)
@@ -2090,7 +2092,7 @@ class NephelymPreset(NephelymBase):
         self.appearance = Appearance(appearance)
         
         if self.remain != self.PRESETTERMINATOR:
-            print(f'Invalid Preset Terminator. {self.remain}')
+            print(f'WARNING: Invalid Preset Terminator. Expected:"{self.PRESETTERMINATOR}". Got:"{self.remain}"')
             self.remain = self.PRESETTERMINATOR
     
     def _parse_gvas(self, preset_data):
@@ -2531,6 +2533,7 @@ class Physics(GenericParsers):
         _, self.breastbounce, physics_data = self._parse_float_property(physics_data, self.BREASTBOUNCE)
         _, self.buttbounce,   physics_data = self._parse_float_property(physics_data, self.BUTTBOUNCE)
         _, self.thighbounce,  physics_data = self._parse_float_property(physics_data, self.THIGHBOUNCE)
+        _, self.dickbounce,   physics_data = self._parse_float_property(physics_data, self.DICKBOUNCE)
         self.remain = physics_data
     
     def get_data(self):
@@ -2539,6 +2542,7 @@ class Physics(GenericParsers):
         bytes_out.append(self._get_float_property_bytes(self.breastbounce, self.BREASTBOUNCE))
         bytes_out.append(self._get_float_property_bytes(self.buttbounce, self.BUTTBOUNCE))
         bytes_out.append(self._get_float_property_bytes(self.thighbounce, self.THIGHBOUNCE))
+        bytes_out.append(self._get_float_property_bytes(self.dickbounce, self.DICKBOUNCE))
         bytes_out.append(self.remain)
         return self.list_to_bytes(bytes_out)
 
@@ -3343,15 +3347,17 @@ class BreedingTasks(GenericParsers):
             _, days,                breedingtasks_data = self._parse_int_property(breedingtasks_data, self.DAYS)
             _, completiontags,      breedingtasks_data = self._parse_struct_property(breedingtasks_data, self.COMPLETIONTAGS, self.GAMEPLAY_TAG_CONTAINER)
             _, rewardmessage,       breedingtasks_data = self._parse_text_property(breedingtasks_data, self.REWARDMESSAGE)
+            _, bnoreward,           breedingtasks_data = self._parse_bool_property(breedingtasks_data, self.BNOREWARD)
+            remain = self.NONE
             breedingtasks_data = breedingtasks_data[len(self.NONE):]
-            breedingtask = BreedingTask(displayname, discription, requiredvariant, requiredstat, requiredfluid, requiredstatvalue, requiredfluidml, levelrequirement, requiredtraits, requirements, difficulty, reward, days, completiontags, rewardmessage, self.NONE)
+            breedingtask = BreedingTask(displayname, discription, requiredvariant, requiredstat, requiredfluid, requiredstatvalue, requiredfluidml, levelrequirement, requiredtraits, requirements, difficulty, reward, days, completiontags, rewardmessage, bnoreward, remain)
             self.breedingtask_list.append(breedingtask)
         
     def get_data(self):
         return self.breedingtask_list
 
 class BreedingTask(GenericParsers):
-    def __init__(self, displayname, discription, requiredvariant, requiredstat, requiredfluid, requiredstatvalue, requiredfluidml, levelrequirement, requiredtraits, requirements, difficulty, reward, days, completiontags, rewardmessage, remain):
+    def __init__(self, displayname, discription, requiredvariant, requiredstat, requiredfluid, requiredstatvalue, requiredfluidml, levelrequirement, requiredtraits, requirements, difficulty, reward, days, completiontags, rewardmessage, bnoreward, remain):
         self.displayname = displayname
         self.discription = discription
         _, self.requiredstat, _ = self._parse_name_property(requiredstat, self.TAGNAME, True)
@@ -3363,6 +3369,7 @@ class BreedingTask(GenericParsers):
         self.reward = reward
         self.days = days
         self.rewardmessage = rewardmessage
+        self.bnoreward = bnoreward
         self.remain = remain
         
         self.requiredvariant = TagContainer(requiredvariant)
@@ -3387,6 +3394,7 @@ class BreedingTask(GenericParsers):
         bytes_out.append(self._get_int_property_bytes(self.days,                self.DAYS))
         bytes_out.append(self._get_struct_property_bytes(self.completiontags.get_data(),    self.COMPLETIONTAGS,    self.GAMEPLAY_TAG_CONTAINER))
         bytes_out.append(self._get_text_property_bytes(self.rewardmessage,  self.REWARDMESSAGE))
+        bytes_out.append(self._get_bool_property_bytes(self.bnoreward, self.BNOREWARD))
         bytes_out.append(self.remain)
         return self.list_to_bytes(bytes_out)
 

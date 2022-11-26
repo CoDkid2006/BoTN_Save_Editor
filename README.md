@@ -1,5 +1,5 @@
 # BoTN Save Editor
-Save Editor for Breeders of the Nephelym. Current Build 0.756.4. Check releases for older versions
+Save Editor for Breeders of the Nephelym. Current Build 0.756.9. Check releases for older versions
 
 Requires python 3.7+
 
@@ -9,7 +9,7 @@ Make backups of saves before modifing them. Program should be able to make worki
 # GUIDE
 Place editor in save directory or change files paths to save directory.
 
-MODIFY LOGIC IN MAIN TO PREFORM DESIRED EDITS.
+MODIFY LOGIC IN MAIN TO PREFORM DESIRED EDITS. Default logic is a bit identity check for the editor.
 
 To execute run 'python NephelymSaveEditor.py'
 
