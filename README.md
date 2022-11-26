@@ -9,7 +9,7 @@ Make backups of saves before modifing them. Program should be able to make worki
 # GUIDE
 Place editor in save directory or change files paths to save directory.
 
-MODIFY LOGIC IN MAIN TO PREFORM DESIRED EDITS. Default logic is a bit identity check for the editor. Save editor requires basic knowledge of python as users will need to program the logic for the edits they desire.
+MODIFY LOGIC IN MAIN TO PREFORM DESIRED EDITS. Default logic is a bit identity check for the editor. Save editor requires basic knowledge of python as users will need to program the logic for the edits they desire. A list on some examples can be found here <link>https://github.com/CoDkid2006/BoTN_Save_Editor/wiki/Examples#examples</link>
 
 
 To execute run 'python NephelymSaveEditor.py'
