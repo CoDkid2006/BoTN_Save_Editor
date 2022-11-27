@@ -3766,13 +3766,11 @@ if __name__ == "__main__":
         exit()
     
     
-    #Example: Saving Nephelym as a preset. Requires template for header data
+    #Example: Saving Nephelym as a preset.
     if False:
         x = NephelymSaveEditor(save_in)
         breeder = x.nephelyms[0]
-        template_preset_path = os.listdir(preset_folder)[0]
-        preset_in_path = os.path.join(preset_folder, template_preset_path)
-        x.nephelym_to_preset(preset_in_path, breeder)
+        x.nephelym_to_preset(breeder, preset_folder)
         exit()
     
     
