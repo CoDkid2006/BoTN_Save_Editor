@@ -10,6 +10,11 @@ class InternalPropertyException(Exception):
 def print_hex(bytes):
     print("".join("%02x " % b for b in bytes).upper())
 
+def print_dec(bytes):
+    print(int.from_bytes(bytes, 'little'))
+
+def print_float(bytes):
+    print(hex_to_float(bytes))
 def find_all_instances(data_block, search_term, padding=0):
     cursor = 0
     while True:
@@ -202,11 +207,14 @@ class DictMacros:
         'buxom' : b'Trait.Appearance.Buxom.',
         'hung' : b'Trait.Appearance.Hung.',
         'slick' : b'Trait.Appearance.Slick.',
+        'gaudy' :  b'Trait.Appearance.Gaudy.',
     }
     TRAIT_STAT_MISC = {
         'wild' : b'Trait.Stat.Wild\x00',
         'domestic' : b'Trait.Stat.Domestic\x00',
         'surprise' : b'Trait.Stat.Surprise\x00',
+        'euphoric' : b'Trait.Stat.Euphoric\x00',
+        'motherly' : b'Trait.Stat.Motherly\x00',
     }
     TRAIT_APPERANCE_MISC = {
         'atypical' :  b'Trait.Appearance.Atypical\x00',
@@ -217,11 +225,26 @@ class DictMacros:
         'hominal' : b'Trait.Form.Hominal\x00',
         'feral' : b'Trait.Form.Feral\x00',
     }
-    
+    TRAIT_ELEMENT = {
+        'dark' : b'Trait.Element.Dark\x00',
+        'fire' : b'Trait.Element.Fire\x00',
+        'garden' : b'Trait.Element.Garden\x00',
+        'ice' : b'Trait.Element.Ice\x00',
+        'light' : b'Trait.Element.Light\x00',
+        'lightning' : b'Trait.Element.Lightning\x00',
+    }
     TRAIT_NEGATIVE = {
         'hedonist' : b'Trait.Stat.Hedonist.',
         'efficient' : b'Trait.Stat.Efficient.',
         'sterile' : b'Trait.Stat.Sterile\x00',
+    }
+
+    CHARACTERSTATS = {
+        'pregnant' : b'Character.State.Pregnant\x00',
+        'inflated' : b'Character.State.Inflated\x00',
+        # Untested
+        'summoneuphoria' : b'Character.State.SummonEuphoria\x00',
+        'inflatedbelly' : b'Character.State.Inflated.Belly\x00',
     }
 
     NEPHELYM_TRAITS.update(BODY_TYPES)
@@ -232,6 +255,7 @@ class DictMacros:
     NEPHELYM_TRAITS.update(TRAIT_APPERANCE_MISC)
     NEPHELYM_TRAITS.update(TRAIT_FORM)
     NEPHELYM_TRAITS.update(TRAIT_NEGATIVE)
+    NEPHELYM_TRAITS.update(TRAIT_ELEMENT)
 
     TRAITS_WITH_LEVELS.update(BODY_TYPES)
     TRAITS_WITH_LEVELS.update(TRAIT_STAT)
@@ -424,6 +448,27 @@ class DictMacros:
         SEXES['female'] : RACES_FEMALE,
         SEXES['futa'] : RACES_FUTA,
         SEXES['male'] : RACES_MALE,
+    }
+    
+    SEX_POSITIONS = {
+        'butterfly' : b'SexScene.Position.Butterfly\x00',
+        'cowgirl' : b'SexScene.Position.Cowgirl\x00',
+        'doggy' : b'SexScene.Position.Doggy\x00',
+        'harvest' : b'SexScene.Position.Harvest\x00',
+        'lapDance' : b'SexScene.Position.LapDance\x00',
+        'lifted' : b'SexScene.Position.Lifted\x00',
+        'missionary' : b'SexScene.Position.Missionary\x00',
+        'rbJ' : b'SexScene.Position.RBJ\x00',
+        'reverseCow' : b'SexScene.Position.ReverseCow\x00',
+        'special' : b'SexScene.Position.Special\x00',
+        'surprise' : b'SexScene.Position.Surprise\x00',
+        'test1' : b'SexScene.Position.Test.1\x00',
+        'test2' : b'SexScene.Position.Test.2\x00',
+        'test3' : b'SexScene.Position.Test.3\x00',
+        'test4' : b'SexScene.Position.Test.4\x00',
+        'test5' : b'SexScene.Position.Test.5\x00',
+        'titjob' : b'SexScene.Position.Titjob\x00',
+        'waterfall' : b'SexScene.Position.Waterfall\x00',
     }
 
 class ByteMacros:
@@ -1161,6 +1206,7 @@ class GenericParsers(DictMacros, ByteMacros, IO):
                 data_end += len(self.NONE)
             bytes_out = name_bytes[data_end:]
         except InternalPropertyException:
+            print("InternalPropertyException")
             raise
         except:
             pre_data = b''
@@ -1691,6 +1737,15 @@ class NephelymBase(GenericParsers):
                 raise Exception(f'{level} not a valid level')
         return new_trait
     
+    def _format_state(self, state):
+        if state in self.CHARACTERSTATS:
+            new_state = self.CHARACTERSTATS[state]
+        elif state in self.CHARACTERSTATS.values():
+            new_state = state
+        else:
+            raise Exception(f'{state} not a valid Character State')
+        return new_state
+    
     def change_name(self, name):
         if type(name) is str:
             self.name = name.encode('utf-8') + b'\x00'
@@ -1799,6 +1854,8 @@ class Nephelym(NephelymBase):
         self.father.new_guid(guid)
     
     def add_trait(self, trait, level='3'):
+        if isinstance(level, int):
+            level = str(level)
         if self.traits.tags == None:
             self.traits.tags = []
         self.traits.tags.append(self._format_trait(trait, level))
@@ -1816,13 +1873,25 @@ class Nephelym(NephelymBase):
             new_trait = self._format_trait(trait, '3')
             self.traits.tags.append(new_trait)
     
+    def add_state(self, state):
+        if self.states.tags == None:
+            self.states.tags = []
+        self.states.tags.append(self._format_state(state))
+    
     def remove_all_traits(self):
         self.traits.tags = []
     
     def remove_trait(self, trait, level='3'):
-        remove_trait = self._format_trait(trait, level)
-        if remove_trait in self.traits.tags:
-            self.traits.tags.remove(remove_trait)
+        if isinstance(level, int):
+            level = str(level)
+        removed_trait = self._format_trait(trait, level)
+        if removed_trait in self.traits.tags:
+            self.traits.tags.remove(removed_trait)
+    
+    def remove_state(self, state):
+        removed_state = self._format_state(state)
+        if removed_state in self.states.tags:
+            self.states.tags.remove(removed_state)
     
     def change_size(self, size):
         if size in self.TRAIT_SIZE:
@@ -3022,7 +3091,10 @@ class AttachmentMaterial(GenericParsers):
 class GameplayTag(GenericParsers):
     def __str__(self):
         return str(self.tags)
-
+    
+    def __iter__(self):
+        return iter(self.tags.copy())
+    
     def __init__(self, gameplaytag_data):
         self.tags = None
         if gameplaytag_data != b'':
@@ -3039,6 +3111,9 @@ class GameplayTag(GenericParsers):
                 self.tags.append(gameplaytag_data[:tag_length])
                 gameplaytag_data = gameplaytag_data[tag_length:]
         self.remain = gameplaytag_data
+    
+    def remove_flag(self, flag):
+        self.tags.remove(flag)
     
     def get_data(self):
         bytes_out = []
@@ -3164,6 +3239,9 @@ class MonsterLevel(GenericParsers):
 
 '''Sex Posistion Classes'''
 class PlayerSexPositions(GenericParsers):
+    def __str__(self):
+        return '\n'.join(str(x) for x in self.playersexposition_list)
+    
     def __init__(self, playersexpositions_data):
         self._parse_sexpositions(playersexpositions_data)
     
@@ -3173,10 +3251,33 @@ class PlayerSexPositions(GenericParsers):
             _, sexposition, playersexpositions_data, = self._parse_name_property(playersexpositions_data, self.TAGNAME, True)
             self.playersexposition_list.append(SexPosition(sexposition))
     
+    def _format_position(self, position):
+        if position in self.SEX_POSITIONS:
+            new_position = self.SEX_POSITIONS[position]
+        elif position in self.SEX_POSITIONS.values():
+            new_position = position
+        else:
+            raise Exception(f'{position} not a valid SexPosition')
+        
+        return new_position
+    
+    def add_position(self, position):
+        formated_position = self._format_position(position)
+        self.playersexposition_list.append(SexPosition(formated_position))
+    
+    def remove_position(self, position):
+        formated_position = self._format_position(position)
+        for list_position in self.playersexposition_list.copy():
+            if str(formated_position) in str(list_position):
+                self.playersexposition_list.remove(list_position)
+    
     def get_data(self):
         return self.playersexposition_list
 
 class SexPosition(GenericParsers):
+    def __str__(self):
+        return str(self.sexposition)
+    
     def __init__(self, sexpositions_data):
         self.sexposition = sexpositions_data
     
@@ -3297,6 +3398,9 @@ class WorldState(GenericParsers):
 class DialogueStates(GenericParsers):
     def __str__(self):
         return "\n".join(str(x) for x in self.dialoguestates_list)
+    
+    def __iter__(self):
+        return iter(self.dialoguestates_list)
     
     def __init__(self, dialoguestates_data):
         self._parse_dialoguestates_data(dialoguestates_data)
@@ -3426,6 +3530,9 @@ class PlayerObtainedVariants(GenericParsers):
         return self.playerobtainedvariant_list
 
 class TagContainer(GenericParsers):
+    def __str__(self):
+        return str(self.tags)
+    
     def __init__(self, tag_bytes):
         if tag_bytes == b'':
             self.tags = None
@@ -3709,6 +3816,28 @@ class NephelymSaveEditor(Appearance):
             preset_out_path = os.path.join(preset_out_path, nephelym_preset.preset_name())
         
         self.write_save(preset_out_path, nephelym_preset.get_data())
+
+    def abort_nephelym(self, nehpelym_mother):
+        '''Remove pregnacy traits from nephelym and remove child from offspringbuffer'''
+        for offspring in x.offspringbuffer.copy():
+            if offspring.guid == nehpelym_mother.offspringid:
+                x.offspringbuffer.remove(offspring)
+                nehpelym_mother.remove_trait('motherly')
+        nehpelym_mother.remove_state('pregnant')
+        nehpelym_mother.offspringid = b'\x00'*16
+
+    def birth_orphans(self):
+        '''Transfer Orphaned offsprings into Nephelym block'''
+        valid_offsprings = [parent.offspringid for parent in self.nephelyms]
+        for offspring in self.offspringbuffer.copy():
+            if offspring.guid not in valid_offsprings:
+                self.add_nephelym(offspring)
+                self.offspringbuffer.remove(offspring)
+
+    def abort_all_nephelyms(self):
+        for nephelym in self.nephelyms:
+            self.abort_nephelym(nephelym)
+
 
     def get_data(self):
         '''Return data in save file format'''
