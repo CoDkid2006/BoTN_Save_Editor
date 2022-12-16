@@ -1,6 +1,8 @@
 import os
 import uuid
 
+DEBUGGING = True
+
 class InternalPropertyException(Exception):
     '''Name Property Testing'''
     pass
@@ -15,6 +17,7 @@ def print_dec(bytes):
 
 def print_float(bytes):
     print(hex_to_float(bytes))
+
 def find_all_instances(data_block, search_term, padding=0):
     cursor = 0
     while True:
@@ -365,9 +368,9 @@ class DictMacros:
     }
     
     RACES_NPC_FUTA = {
-       'cassie' : b'Race.Neko.Cheshire.Cassie\x00',
-       'chief' : b'Race.Sylvan.Orc.Chief\x00',
-       'mirru' : b'Race.Formurian.Kraken.Mirru\x00',
+        'cassie' : b'Race.Neko.Cheshire.Cassie\x00',
+        'chief' : b'Race.Sylvan.Orc.Chief\x00',
+        'mirru' : b'Race.Formurian.Kraken.Mirru\x00',
     }
     
     RACES_OTHERS = {
@@ -3689,7 +3692,7 @@ class NephelymSaveEditor(Appearance):
 
     def save(self, file_out):
         '''Fix up data and export save'''
-        guids = [x.guid for x in self.nephelyms]
+        guids = [nephelym.guid for nephelym in self.nephelyms]
         if self.get_player_nephelym() not in guids:
             self.set_player_nephelym()
         
@@ -3819,20 +3822,21 @@ class NephelymSaveEditor(Appearance):
 
     def abort_nephelym(self, nehpelym_mother):
         '''Remove pregnacy traits from nephelym and remove child from offspringbuffer'''
-        for offspring in x.offspringbuffer.copy():
+        for offspring in self.offspringbuffer.copy():
             if offspring.guid == nehpelym_mother.offspringid:
-                x.offspringbuffer.remove(offspring)
+                self.offspringbuffer.remove(offspring)
                 nehpelym_mother.remove_trait('motherly')
         nehpelym_mother.remove_state('pregnant')
         nehpelym_mother.offspringid = b'\x00'*16
 
-    def birth_orphans(self):
-        '''Transfer Orphaned offsprings into Nephelym block'''
+    def remove_orphans(self, keep=True):
+        '''Remove orphaned offsprings. Defaults to moving orphans into Nephelym block'''
         valid_offsprings = [parent.offspringid for parent in self.nephelyms]
         for offspring in self.offspringbuffer.copy():
             if offspring.guid not in valid_offsprings:
-                self.add_nephelym(offspring)
                 self.offspringbuffer.remove(offspring)
+                if keep:
+                    self.add_nephelym(offspring)
 
     def abort_all_nephelyms(self):
         for nephelym in self.nephelyms:
